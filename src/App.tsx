@@ -1,8 +1,8 @@
 import "./App.css";
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import HomePage from "./pages/homePage.tsx";
-import DetailsPage from "./pages/detailsPage.tsx";
+import HomePage from "./pages/homePage";
+import DetailsPage from "./pages/detailsPage";
 
 export default class App extends Component {
   state = {
