@@ -1,8 +1,8 @@
-import "./App.scss";
+import "./App.css";
 import React, { Component } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import HomePage from "./pages/homepage";
-import DetailsPage from "./pages/detailsPage";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import HomePage from "./pages/homePage.tsx";
+import DetailsPage from "./pages/detailsPage.tsx";
 
 export default class App extends Component {
   state = {
@@ -15,15 +15,9 @@ export default class App extends Component {
         <Router>
           <div className="App">
             <Switch>
-              <Route path='/'>
-                <HomePage />
-              </Route>
-              <Route path='/details/:id'>
-                <DetailsPage />
-              </Route>
-              <Route path='*'>
-                <HomePage />
-              </Route>
+              <Route path='/' exact render={(routerProps) => <HomePage {...routerProps} />} />
+              <Route path='/details:id' exact render={(routerProps) => <DetailsPage {...routerProps} />} />
+              <Route path='*' exact render={(routerProps) => <HomePage {...routerProps} />} />
             </Switch>
           </div>
         </Router>
