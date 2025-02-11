@@ -3,12 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mantine/charts": "^7.16.3",
+    "@mantine/core": "^7.16.3",
+    "@mantine/dates": "^7.16.3",
+    "@mantine/dropzone": "^7.16.3",
+    "@mantine/form": "^7.16.3",
+    "@mantine/hooks": "^7.16.3",
+    "@mantine/modals": "^7.16.3",
+    "@mantine/notifications": "^7.16.3",
+    "@mantine/spotlight": "^7.16.3",
+    "@mantine/tiptap": "^7.16.3",
+    "@tiptap/extension-link": "^2.11.5",
+    "@tiptap/pm": "^2.11.5",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
     "@vitejs/plugin-react": "^4.3.4",
     "cra-template-typescript": "1.2.0",
+    "dayjs": "^1.11.13",
     "normalize.css": "^8.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^5.3.4",
+    "recharts": "^2.15.1",
     "vite": "^6.1.0",
     "vite-plugin-svgr": "^4.3.0",
     "vite-tsconfig-paths": "^5.1.4"
@@ -40,6 +56,9 @@
     ]
   },
   "devDependencies": {
+    "postcss": "^8.5.2",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "rollup": "^4.34.6"
   }
 }
