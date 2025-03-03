@@ -1,0 +1,22 @@
+.mantine-AppShell-header {
+  background-color: #282c34;
+
+}
+
+.mantine-AppShell-navbar {
+  background-color: #282c34;
+}
+
+.mantine-AppShell-footer {
+  background-color: #282c34;
+}
+
+.home-link {
+  color: #fff;
+  text-decoration: none;
+  padding: 16px;
+}
+
+.header__searchbox-wrapper {
+  flex-grow: 1;
+}
