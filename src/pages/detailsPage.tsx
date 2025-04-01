@@ -75,7 +75,7 @@ export default function DetailsPage() {
     <AppShell
       className="details-page"
       header={{ collapsed: !pinned, offset: false }}
-      footer
+      main={{ width: "100vw", padding: "md" }}
       padding="md"
     >
       <AppShell.Header>
@@ -97,10 +97,9 @@ export default function DetailsPage() {
           </Flex>
         </Flex>
       </AppShell.Header>
-      <AppShell.Main pt={`calc(${rem(60)} + var(--mantine-spacing-md))`}>
+      <AppShell.Main pt={`calc(${rem(60)} + var(--mantine-spacing-md))`} style={{ width: '100vw'}}>
         <DetailsPageContent stockData={stockDetails} />
       </AppShell.Main>
-      {/* <AppShell.Footer p="md">Footer</AppShell.Footer> */}
     </AppShell>
   );
 }

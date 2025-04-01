@@ -1,10 +1,9 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { Center, Title, Stack } from '@mantine/core';
 import './homePage.css';
 import SearchBox from '@components/searchBox/searchBox';
 
 export default function HomePage() {
-  const query = useState('');
 
   return (
     <Center className="homePage">

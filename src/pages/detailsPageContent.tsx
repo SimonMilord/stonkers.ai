@@ -1,5 +1,7 @@
 import React from 'react';
-import { Text, Image, Flex } from '@mantine/core';
+import StockQuote from '@components/stockQuote/stockQuote';
+import { Flex, Grid } from '@mantine/core';
+import DetailsCard from '@components/detailsCard/detailsCard';
 
 export default function DetailsPageContent({stockData}: {stockData: any}) {
   const {
@@ -13,16 +15,21 @@ export default function DetailsPageContent({stockData}: {stockData: any}) {
 
   console.log(stockData);
   const fluctuationColor = quoteData.dp >= 0 ? "green" : "red";
+
   return (
-    <div>
-      <Flex align="center" mb='md'>
-        <Image mr={12} h={50} radius="md" src={companyProfileData.logo}/>
-        <Text size='lg'>{companyProfileData.name} - {companyProfileData.ticker}</Text>
+    <>
+      <Flex justify="center" mb='lg'>
+        {quoteData && companyProfileData ? (
+          <StockQuote quoteData={quoteData} companyProfileData={companyProfileData} />
+        ) : (
+          <p>Loading...</p>
+        )}
       </Flex>
-      <Flex justify="center" gap="lg">
-        <Text>{quoteData.c}$ {companyProfileData.currency}</Text>
-        <Text c={fluctuationColor}>${quoteData.d} | {(quoteData?.dp?.toFixed(2))}%</Text>
-      </Flex>
-    </div>
+
+      <Grid>
+        <Grid.Col span={6}><DetailsCard /></Grid.Col>
+        <Grid.Col span={6}><DetailsCard /></Grid.Col>
+      </Grid>
+    </>
   );
 }

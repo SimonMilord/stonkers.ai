@@ -86,7 +86,7 @@ export default function SearchBox(props: { variant: string }) {
       {props.variant === "standalone" && (
         <>
           <TextInput
-            variant="filled"
+            variant="unstyled"
             radius="xl"
             size="lg"
             placeholder="Search for a stock"
@@ -110,6 +110,7 @@ export default function SearchBox(props: { variant: string }) {
             onChange={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={handleKeyDown}
           />
+          {loading && <Loader />}
         </>
       )}
     </Box>
