@@ -1,7 +1,7 @@
 import React from 'react';
 import StockQuote from '@components/stockQuote/stockQuote';
 import { Flex, Grid } from '@mantine/core';
-import DetailsCard from '@components/detailsCard/detailsCard';
+import CompanyProfileCard from '@components/companyProfileCard/companyProfileCard';
 
 export default function DetailsPageContent({stockData}: {stockData: any}) {
   const {
@@ -27,8 +27,7 @@ export default function DetailsPageContent({stockData}: {stockData: any}) {
       </Flex>
 
       <Grid>
-        <Grid.Col span={6}><DetailsCard /></Grid.Col>
-        <Grid.Col span={6}><DetailsCard /></Grid.Col>
+        <Grid.Col span={6}><CompanyProfileCard profileData={companyProfileData}/></Grid.Col>
       </Grid>
     </>
   );

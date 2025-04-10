@@ -8,7 +8,9 @@ export default function HomePage() {
   return (
     <Center className="homePage">
       <Stack>
-        <Title>Stonkers.ai</Title>
+        <Center>
+          <Title>Stonkers.ai</Title>
+        </Center>
         <SearchBox variant="standalone"/>
       </Stack>
     </Center>
