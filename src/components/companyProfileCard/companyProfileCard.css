@@ -1,0 +1,14 @@
+.mantine-Paper-root {
+  background-color: #282c34;
+  color: white;
+  border-color: white;
+}
+
+.tableRow__value {
+  display: grid;
+  justify-content: flex-end;
+}
+
+.companyUrl {
+  color: white;
+}
