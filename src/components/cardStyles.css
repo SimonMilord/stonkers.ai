@@ -1,0 +1,19 @@
+.mantine-Paper-root {
+  background-color: #282c34;
+  color: white;
+  border-color: white;
+}
+
+.tableRow {
+  padding: 0px;
+}
+
+.tableHead {
+  padding: 0px;
+}
+
+.tableRow__value {
+  display: grid;
+  justify-content: flex-end;
+}
+

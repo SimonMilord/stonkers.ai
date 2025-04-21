@@ -1,6 +1,8 @@
 import React from "react";
+import { formatDollarAmount } from "@utils/functions";
 import { Paper, Title, Text, Divider, Table } from "@mantine/core";
 import "./companyProfileCard.css";
+import "../cardStyles.css";
 
 export default function CompanyProfileCard({
   profileData,
@@ -9,22 +11,12 @@ export default function CompanyProfileCard({
 }) {
   const notAvailable: String = "Not Available";
 
-  const formatMarketCap = (marketCap: number) => {
-    if (marketCap >= 1e12) {
-      return `${(marketCap / 1e12).toFixed(2)}T`;
-    } else if (marketCap >= 1e9) {
-      return `${(marketCap / 1e9).toFixed(2)}B`;
-    } else if (marketCap >= 1e6) {
-      return `${(marketCap / 1e6).toFixed(2)}M`;
-    } else {
-      return `${marketCap} USD`;
-    }
-  };
 
-  const formattedMarketCap = formatMarketCap(
+
+  const formattedMarketCap = formatDollarAmount(
     profileData?.marketCapitalization * 1000000
   );
-  const formattedSharesOutstanding = formatMarketCap(
+  const formattedSharesOutstanding = formatDollarAmount(
     profileData?.shareOutstanding * 1000000
   );
   const companyWebsiteLink = profileData?.weburl ? (
@@ -36,16 +28,16 @@ export default function CompanyProfileCard({
   );
 
   const profileDataTableElements = [
-    { key: "Company Name", value: profileData?.name || notAvailable },
-    { key: "Market Capitalization", value: formattedMarketCap || notAvailable },
-    { key: "Industry", value: profileData?.finnhubIndustry || notAvailable },
-    { key: "Country", value: profileData?.country || notAvailable },
+    { key: "Company Name:", value: profileData?.name || notAvailable },
+    { key: "Market Capitalization:", value: formattedMarketCap || notAvailable },
+    { key: "Industry:", value: profileData?.finnhubIndustry || notAvailable },
+    { key: "Country:", value: profileData?.country || notAvailable },
     {
-      key: "Shares outstanding",
+      key: "Shares outstanding:",
       value: formattedSharesOutstanding || notAvailable,
     },
-    { key: "Exchange", value: profileData?.exchange || notAvailable },
-    { key: "Website", value: companyWebsiteLink || notAvailable },
+    { key: "Exchange:", value: profileData?.exchange || notAvailable },
+    { key: "Website:", value: companyWebsiteLink || notAvailable },
   ];
 
   const rows = profileDataTableElements.map((item, index) => (
@@ -66,6 +58,7 @@ export default function CompanyProfileCard({
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
         <Divider my="lg" />
+        {/* TODO: Change description to one that is AI generated */}
         <Text>
           Amazon is a global technology company primarily known for its
           e-commerce platform, where it sells a wide range of products directly
