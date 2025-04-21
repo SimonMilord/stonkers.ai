@@ -133,6 +133,47 @@ export const getRecommendationTrends = async (symbol: string) => {
   return await response.json();
 };
 
+/**
+ * Fetch the basic financials for a given symbol using the Finnhub API.
+ * @param symbol
+ * @returns object
+ */
+export const getBasicFinancials = async (symbol: string) => {
+  const request = buildFinnhubGetRequest({ symbol });
+
+  const response = await fetch(`${apiUrl}/stock/metric?symbol=${symbol}&metric=all`, request);
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable complete network request to get the basic financials for this symbol: " +
+        symbol
+    );
+  }
+
+  return await response.json();
+}
+
+/**
+ * Fetch lastest year reported financials for a given symbol using the Finnhub API.
+ * @param symbol
+ * @returns object
+ */
+export const getReportedFinancials = async (symbol: string) => {
+  const request = buildFinnhubGetRequest({ symbol });
+
+  const response = await fetch(`${apiUrl}/stock/financials-reported?symbol=${symbol}`, request);
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable complete network request to get the reported financials for this symbol: " +
+        symbol
+    );
+  }
+  const res = await response.json();
+
+  return res?.data[0];
+}
+
 const buildFinnhubGetRequest = (params: object) => {
   return {
     method: "GET",
