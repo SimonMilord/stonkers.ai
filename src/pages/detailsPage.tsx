@@ -12,6 +12,8 @@ import {
   getEarningsSurprise,
   getCompanyNews,
   getRecommendationTrends,
+  getBasicFinancials,
+  getReportedFinancials,
 } from "@utils/requests";
 
 export default function DetailsPage() {
@@ -26,6 +28,8 @@ export default function DetailsPage() {
   const [earningsSurpriseData, setEarningsSurpriseData] = useState({});
   const [companyNewsData, setCompanyNewsData] = useState({});
   const [recommendationTrendsData, setRecommendationTrendsData] = useState({});
+  const [basicFinancialsData, setBasicFinancialsData] = useState({});
+  const [reportedFinancialsData, setReportedFinancialsData] = useState({});
 
   useEffect(() => {
     fetchStockData(symbol);
@@ -41,6 +45,8 @@ export default function DetailsPage() {
         earningsSurprise,
         companyNews,
         recommendationTrends,
+        basicFinancials,
+        reportedFinancials,
       ] = await Promise.all([
         getQuote(symbol),
         getCompanyProfile(symbol),
@@ -48,6 +54,8 @@ export default function DetailsPage() {
         getEarningsSurprise(symbol),
         getCompanyNews(symbol),
         getRecommendationTrends(symbol),
+        getBasicFinancials(symbol),
+        getReportedFinancials(symbol),
       ]);
 
       setQuoteData(quote);
@@ -56,6 +64,8 @@ export default function DetailsPage() {
       setEarningsSurpriseData(earningsSurprise);
       setCompanyNewsData(companyNews);
       setRecommendationTrendsData(recommendationTrends);
+      setBasicFinancialsData(basicFinancials);
+      setReportedFinancialsData(reportedFinancials);
     } catch (error) {
       console.error("Error fetching stock data: ", error);
     }
@@ -69,6 +79,8 @@ export default function DetailsPage() {
     earningsSurpriseData,
     companyNewsData,
     recommendationTrendsData,
+    basicFinancialsData,
+    reportedFinancialsData,
   };
 
   return (
@@ -97,7 +109,7 @@ export default function DetailsPage() {
           </Flex>
         </Flex>
       </AppShell.Header>
-      <AppShell.Main pt={`calc(${rem(60)} + var(--mantine-spacing-md))`} style={{ width: '100vw'}}>
+      <AppShell.Main pt={`calc(${rem(60)} + var(--mantine-spacing-md))`}>
         <DetailsPageContent stockData={stockDetails} />
       </AppShell.Main>
     </AppShell>
