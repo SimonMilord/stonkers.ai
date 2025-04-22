@@ -41,7 +41,6 @@ export const validateMetricsValue = (str: string | number, unit?: string) => {
     str = str.toString();
   }
 
-  console.log('str', str);
   if (str === undefined || str === null || str === "") {
     return notAvailable;
   } else {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, TextInput, Loader } from "@mantine/core";
+import { Box, TextInput, Loader, Text } from "@mantine/core";
 import { useHistory } from "react-router-dom";
 
 /**
@@ -9,21 +9,34 @@ import { useHistory } from "react-router-dom";
  */
 export default function SearchBox(props: { variant: string }) {
   const [query, setQuery] = useState("");
+  const [searchedQuery, setSearchedQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [noResultsFound, setNoResultsFound] = useState(false);
   const history = useHistory();
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (event.key === "Enter" && query !== "") {
+    const trimmedQuery = query.trim();
+    if (event.key === "Enter" && trimmedQuery !== "") {
+      setNoResultsFound(false);
+
       try {
-        const queriedSymbol = await searchForSymbol(query);
+        const queriedSymbol = await searchForSymbol(trimmedQuery);
+        setSearchedQuery(trimmedQuery);
+        // This check avoids the situation where a query like "amamaz" sends a request with a [object, object] value.
         if (queriedSymbol !== null) {
           history.push(`/details/${queriedSymbol}`, { symbol: queriedSymbol });
+        } else {
+          console.warn(
+            `No symbol found for: ${trimmedQuery}. Please try again with a different symbol.`
+          );
+          setNoResultsFound(true);
         }
       } catch (error) {
-        console.error(`Error searching for stock: ${query}`, error);
+        console.error(`Error searching for stock: ${trimmedQuery}`, error);
       }
+      setQuery(trimmedQuery);
     }
   };
 
@@ -58,8 +71,7 @@ export default function SearchBox(props: { variant: string }) {
       return null;
     }
 
-    const symbolFound = findSymbolInResults(data);
-
+    const symbolFound: string = findSymbolInResults(data, symbol);
     setLoading(false);
     return symbolFound;
   };
@@ -70,10 +82,10 @@ export default function SearchBox(props: { variant: string }) {
    * @param data
    * @returns string
    */
-  const findSymbolInResults = (data: any) => {
+  const findSymbolInResults = (data: any, symbol: string): string => {
     try {
       const symbolToReturn = data.result.find((result: any) => {
-        return result.symbol === query.toUpperCase();
+        return result.symbol === symbol.toUpperCase();
       });
       return symbolToReturn.symbol;
     } catch (error) {
@@ -95,6 +107,7 @@ export default function SearchBox(props: { variant: string }) {
             onChange={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={handleKeyDown}
           />
+          {noResultsFound && (<Text style={{ color: "red" }}>No results found for: {searchedQuery} </Text>)}
           {loading && <Loader />}
         </>
       )}
@@ -110,6 +123,7 @@ export default function SearchBox(props: { variant: string }) {
             onChange={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={handleKeyDown}
           />
+          {noResultsFound && (<Text style={{ color: "red" }}>No results found for: {searchedQuery} </Text>)}
           {loading && <Loader />}
         </>
       )}
