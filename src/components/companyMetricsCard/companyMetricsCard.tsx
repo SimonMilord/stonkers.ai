@@ -103,27 +103,27 @@ export default function CompanyMetricsCard({
   const companyGrowthItems = [
     {
       key: "Rev growth TTM:",
-      value: validateMetricsValue(metrics?.revenueGrowthTTMYoy, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowthTTMYoy, 2)}`, "%"),
     },
     {
       key: "Rev growth 3Y:",
-      value: validateMetricsValue(metrics?.revenueGrowth3Y, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowth3Y, 2)}`, "%"),
     },
     {
       key: "Rev growth 5Y:",
-      value: validateMetricsValue(metrics?.revenueGrowth5Y, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowth5Y, 2)}`, "%"),
     },
     {
       key: "EPS growth TTM:",
-      value: validateMetricsValue(metrics?.epsGrowthTTMYoy, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowthTTMYoy, 2)}`, "%"),
     },
     {
       key: "EPS growth 3Y:",
-      value: validateMetricsValue(metrics?.epsGrowth3Y, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowth3Y, 2)}`, "%"),
     },
     {
       key: "EPS growth 5Y:",
-      value: validateMetricsValue(metrics?.epsGrowth5Y, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowth5Y, 2)}`, "%"),
     },
     { key: "FCF/Sh growth 3Y:", value: `${getFCFperShareGrowth(3)}` },
     { key: "FCF/Sh growth 5Y:", value: `${getFCFperShareGrowth(5)}` },
@@ -132,23 +132,23 @@ export default function CompanyMetricsCard({
   const companyProfitabilityItems = [
     {
       key: "Gross margin TTM:",
-      value: validateMetricsValue(metrics?.grossMarginTTM, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.grossMarginTTM, 2)}`, "%"),
     },
     {
       key: "Operating margin TTM:",
-      value: validateMetricsValue(metrics?.operatingMarginTTM, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.operatingMarginTTM, 2)}`, "%"),
     },
     {
       key: "Profit margin TTM:",
-      value: validateMetricsValue(metrics?.netProfitMarginTTM, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.netProfitMarginTTM, 2)}`, "%"),
     },
     {
       key: "ROA:",
-      value: validateMetricsValue(metrics?.roaTTM, "%"),
+      value:validateMetricsValue(`${roundToDecimal(metrics?.roaTTM, 2)}`, "%"),
     },
     {
       key: "ROE:",
-      value: validateMetricsValue(metrics?.roeTTM, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.roeTTM, 2)}`, "%"),
     },
     {
       key: "ROIC:",
