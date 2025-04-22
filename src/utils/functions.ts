@@ -19,14 +19,17 @@ export const roundToDecimal = (num: number, decimalPlaces: number): number => {
  * Helper function that formats a number into a dollar amount with appropriate suffixes (T, B, M).
  */
 export const formatDollarAmount = (amount: number) => {
-  if (amount >= 1e12) {
-    return `${(amount / 1e12).toFixed(2)}T`;
-  } else if (amount >= 1e9) {
-    return `${(amount / 1e9).toFixed(2)}B`;
-  } else if (amount >= 1e6) {
-    return `${(amount / 1e6).toFixed(2)}M`;
+  const sign = amount < 0 ? "-" : "";
+  const absAmount = Math.abs(amount);
+
+  if (absAmount >= 1e12) {
+    return `${sign}${(absAmount / 1e12).toFixed(2)}T`;
+  } else if (absAmount >= 1e9) {
+    return `${sign}${(absAmount / 1e9).toFixed(2)}B`;
+  } else if (absAmount >= 1e6) {
+    return `${sign}${(absAmount / 1e6).toFixed(2)}M`;
   } else {
-    return `${amount}`;
+    return `${sign}${absAmount}`;
   }
 };
 
@@ -35,13 +38,13 @@ export const formatDollarAmount = (amount: number) => {
  * @param str The string to validate
  * @param unit Optional unit to append to the string like "%", "$", etc.
  */
-export const validateMetricsValue = (str: string | number, unit?: string) => {
+export const validateMetricsValue = (str: string | number | null, unit?: string) => {
   const notAvailable: string = "N/A";
   if (typeof str === "number") {
     str = str.toString();
   }
 
-  if (str === undefined || str === null || str === "") {
+  if (str === undefined || str === null || str === "" || str === "null") {
     return notAvailable;
   } else {
     return unit === undefined ? `${str}` : `${str}${unit}`;
