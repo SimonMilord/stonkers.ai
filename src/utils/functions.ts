@@ -4,7 +4,10 @@
  * @param num Number to round
  * @param decimalPlaces Number of decimal places to round to
  */
-export const roundToDecimal = (num: number, decimalPlaces: number) => {
+export const roundToDecimal = (num: number, decimalPlaces: number): number => {
+  if (typeof num === "string") {
+    num = Number(num);
+  }
   if (isNaN(num)) {
     return num;
   }
@@ -29,3 +32,18 @@ export const formatDollarAmount = (amount: number) => {
     return `${amount}`;
   }
 };
+
+/**
+ * Helper function that formats a string to display a specified string if the original string is empty or undefined.
+ * @param str The string to validate
+ * @param unit Optional unit to append to the string like "%", "$", etc.
+ */
+export const validateMetricsValue = (str: string, unit?: string) => {
+  const notAvailable: string = "N/A";
+
+  if (str === undefined || str === null || str === "") {
+    return notAvailable;
+  } else {
+    return unit === undefined ? `${str}` : `${str}${unit}`;
+  }
+}
