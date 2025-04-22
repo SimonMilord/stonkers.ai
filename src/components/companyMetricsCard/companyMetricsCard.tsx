@@ -1,6 +1,10 @@
 import React from "react";
 import { Paper, Title, Divider, Table, Box } from "@mantine/core";
-import { formatDollarAmount, validateMetricsValue, roundToDecimal } from "@utils/functions";
+import {
+  formatDollarAmount,
+  validateMetricsValue,
+  roundToDecimal,
+} from "@utils/functions";
 import "../cardStyles.css";
 
 type RowItem = {
@@ -187,21 +191,21 @@ export default function CompanyMetricsCard({
     {
       key: "Div/sh:",
       value: validateMetricsValue(
-        `${roundToDecimal(metrics?.dividendPerShareTTM, 2)}`,
+        roundToDecimal(metrics?.dividendPerShareTTM, 2),
         "$"
       ),
     },
     {
       key: "Div yield:",
       value: validateMetricsValue(
-        `${roundToDecimal(metrics?.currentDividendYieldTTM, 2)}`,
+        roundToDecimal(metrics?.currentDividendYieldTTM, 2),
         "%"
       ),
     },
     {
       key: "Payout ratio:",
       value: validateMetricsValue(
-        `${roundToDecimal(metrics?.payoutRatioTTM, 2)}`,
+        roundToDecimal(metrics?.payoutRatioTTM, 2),
         "%"
       ),
     },
