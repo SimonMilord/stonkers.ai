@@ -14,9 +14,12 @@
 .home-link {
   color: #fff;
   text-decoration: none;
-  padding: 16px;
 }
 
 .header__searchbox-wrapper {
   flex-grow: 1;
+}
+
+.layout__navlink:hover {
+  background-color: #393f4b;
 }

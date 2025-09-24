@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 
 /**
  * SearchBox component that allows users to search for a stock symbol.
- * @param props variant: string
+ * @param props variant: string - The variant of the search box. It can be "standalone" or "header".
  * @returns
  */
 export default function SearchBox(props: { variant: string }) {
