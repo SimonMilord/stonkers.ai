@@ -5,6 +5,7 @@ import {
   validateMetricsValue,
   roundToDecimal,
 } from "@utils/functions";
+import { getFCFperShareGrowth } from "@utils/metrics";
 import "../cardStyles.css";
 
 type RowItem = {
@@ -28,6 +29,7 @@ export default function CompanyMetricsCard({
   const fcfPerShare: number =
     metricsData?.series?.quarterly?.fcfPerShareTTM[0].v;
   const stockPrice: number = quoteData?.c;
+  const fcfPerShareArray = metricsData?.series?.quarterly?.fcfPerShareTTM;
 
   const getFCFYield = () => {
     const fcfYield = (fcfPerShare / stockPrice) * 100;
@@ -36,24 +38,6 @@ export default function CompanyMetricsCard({
 
   const getPriceToFCF = () => {
     return `${roundToDecimal(stockPrice / fcfPerShare, 2)}` || notAvailable;
-  };
-
-  const getFCFperShareGrowth = (period: number): string => {
-    const fcfPerShareArray = metricsData?.series?.quarterly?.fcfPerShareTTM;
-    const previousIndex: number = 4 * period;
-
-    const latestFCFperShValue = fcfPerShareArray && fcfPerShareArray[0]?.v;
-    const previousFCFperShValue =
-      fcfPerShareArray && fcfPerShareArray[previousIndex]?.v;
-
-    if (latestFCFperShValue > 0 && previousFCFperShValue > 0) {
-      const fcfCagr =
-        ((latestFCFperShValue / previousFCFperShValue) ** (1 / period) - 1) *
-        100;
-      return `${roundToDecimal(fcfCagr, 2)}%`;
-    } else {
-      return "--.--%";
-    }
   };
 
   const retrieveCashOnBalanceSheet = (): number => {
@@ -125,8 +109,8 @@ export default function CompanyMetricsCard({
       key: "EPS growth 5Y:",
       value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowth5Y, 2)}`, "%"),
     },
-    { key: "FCF/Sh growth 3Y:", value: `${getFCFperShareGrowth(3)}` },
-    { key: "FCF/Sh growth 5Y:", value: `${getFCFperShareGrowth(5)}` },
+    { key: "FCF/Sh growth 3Y:", value: `${getFCFperShareGrowth(fcfPerShareArray, 3) ?? "--.--%"}` },
+    { key: "FCF/Sh growth 5Y:", value: `${getFCFperShareGrowth(fcfPerShareArray, 5) ?? "--.--%"}` },
   ];
 
   const companyProfitabilityItems = [

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, Image, Flex, Box } from '@mantine/core';
+import { QuoteData, CompanyProfileData } from '../../types/financialApi';
 
-export default function StockQuote({ quoteData, companyProfileData }: { quoteData: any; companyProfileData: any }) {
+export default function StockQuote({ quoteData, companyProfileData }: { quoteData: QuoteData; companyProfileData: CompanyProfileData }) {
   const fluctuationColor = quoteData?.dp >= 0 ? "green" : "red";
   return (
     <Box m='lg'>
