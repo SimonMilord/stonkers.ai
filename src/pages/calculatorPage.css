@@ -1,0 +1,10 @@
+.calculatorPage {
+  margin: 0;
+  max-width: 100%;
+}
+
+.calculatorPage .calculator-grid-col {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+}

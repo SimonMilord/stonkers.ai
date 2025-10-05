@@ -3,6 +3,7 @@ import { AppShell, Flex, Group, Burger, NavLink, Box, Center, Loader } from "@ma
 import { Link } from "react-router-dom";
 import SearchBox from "@components/searchBox/searchBox";
 import { CiCalculator1, CiHome, CiCircleList } from "react-icons/ci";
+import { FaChartPie } from "react-icons/fa";
 import "./layout.css";
 
 interface LayoutProps {
@@ -17,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children, loading = false, opened, togg
     { label: "Home", icon: CiHome, href: `/` },
     { label: "Calculator", icon: CiCalculator1, href: `/calculator` },
     { label: "Watchlist", icon: CiCircleList, href: `/watchlist` },
+    { label: "Portfolio", icon: FaChartPie, href: `/portfolio` },
   ];
 
   return (
