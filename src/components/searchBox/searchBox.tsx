@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Box, TextInput, Loader, Text } from "@mantine/core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
+import { useStockInfo } from "../../contexts/stockContext";
+import { getQuote, getCompanyProfile, getBasicFinancials, getReportedFinancials } from "../../utils/requests";
+import { roundToDecimal } from "../../utils/functions";
+import { getFCFperShareGrowth } from "../../utils/metrics";
 
 /**
  * SearchBox component that allows users to search for a stock symbol.
@@ -13,6 +17,8 @@ export default function SearchBox(props: { variant: string }) {
   const [loading, setLoading] = useState(false);
   const [noResultsFound, setNoResultsFound] = useState(false);
   const history = useHistory();
+  const location = useLocation();
+  const { setCurrentStock } = useStockInfo();
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
@@ -26,7 +32,14 @@ export default function SearchBox(props: { variant: string }) {
         setSearchedQuery(trimmedQuery);
         // This check avoids the situation where a query like "amamaz" sends a request with a [object, object] value.
         if (queriedSymbol !== null) {
-          history.push(`/details/${queriedSymbol}`, { symbol: queriedSymbol });
+          // Check current location and navigate accordingly
+          if (location.pathname === '/calculator') {
+            // If on calculator page, fetch stock data and update context without navigation
+            await fetchAndSetStockData(queriedSymbol);
+          } else {
+            // Default behavior - navigate to details page
+            history.push(`/details/${queriedSymbol}`, { symbol: queriedSymbol });
+          }
         } else {
           console.warn(
             `No symbol found for: ${trimmedQuery}. Please try again with a different symbol.`
@@ -93,7 +106,45 @@ export default function SearchBox(props: { variant: string }) {
     }
   };
 
-  return (
+  /**
+   * Fetch stock data and update the stock context for calculator page
+   * @param symbol
+   */
+  const fetchAndSetStockData = async (symbol: string) => {
+    try {
+      const [quote, companyProfile, basicFinancials, reportedFinancials] = await Promise.all([
+        getQuote(symbol),
+        getCompanyProfile(symbol),
+        getBasicFinancials(symbol),
+        getReportedFinancials(symbol)
+      ]);
+
+      setCurrentStock({
+        logo: companyProfile?.logo,
+        name: companyProfile?.name,
+        ticker: companyProfile?.ticker || symbol,
+        currency: companyProfile?.currency,
+        price: quote?.c,
+        change: quote?.d,
+        changePercent: quote?.dp,
+        // Use the same mapping as detailsPage for consistency
+        epsTTM: basicFinancials?.metric?.epsTTM,
+        peRatioTTM: basicFinancials?.metric?.peTTM,
+        epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
+        fcfPerShareTTM: basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
+        fcfYieldTTM: roundToDecimal(
+          (basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v / quote?.c) * 100,
+          2
+        ),
+        fcfPerShareGrowthTTM: roundToDecimal(
+          Number(getFCFperShareGrowth(basicFinancials?.series?.quarterly?.fcfPerShareTTM, 1)),
+          2
+        ),
+      });
+    } catch (error) {
+      console.error("Error fetching stock data:", error);
+    }
+  };  return (
     <Box className="searchbox__container">
       {props.variant === "standalone" && (
         <>

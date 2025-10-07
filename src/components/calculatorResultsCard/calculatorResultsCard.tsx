@@ -10,8 +10,8 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 import { CalculationResults } from "src/pages/calculatorPage";
 import "./calculatorResultsCard.css";
 
@@ -27,17 +27,26 @@ ChartJS.register(
 
 export default function CalculatorResultsCard({
   calculationResults,
+  desiredReturn,
 }: {
   calculationResults: CalculationResults;
+  desiredReturn: number;
 }) {
-  const { fairValue, currentPrice, upside } = calculationResults;
-  const upsideColor = upside >= 0 ? "green" : "red";
+  const { fairValue, currentPrice, targetPrice5yr, projectedCagr } = calculationResults;
+  const upsideColor = projectedCagr >= 0 ? "green" : "red";
 
   // Generate 5-year projection data
   const generateProjectionData = () => {
     const currentYear = new Date().getFullYear();
-    const years = [currentYear, currentYear + 1, currentYear + 2, currentYear + 3, currentYear + 4, currentYear + 5];
-    const growthRate = upside / 100 / 5; // Distribute the total upside over 5 years
+    const years = [
+      currentYear,
+      currentYear + 1,
+      currentYear + 2,
+      currentYear + 3,
+      currentYear + 4,
+      currentYear + 5,
+    ];
+    const growthRate = projectedCagr / 100 / 5; // Distribute the total upside over 5 years
 
     const projectionData = years.map((_, index) => {
       if (index === 0) return currentPrice;
@@ -53,13 +62,13 @@ export default function CalculatorResultsCard({
     labels: years,
     datasets: [
       {
-        label: 'Stock Price Projection',
+        label: "Stock Price Projection",
         data: projectionData,
-        borderColor: 'rgb(34, 197, 94)',
-        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderColor: "rgb(34, 197, 94)",
+        backgroundColor: "rgba(34, 197, 94, 0.1)",
         borderWidth: 3,
-        pointBackgroundColor: 'rgb(34, 197, 94)',
-        pointBorderColor: 'rgb(34, 197, 94)',
+        pointBackgroundColor: "rgb(34, 197, 94)",
+        pointBorderColor: "rgb(34, 197, 94)",
         pointRadius: 6,
         pointHoverRadius: 8,
         tension: 0.4,
@@ -67,7 +76,7 @@ export default function CalculatorResultsCard({
     ],
   };
 
-  const chartOptions: ChartOptions<'line'> = {
+  const chartOptions: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -75,47 +84,45 @@ export default function CalculatorResultsCard({
         display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleColor: "white",
+        bodyColor: "white",
+        borderColor: "rgb(34, 197, 94)",
         borderWidth: 1,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             return `$${context.parsed.y.toFixed(2)}`;
-          }
-        }
+          },
+        },
       },
     },
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(255, 255, 255, 0.1)",
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.7)',
+          color: "rgba(255, 255, 255, 0.7)",
         },
       },
       y: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(255, 255, 255, 0.1)",
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.7)',
-          callback: function(value) {
-            return '$' + value;
-          }
+          color: "rgba(255, 255, 255, 0.7)",
+          callback: function (value) {
+            return "$" + value;
+          },
         },
       },
     },
     elements: {
       point: {
-        hoverBackgroundColor: 'rgb(34, 197, 94)',
+        hoverBackgroundColor: "rgb(34, 197, 94)",
       },
     },
   };
-
-  const entryPriceFor15Return = currentPrice / 1.15; // Price needed for 15% return
 
   return (
     <Paper withBorder radius="md" p="lg" className="calculator-results-card">
@@ -124,14 +131,13 @@ export default function CalculatorResultsCard({
       </Title>
       <Divider mb="lg" />
 
-      {/* Calculation Results Summary */}
       <Box
         p="md"
         mb="lg"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '8px',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          borderRadius: "8px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
       >
         <Text size="lg" fw={600} mb="md" ta="center">
@@ -139,39 +145,52 @@ export default function CalculatorResultsCard({
         </Text>
         <Group justify="space-between">
           <Stack gap="xs">
-            <Text size="sm" c="dimmed">Return from today's price</Text>
+            <Text size="sm" c="dimmed">
+              Return from today's price
+            </Text>
             <Text size="xl" fw={700} c={upsideColor}>
-              {upside > 0 ? '+' : ''}{upside}%
+              {projectedCagr > 0 ? "+" : ""}
+              {projectedCagr}%
             </Text>
           </Stack>
           <Stack gap="xs">
-            <Text size="sm" c="dimmed">Entry Price for ${}% Return</Text>
+            <Text size="sm" c="dimmed">
+              Entry Price for ${desiredReturn}% Return
+            </Text>
             <Text size="xl" fw={700}>
-              ${entryPriceFor15Return.toFixed(2)}
+              ${calculationResults.fairValue}
             </Text>
           </Stack>
         </Group>
       </Box>
-
-      {/* Chart */}
-      <Box className="chart-container" style={{ height: '300px', marginBottom: '16px' }}>
+      <Box
+        className="chart-container"
+        style={{ height: "300px", marginBottom: "16px" }}
+      >
         <Line data={chartData} options={chartOptions} />
       </Box>
 
-      {/* Additional Results */}
       <Group justify="space-between" mt="md">
         <Stack gap="xs">
-          <Text size="sm" c="dimmed">Fair Value</Text>
-          <Text size="lg" fw={600}>${fairValue}</Text>
+          <Text size="sm" c="dimmed">
+            Fair Value
+          </Text>
+          <Text size="lg" fw={600}>
+            ${fairValue}
+          </Text>
         </Stack>
         <Stack gap="xs">
-          <Text size="sm" c="dimmed">Current Price</Text>
+          <Text size="sm" c="dimmed">
+            Current Price
+          </Text>
           <Text size="lg">${currentPrice}</Text>
         </Stack>
         <Stack gap="xs">
-          <Text size="sm" c="dimmed">5-Year Target</Text>
+          <Text size="sm" c="dimmed">
+            5-Year Target
+          </Text>
           <Text size="lg" fw={600}>
-            ${projectionData[projectionData.length - 1]?.toFixed(2)}
+            ${targetPrice5yr}
           </Text>
         </Stack>
       </Group>

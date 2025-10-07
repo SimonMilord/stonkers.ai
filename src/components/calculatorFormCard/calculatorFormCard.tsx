@@ -31,8 +31,6 @@ export default function CalculatorFormCard({
   const peRatio = roundToDecimal(metrics?.peRatio, 2);
   const epsGrowthTTM = roundToDecimal(metrics?.epsGrowthTTM, 2);
 
-
-
   return (
     <Paper withBorder radius="md" p="lg" className="calculator-form-card">
       <Title order={3} mb="8">
@@ -58,7 +56,7 @@ export default function CalculatorFormCard({
             </Stack>
             <Stack>
               <Text>EPS growth</Text>
-              <Text>{`${epsGrowthTTM ?? "N/A"}`}</Text>
+              <Text>{`${epsGrowthTTM ?? "N/A"}`}%</Text>
             </Stack>
           </Group>
         ) : (
@@ -69,11 +67,11 @@ export default function CalculatorFormCard({
             </Stack>
             <Stack>
               <Text>FCF Yield</Text>
-              <Text>{`${fcfYieldTTM ?? "N/A"}`}</Text>
+              <Text>{`${fcfYieldTTM ?? "N/A"}%`}</Text>
             </Stack>
             <Stack>
               <Text>FCF/Share growth</Text>
-              <Text>{`${fcfPerShareGrowthTTM ?? "N/A"}`}</Text>
+              <Text>{`${fcfPerShareGrowthTTM ?? "N/A"}%`}</Text>
             </Stack>
           </Group>
         )}
@@ -84,15 +82,17 @@ export default function CalculatorFormCard({
             label="FCF/Share (TTM)"
             variant="filled"
             allowDecimal
+            step={1}
             placeholder="Enter FCF/Share"
             radius="md"
             value={formValues.fcfPerShare}
             onChange={(value) => onInputChange("fcfPerShare", value || 0)}
           />
-                    <NumberInput
+          <NumberInput
             label="FCF/Share Growth rate (%)"
             variant="filled"
             allowDecimal
+            step={1}
             placeholder="Enter FCF/Share Growth rate"
             radius="md"
             value={formValues.fcfGrowthRate}
@@ -102,6 +102,7 @@ export default function CalculatorFormCard({
             label="Target FCF Yield (%)"
             variant="filled"
             allowDecimal
+            step={1}
             placeholder="Enter FCF Yield"
             radius="md"
             value={formValues.targetFcfYield}
@@ -111,6 +112,7 @@ export default function CalculatorFormCard({
             label="Desired Return (%)"
             variant="filled"
             allowDecimal
+            step={1}
             placeholder="Enter Desired Return"
             radius="md"
             value={formValues.desiredReturn}

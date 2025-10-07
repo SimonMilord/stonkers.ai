@@ -1,7 +1,7 @@
 import "@mantine/core/styles.css";
 import "./App.css";
-import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import React, { Component, useEffect } from "react";
+import { BrowserRouter as Router, Route, Switch, useLocation } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import HomePage from "./pages/homePage";
 import DetailsPage from "./pages/detailsPage";
@@ -17,6 +17,7 @@ export default class App extends Component {
       <MantineProvider>
         <StockProvider>
           <Router>
+            <AutoTitleManager />
             <div className="App">
               <Switch>
                 <Route
@@ -56,4 +57,29 @@ export default class App extends Component {
       </MantineProvider>
     );
   }
+}
+
+// Auto title manager that requires no changes to individual pages
+function AutoTitleManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const routeTitles: Record<string, string> = {
+      '/': 'Stonkers.ai - Stock Analysis Platform',
+      '/calculator': 'Calculator - Stonkers.ai',
+      '/watchlist': 'Watchlist - Stonkers.ai',
+      '/portfolio': 'Portfolio - Stonkers.ai',
+    };
+
+    // Handle dynamic routes
+    if (location.pathname.startsWith('/details/')) {
+      const symbol = location.pathname.split('/')[2];
+      document.title = `${symbol.toUpperCase()} - Stock Details - Stonkers.ai`;
+    } else {
+      // Use static route titles
+      document.title = routeTitles[location.pathname] || 'Stonkers.ai';
+    }
+  }, [location.pathname]);
+
+  return null;
 }
