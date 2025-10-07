@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
-// import SearchBox from "@components/searchBox/searchBox";
 import { Center, Flex, Grid, Switch, Text } from "@mantine/core";
 import CalculatorFormCard from "@components/calculatorFormCard/calculatorFormCard";
 import CalculatorResultsCard from "@components/calculatorResultsCard/calculatorResultsCard";
@@ -31,8 +30,11 @@ export type FormValues = {
 export type CalculationResults = {
   fairValue: number;
   currentPrice: number;
-  upside: number;
+  targetPrice5yr: number;
+  projectedCagr: number;
 };
+
+const defaultDesiredReturn = 15;
 
 export default function CalculatorPage() {
   const [opened, setOpened] = useState(false);
@@ -44,26 +46,28 @@ export default function CalculatorPage() {
     fcfPerShare: roundToDecimal(currentStock?.fcfPerShareTTM, 2) || 0,
     fcfGrowthRate: roundToDecimal(currentStock?.fcfPerShareGrowthTTM, 2) || 0,
     targetFcfYield: roundToDecimal(currentStock?.fcfYieldTTM, 2) || 0,
-    desiredReturn: 10, // Default desired return
+    desiredReturn: defaultDesiredReturn,
     eps: roundToDecimal(currentStock?.epsTTM, 2) || 0,
     epsGrowthRate: roundToDecimal(currentStock?.epsGrowthTTM, 2) || 0,
     targetPeRatio: roundToDecimal(currentStock?.peRatioTTM, 2) || 0,
   });
 
-  const [calculationResults, setCalculationResults] = useState<CalculationResults>({
-    fairValue: 0,
-    currentPrice: currentStock?.price || 0,
-    upside: 0,
-  });
+  const [calculationResults, setCalculationResults] =
+    useState<CalculationResults>({
+      fairValue: 0,
+      currentPrice: currentStock?.price || 0,
+      targetPrice5yr: 0,
+      projectedCagr: 0,
+    });
 
-  // Update form values when stock changes
   useEffect(() => {
     if (currentStock) {
       setFormValues({
         fcfPerShare: roundToDecimal(currentStock.fcfPerShareTTM, 2) || 0,
-        fcfGrowthRate: roundToDecimal(currentStock.fcfPerShareGrowthTTM, 2) || 0,
+        fcfGrowthRate:
+          roundToDecimal(currentStock.fcfPerShareGrowthTTM, 2) || 0,
         targetFcfYield: roundToDecimal(currentStock.fcfYieldTTM, 2) || 0,
-        desiredReturn: 10,
+        desiredReturn: defaultDesiredReturn,
         eps: roundToDecimal(currentStock.epsTTM, 2) || 0,
         epsGrowthRate: roundToDecimal(currentStock.epsGrowthTTM, 2) || 0,
         targetPeRatio: roundToDecimal(currentStock.peRatioTTM, 2) || 0,
@@ -86,27 +90,34 @@ export default function CalculatorPage() {
   const calculateReturns = () => {
     const currentPrice = currentStock?.price || 0;
     let fairValue = 0;
+    let targetPrice5yr = 0;
+    let discountRate = 0;
 
     if (isEPSMethod) {
       // EPS-based calculation
       const { eps, epsGrowthRate, targetPeRatio, desiredReturn } = formValues;
-      const futureEps = eps * Math.pow(1 + epsGrowthRate / 100, 10); // 10-year projection
-      fairValue = futureEps * targetPeRatio;
-      fairValue = fairValue / Math.pow(1 + desiredReturn / 100, 10); // Discount back to present value
+      const epsYr5 = eps * (1 + epsGrowthRate / 100) ** 5;
+      targetPrice5yr = epsYr5 * targetPeRatio;
+      discountRate = desiredReturn;
     } else {
       // FCF-based calculation
-      const { fcfPerShare, fcfGrowthRate, targetFcfYield, desiredReturn } = formValues;
-      const futureFcf = fcfPerShare * Math.pow(1 + fcfGrowthRate / 100, 10); // 10-year projection
-      fairValue = futureFcf / (targetFcfYield / 100);
-      fairValue = fairValue / Math.pow(1 + desiredReturn / 100, 10); // Discount back to present value
+      const { fcfPerShare, fcfGrowthRate, targetFcfYield, desiredReturn } =
+        formValues;
+      const futureFcf = fcfPerShare * (1 + fcfGrowthRate / 100) ** 5;
+      targetPrice5yr = futureFcf / (targetFcfYield / 100);
+      discountRate = desiredReturn;
     }
-
-    const upside = currentPrice > 0 ? ((fairValue - currentPrice) / currentPrice) * 100 : 0;
+    fairValue = targetPrice5yr / (1 + discountRate / 100) ** 5;
+    const projectedCagr =
+      currentPrice > 0
+        ? ((targetPrice5yr / currentPrice) ** (1 / 5) - 1) * 100
+        : 0;
 
     setCalculationResults({
       fairValue: roundToDecimal(fairValue, 2),
       currentPrice: roundToDecimal(currentPrice, 2),
-      upside: roundToDecimal(upside, 2),
+      targetPrice5yr: roundToDecimal(targetPrice5yr, 2),
+      projectedCagr: roundToDecimal(projectedCagr, 2),
     });
   };
 
@@ -175,7 +186,10 @@ export default function CalculatorPage() {
           />
         </Grid.Col>
         <Grid.Col span={6} className="calculator-grid-col">
-          <CalculatorResultsCard calculationResults={calculationResults} />
+          <CalculatorResultsCard
+            calculationResults={calculationResults}
+            desiredReturn={formValues.desiredReturn}
+          />
         </Grid.Col>
       </Grid>
     </Layout>
