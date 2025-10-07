@@ -83,6 +83,7 @@ export default function CalculatorFormCard({
             variant="filled"
             allowDecimal
             step={1}
+            min={0}
             placeholder="Enter FCF/Share"
             radius="md"
             value={formValues.fcfPerShare}
@@ -93,6 +94,8 @@ export default function CalculatorFormCard({
             variant="filled"
             allowDecimal
             step={1}
+            min={0}
+            max={100}
             placeholder="Enter FCF/Share Growth rate"
             radius="md"
             value={formValues.fcfGrowthRate}
@@ -103,6 +106,8 @@ export default function CalculatorFormCard({
             variant="filled"
             allowDecimal
             step={1}
+            min={0}
+            max={100}
             placeholder="Enter FCF Yield"
             radius="md"
             value={formValues.targetFcfYield}
@@ -113,6 +118,8 @@ export default function CalculatorFormCard({
             variant="filled"
             allowDecimal
             step={1}
+            min={0}
+            max
             placeholder="Enter Desired Return"
             radius="md"
             value={formValues.desiredReturn}
@@ -125,6 +132,8 @@ export default function CalculatorFormCard({
             label="EPS (TTM)"
             variant="filled"
             allowDecimal
+            step={1}
+            min={0}
             placeholder="Input placeholder"
             radius="md"
             value={formValues.eps}
@@ -134,6 +143,9 @@ export default function CalculatorFormCard({
             label="EPS Growth rate (%)"
             variant="filled"
             allowDecimal
+            step={1}
+            min={0}
+            max={100}
             placeholder="Input placeholder"
             radius="md"
             value={formValues.epsGrowthRate}
@@ -143,6 +155,8 @@ export default function CalculatorFormCard({
             label="Target P/E multiple"
             variant="filled"
             allowDecimal
+            step={1}
+            min={0}
             placeholder="Input placeholder"
             radius="md"
             value={formValues.targetPeRatio}
@@ -152,6 +166,8 @@ export default function CalculatorFormCard({
             label="Desired Return (%)"
             variant="filled"
             allowDecimal
+            step={1}
+            min={0}
             placeholder="Enter Desired Return"
             radius="md"
             value={formValues.desiredReturn}
