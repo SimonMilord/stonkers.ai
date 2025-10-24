@@ -67,6 +67,10 @@ export default function CompanyMetricsCard({
       value: validateMetricsValue(`${roundToDecimal(metrics?.peTTM, 2)}`),
     },
     {
+      key: "Forward PE:",
+      value: validateMetricsValue(`${roundToDecimal(metrics?.forwardPE, 2)}`),
+    },
+    {
       key: "P/S:",
       value: validateMetricsValue(`${roundToDecimal(metrics?.psTTM, 2)}`),
     },

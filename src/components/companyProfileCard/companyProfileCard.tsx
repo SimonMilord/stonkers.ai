@@ -10,9 +10,6 @@ export default function CompanyProfileCard({
   profileData: any;
 }) {
   const notAvailable: String = "Not Available";
-
-
-
   const formattedMarketCap = formatDollarAmount(
     profileData?.marketCapitalization * 1000000
   );

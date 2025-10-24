@@ -1,5 +1,5 @@
 import React from "react";
-import { Paper, Title, Divider, Text, Table, Flex } from "@mantine/core";
+import { Paper, Title, Divider, Text, Flex } from "@mantine/core";
 import "../cardStyles.css";
 import GenerativeAIBadge from "@components/generativeAIBadge/generativeAIBadge";
 
