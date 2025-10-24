@@ -6,6 +6,7 @@ import { Flex, Grid } from "@mantine/core";
 import CompanyProfileCard from "@components/companyProfileCard/companyProfileCard";
 import CompanyMetricsCard from "@components/companyMetricsCard/companyMetricsCard";
 import GeneratedContentCard from "@components/generatedContentCard/generatedContentCard";
+import CompanyNewsCard from "@components/companyNewsCard/companyNewsCard";
 import {
   getQuote,
   getCompanyProfile,
@@ -67,25 +68,25 @@ export default function DetailsPage() {
       };
 
       setStockDetails(stockData);
-        setCurrentStock({
-          logo: companyProfile?.logo,
-          name: companyProfile?.name,
-          ticker: companyProfile?.ticker || symbol,
-          currency: companyProfile?.currency,
-          price: quote?.c,
-          change: quote?.d,
-          changePercent: quote?.dp,
-          epsTTM: basicFinancials?.metric?.epsTTM,
-          peRatioTTM: basicFinancials?.metric?.peTTM,
-          epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
-          fcfPerShareTTM: basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v,
-          fcfYieldTTM: roundToDecimal(
-            (basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v / quote?.c) *
-              100,
-            2
-          ),
-          fcfPerShareGrowthTTM: roundToDecimal(Number(getFCFperShareGrowth(basicFinancials?.series?.quarterly?.fcfPerShareTTM, 1)), 2),
-        });
+      setCurrentStock({
+        logo: companyProfile?.logo,
+        name: companyProfile?.name,
+        ticker: companyProfile?.ticker || symbol,
+        currency: companyProfile?.currency,
+        price: quote?.c,
+        change: quote?.d,
+        changePercent: quote?.dp,
+        epsTTM: basicFinancials?.metric?.epsTTM,
+        peRatioTTM: basicFinancials?.metric?.peTTM,
+        epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
+        fcfPerShareTTM: basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v,
+        fcfYieldTTM: roundToDecimal(
+          (basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v / quote?.c) *
+            100,
+          2
+        ),
+        fcfPerShareGrowthTTM: roundToDecimal(Number(getFCFperShareGrowth(basicFinancials?.series?.quarterly?.fcfPerShareTTM, 1)), 2),
+      });
     } catch (error) {
       console.error("Error fetching stock data: ", error);
     }
@@ -129,6 +130,9 @@ export default function DetailsPage() {
               title="Investment Risks"
               generatedContent="TODO: ADD GENERATED CONTENT HERE"
             />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <CompanyNewsCard title={`Recent News`} newsData={stockDetails?.companyNewsData} />
           </Grid.Col>
         </Grid>
       </>
