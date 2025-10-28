@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
-import { Flex, Grid } from "@mantine/core";
+import { Flex, Grid, Button, Tooltip } from "@mantine/core";
 import CompanyProfileCard from "@components/companyProfileCard/companyProfileCard";
 import CompanyMetricsCard from "@components/companyMetricsCard/companyMetricsCard";
 import GeneratedContentCard from "@components/generatedContentCard/generatedContentCard";
 import CompanyNewsCard from "@components/companyNewsCard/companyNewsCard";
+import "./detailsPage.css";
 import {
   getQuote,
   getCompanyProfile,
@@ -20,6 +21,7 @@ import {
 import { useStockInfo } from "../contexts/stockContext";
 import { roundToDecimal } from "@utils/functions";
 import { getFCFperShareGrowth } from "@utils/metrics";
+import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 
 export default function DetailsPage() {
   const location = useLocation();
@@ -27,11 +29,41 @@ export default function DetailsPage() {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stockDetails, setStockDetails] = useState({});
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
   const { setCurrentStock } = useStockInfo();
 
   useEffect(() => {
     fetchStockData(symbol);
+    checkIfInWatchlist(symbol);
   }, [symbol]);
+
+  const checkIfInWatchlist = async (symbol: string) => {
+    // TODO: Check if stock is already in watchlist
+    // This would typically be an API call to check the user's watchlist
+    setIsInWatchlist(false);
+  };
+
+  const handleAddToWatchlist = async () => {
+    try {
+      // TODO: Add API call to add stock to watchlist
+      console.log(`Adding ${symbol} to watchlist`);
+      setIsInWatchlist(true);
+      // You can add a notification here
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+    }
+  };
+
+  const handleRemoveFromWatchlist = async () => {
+    try {
+      // TODO: Add API call to remove stock from watchlist
+      console.log(`Removing ${symbol} from watchlist`);
+      setIsInWatchlist(false);
+      // You can add a notification here
+    } catch (error) {
+      console.error("Error removing from watchlist:", error);
+    }
+  };
 
   const fetchStockData = async (symbol: string) => {
     setLoading(true);
@@ -96,15 +128,32 @@ export default function DetailsPage() {
   return (
     <Layout loading={loading} opened={opened} toggle={() => setOpened(!opened)}>
       <>
-        <Flex justify="center" mb="lg">
-          {stockDetails.quoteData && stockDetails.companyProfileData ? (
-            <StockQuote
-              quoteData={stockDetails.quoteData}
-              companyProfileData={stockDetails.companyProfileData}
-            />
-          ) : (
-            <p>Loading...</p>
-          )}
+        <Flex className="details-page-header">
+          <div className="details-page-spacer"></div>
+          <div className="details-page-quote-container">
+            {stockDetails.quoteData && stockDetails.companyProfileData ? (
+              <StockQuote
+                quoteData={stockDetails.quoteData}
+                companyProfileData={stockDetails.companyProfileData}
+              />
+            ) : (
+              <p>Loading...</p>
+            )}
+          </div>
+          <div className="details-page-button-container">
+            {stockDetails.quoteData && stockDetails.companyProfileData && (
+              <Tooltip label={`${isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}`}>
+                <Button
+                  variant={"light"}
+                  color={isInWatchlist ? "red" : "blue"}
+                  onClick={isInWatchlist ? handleRemoveFromWatchlist : handleAddToWatchlist}
+                  size="md"
+                >
+                  {isInWatchlist ? <RiSubtractLine /> : <RiAddLargeLine />}
+                </Button>
+              </Tooltip>
+            )}
+          </div>
         </Flex>
 
         <Grid>
