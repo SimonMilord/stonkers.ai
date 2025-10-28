@@ -1,0 +1,21 @@
+.details-page-header {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.details-page-spacer {
+  flex: 1;
+}
+
+.details-page-quote-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.details-page-button-container {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
