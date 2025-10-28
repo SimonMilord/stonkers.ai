@@ -79,22 +79,22 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         <ActionIcon
           radius="md"
           variant="subtle"
-          color="red"
-          onClick={() => onRemove(stock.symbol)}
-        >
-          <RiDeleteBin5Fill />
-        </ActionIcon>
-      </Table.Td>
-      <Table.Td>
-        <ActionIcon
-          radius="md"
-          variant="subtle"
           color="gray"
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
           {...attributes}
           {...listeners}
         >
           <RiMenuFill />
+        </ActionIcon>
+      </Table.Td>
+      <Table.Td>
+        <ActionIcon
+          radius="md"
+          variant="subtle"
+          color="red"
+          onClick={() => onRemove(stock.symbol)}
+        >
+          <RiDeleteBin5Fill />
         </ActionIcon>
       </Table.Td>
     </Table.Tr>
