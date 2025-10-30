@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { formatDollarAmount } from "@utils/functions";
-import { Paper, Title, Text, Divider, Table } from "@mantine/core";
+import { Paper, Title, Text, Divider, Table, Flex } from "@mantine/core";
 import "./companyProfileCard.css";
 import "../cardStyles.css";
+import GenerativeAIBadge from "@components/generativeAIBadge/generativeAIBadge";
 
 export default function CompanyProfileCard({
   profileData,
 }: {
   profileData: any;
 }) {
+  const [companyDescription, setCompanyDescription] = useState<string | null>(
+    null
+  );
+
   const notAvailable: String = "Not Available";
   const formattedMarketCap = formatDollarAmount(
     profileData?.marketCapitalization * 1000000
@@ -26,7 +31,10 @@ export default function CompanyProfileCard({
 
   const profileDataTableElements = [
     { key: "Company Name:", value: profileData?.name || notAvailable },
-    { key: "Market Capitalization:", value: formattedMarketCap || notAvailable },
+    {
+      key: "Market Capitalization:",
+      value: formattedMarketCap || notAvailable,
+    },
     { key: "Industry:", value: profileData?.finnhubIndustry || notAvailable },
     { key: "Country:", value: profileData?.country || notAvailable },
     {
@@ -36,6 +44,42 @@ export default function CompanyProfileCard({
     { key: "Exchange:", value: profileData?.exchange || notAvailable },
     { key: "Website:", value: companyWebsiteLink || notAvailable },
   ];
+
+  const generateCompanyDescription = async (companyName: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-company-description`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ companyName }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate company description");
+      }
+
+      const data = await response.json();
+      return data.content;
+    } catch (error) {
+      console.error("Error generating company description:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchCompanyDescription = async () => {
+      if (profileData?.name) {
+        const description = await generateCompanyDescription(profileData.name);
+        setCompanyDescription(description);
+      }
+    };
+
+    fetchCompanyDescription();
+  }, [profileData?.name]);
 
   const rows = profileDataTableElements.map((item, index) => (
     <Table.Tr key={index}>
@@ -55,19 +99,15 @@ export default function CompanyProfileCard({
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
         <Divider my="lg" />
-        {/* TODO: Change description to one that is AI generated */}
-        <Text>
-          Amazon is a global technology company primarily known for its
-          e-commerce platform, where it sells a wide range of products directly
-          and through third-party sellers. It operates through several key
-          segments: North America and International (its retail businesses),
-          Amazon Web Services (AWS) (its cloud computing division), Advertising
-          Services, and Subscription Services like Prime. Amazon makes money by
-          selling goods online, taking commissions from third-party sellers,
-          charging for advertising space on its platform, offering subscription
-          plans, and providing scalable cloud computing solutions through
-          AWS—which is one of its most profitable segments.
-        </Text>
+        <Flex justify="space-between" align="center" mb="16">
+          <Title order={4}>Overview</Title>
+          <GenerativeAIBadge />
+        </Flex>
+        {companyDescription ? (
+          <Text className="formatted-description">{companyDescription}</Text>
+        ) : (
+          <Text>Loading...</Text>
+        )}
       </Paper>
     </div>
   );

@@ -1,3 +1,7 @@
 .companyUrl {
   color: white;
 }
+
+.formatted-description {
+  white-space: pre-line;
+}

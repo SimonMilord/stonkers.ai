@@ -30,6 +30,12 @@ export default function DetailsPage() {
   const [loading, setLoading] = useState(false);
   const [stockDetails, setStockDetails] = useState({});
   const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [investmentRisks, setInvestmentRisks] = useState<string | null>(
+    null
+  );
+  const [competitiveAdvantages, setCompetitiveAdvantages] = useState<string | null>(
+    null
+  );
   const { setCurrentStock } = useStockInfo();
 
   useEffect(() => {
@@ -125,6 +131,76 @@ export default function DetailsPage() {
     setLoading(false);
   };
 
+  const generateCompetitiveAdvantages = async (companyName: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-competitive-advantages-analysis`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ companyName }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate competitive advantages analysis");
+      }
+
+      const data = await response.json();
+      return data.content;
+    } catch (error) {
+      console.error("Error generating competitive advantages:", error);
+      return null;
+    }
+  };
+
+  const generateInvestmentRisks = async (companyName: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-investment-risks-analysis`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ companyName }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate investment risks analysis");
+      }
+
+      const data = await response.json();
+      return data.content;
+    } catch (error) {
+      console.error("Error generating investment risks:", error);
+      return null;
+    }
+  };
+
+  // Fetch AI-generated content when company profile data is available
+  useEffect(() => {
+    const fetchAIContent = async () => {
+      if (stockDetails.companyProfileData?.name) {
+        const companyName = stockDetails.companyProfileData.name;
+
+        // Fetch both analyses in parallel
+        const [advantages, risks] = await Promise.all([
+          generateCompetitiveAdvantages(companyName),
+          generateInvestmentRisks(companyName),
+        ]);
+
+        setCompetitiveAdvantages(advantages);
+        setInvestmentRisks(risks);
+      }
+    };
+
+    fetchAIContent();
+  }, [stockDetails.companyProfileData?.name]);
+
   return (
     <Layout loading={loading} opened={opened} toggle={() => setOpened(!opened)}>
       <>
@@ -171,13 +247,13 @@ export default function DetailsPage() {
           <Grid.Col span={6}>
             <GeneratedContentCard
               title="Competitive Advantages"
-              generatedContent="TODO: ADD GENERATED CONTENT HERE"
+              generatedContent={competitiveAdvantages || "Generating..."}
             />
           </Grid.Col>
           <Grid.Col span={6}>
             <GeneratedContentCard
               title="Investment Risks"
-              generatedContent="TODO: ADD GENERATED CONTENT HERE"
+              generatedContent={investmentRisks || "Generating..."}
             />
           </Grid.Col>
           <Grid.Col span={6}>

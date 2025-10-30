@@ -1,0 +1,9 @@
+.formatted-content {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.formatted-content strong {
+  font-weight: 600;
+  color: var(--mantine-color-text);
+}

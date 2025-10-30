@@ -1,5 +1,5 @@
-const apiUrl = import.meta.env.VITE_API_URL;
-const apiKey = import.meta.env.VITE_API_KEY;
+const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
+const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
 
 /**
  * Fetch a stock quote using the Finnhub API for a given symbol.

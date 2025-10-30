@@ -60,8 +60,8 @@ export default function SearchBox(props: { variant: string }) {
    */
   const searchForSymbol = async (symbol: string) => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const apiKey = import.meta.env.VITE_API_KEY;
+    const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
+    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
     const request = {
       method: "GET",
       headers: {
