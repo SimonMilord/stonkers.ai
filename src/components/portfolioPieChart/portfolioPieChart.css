@@ -1,0 +1,10 @@
+.portfolio-pie-chart {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.portfolio-pie-chart canvas {
+  max-height: 400px !important;
+}

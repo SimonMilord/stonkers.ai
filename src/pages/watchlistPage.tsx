@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import WatchlistItem, {
   WatchlistItemData,
-} from "../components/watchlistItem/watchListItem";
+} from "../components/watchlistItem/watchlistItem";
 import {
   DndContext,
   closestCenter,
