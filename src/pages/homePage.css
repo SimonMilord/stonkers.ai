@@ -6,11 +6,6 @@
   height: 100vh;
 }
 
-.searchbox__container {
-  min-width: 300px;
-  width: 40vw;
-}
-
 .mantine-TextInput-input {
   background-color: #282c34;
   border-color: white;

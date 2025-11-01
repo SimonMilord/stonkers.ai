@@ -1,5 +1,5 @@
 import React from "react";
-import { AppShell, Flex, Group, Burger, NavLink, Box, Center, Loader } from "@mantine/core";
+import { AppShell, Flex, Group, Burger, NavLink, Box } from "@mantine/core";
 import { Link } from "react-router-dom";
 import SearchBox from "@components/searchBox/searchBox";
 import { CiCalculator1, CiHome, CiCircleList } from "react-icons/ci";
@@ -8,12 +8,11 @@ import "./layout.css";
 
 interface LayoutProps {
   children: React.ReactNode;
-  loading?: boolean;
   opened: boolean;
   toggle: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, loading = false, opened, toggle }) => {
+const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
   const navLinks = [
     { label: "Home", icon: CiHome, href: `/` },
     { label: "Calculator", icon: CiCalculator1, href: `/calculator` },
@@ -29,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, loading = false, opened, togg
     >
       <AppShell.Header>
         <Flex align="center" justify="space-between" h="100%">
-          <Group px="md">
+          <Group px="md" className="header__logo-group">
             <Burger
               opened={opened}
               onClick={toggle}
@@ -41,16 +40,9 @@ const Layout: React.FC<LayoutProps> = ({ children, loading = false, opened, togg
               Stonkers.ai
             </Link>
           </Group>
-          <Flex justify="center" className="header__searchbox-wrapper">
+          <Box className="header__searchbox-wrapper">
             <SearchBox variant="header" />
-            {loading ? (
-              <Center>
-                <Box ml="md">
-                  <Loader size={24} />
-                </Box>
-              </Center>
-            ) : null}
-          </Flex>
+          </Box>
         </Flex>
       </AppShell.Header>
       <AppShell.Navbar p="md">

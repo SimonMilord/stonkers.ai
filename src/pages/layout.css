@@ -15,8 +15,30 @@
   text-decoration: none;
 }
 
+.header__logo-group {
+  width: 300px;
+  min-width: 300px;
+}
+
 .header__searchbox-wrapper {
   flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .header__logo-group {
+    width: auto;
+    min-width: auto;
+    flex-shrink: 0;
+  }
+
+  .header__searchbox-wrapper {
+    margin-left: 8px;
+    margin-right: 16px;
+  }
 }
 
 .layout__navlink:hover {
