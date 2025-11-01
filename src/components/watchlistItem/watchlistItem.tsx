@@ -52,6 +52,18 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
   return (
     <Table.Tr ref={setNodeRef} style={style}>
       <Table.Td>
+        <ActionIcon
+          radius="md"
+          variant="subtle"
+          color="gray"
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          {...attributes}
+          {...listeners}
+        >
+          <RiMenuFill />
+        </ActionIcon>
+      </Table.Td>
+      <Table.Td>
         <Text fw={500}>{stock.symbol}</Text>
       </Table.Td>
       <Table.Td>
@@ -74,18 +86,6 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         <Badge color={changePercentData.color} variant="light" size="sm">
           {changePercentData.value}
         </Badge>
-      </Table.Td>
-      <Table.Td>
-        <ActionIcon
-          radius="md"
-          variant="subtle"
-          color="gray"
-          style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          {...attributes}
-          {...listeners}
-        >
-          <RiMenuFill />
-        </ActionIcon>
       </Table.Td>
       <Table.Td>
         <ActionIcon
