@@ -105,12 +105,12 @@ export default function WatchlistPage() {
             <Table borderColor='gray'>
               <Table.Thead>
                 <Table.Tr>
+                  <Table.Th></Table.Th>
                   <Table.Th>Symbol</Table.Th>
                   <Table.Th>Name</Table.Th>
                   <Table.Th>Price</Table.Th>
                   <Table.Th>Change ($)</Table.Th>
                   <Table.Th>Change (%)</Table.Th>
-                  <Table.Th></Table.Th>
                   <Table.Th></Table.Th>
                 </Table.Tr>
               </Table.Thead>
