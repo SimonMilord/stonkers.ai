@@ -1,0 +1,9 @@
+.portfolio-item-name {
+  cursor: pointer;
+  color: var(--mantine-color-white-0);
+  transition: color 0.2s ease;
+}
+
+.portfolio-item-name:hover {
+  color: var(--mantine-color-gray-6);
+}
