@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { Box, TextInput, Loader, Text } from "@mantine/core";
+import { Box, TextInput, Loader, Text, Flex } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
 import { useStockInfo } from "../../contexts/stockContext";
-import { getQuote, getCompanyProfile, getBasicFinancials, getReportedFinancials } from "../../utils/requests";
+import {
+  getQuote,
+  getCompanyProfile,
+  getBasicFinancials,
+  getReportedFinancials,
+} from "../../utils/requests";
 import { roundToDecimal } from "../../utils/functions";
 import { getFCFperShareGrowth } from "../../utils/metrics";
+import "./searchBox.css";
 
 /**
  * SearchBox component that allows users to search for a stock symbol.
@@ -33,12 +39,14 @@ export default function SearchBox(props: { variant: string }) {
         // This check avoids the situation where a query like "amamaz" sends a request with a [object, object] value.
         if (queriedSymbol !== null) {
           // Check current location and navigate accordingly
-          if (location.pathname === '/calculator') {
+          if (location.pathname === "/calculator") {
             // If on calculator page, fetch stock data and update context without navigation
             await fetchAndSetStockData(queriedSymbol);
           } else {
             // Default behavior - navigate to details page
-            history.push(`/details/${queriedSymbol}`, { symbol: queriedSymbol });
+            history.push(`/details/${queriedSymbol}`, {
+              symbol: queriedSymbol,
+            });
           }
         } else {
           console.warn(
@@ -112,12 +120,13 @@ export default function SearchBox(props: { variant: string }) {
    */
   const fetchAndSetStockData = async (symbol: string) => {
     try {
-      const [quote, companyProfile, basicFinancials, reportedFinancials] = await Promise.all([
-        getQuote(symbol),
-        getCompanyProfile(symbol),
-        getBasicFinancials(symbol),
-        getReportedFinancials(symbol)
-      ]);
+      const [quote, companyProfile, basicFinancials, reportedFinancials] =
+        await Promise.all([
+          getQuote(symbol),
+          getCompanyProfile(symbol),
+          getBasicFinancials(symbol),
+          getReportedFinancials(symbol),
+        ]);
 
       setCurrentStock({
         logo: companyProfile?.logo,
@@ -131,20 +140,29 @@ export default function SearchBox(props: { variant: string }) {
         epsTTM: basicFinancials?.metric?.epsTTM,
         peRatioTTM: basicFinancials?.metric?.peTTM,
         epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
-        fcfPerShareTTM: basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
+        fcfPerShareTTM:
+          basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
         fcfYieldTTM: roundToDecimal(
-          (basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v / quote?.c) * 100,
+          (basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v /
+            quote?.c) *
+            100,
           2
         ),
         fcfPerShareGrowthTTM: roundToDecimal(
-          Number(getFCFperShareGrowth(basicFinancials?.series?.quarterly?.fcfPerShareTTM, 1)),
+          Number(
+            getFCFperShareGrowth(
+              basicFinancials?.series?.quarterly?.fcfPerShareTTM,
+              1
+            )
+          ),
           2
         ),
       });
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }
-  };  return (
+  };
+  return (
     <Box className="searchbox__container">
       {props.variant === "standalone" && (
         <>
@@ -157,9 +175,13 @@ export default function SearchBox(props: { variant: string }) {
             value={query}
             onChange={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={handleKeyDown}
+            rightSection={loading && <Loader size="sm" />}
           />
-          {noResultsFound && (<Text style={{ color: "red" }}>No results found for: {searchedQuery} </Text>)}
-          {loading && <Loader />}
+          {noResultsFound && (
+            <Text style={{ color: "red" }}>
+              No results found for: {searchedQuery}{" "}
+            </Text>
+          )}
         </>
       )}
       {props.variant === "header" && (
@@ -173,9 +195,13 @@ export default function SearchBox(props: { variant: string }) {
             value={query}
             onChange={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={handleKeyDown}
+            rightSection={loading && <Loader size="sm" />}
           />
-          {noResultsFound && (<Text style={{ color: "red" }}>No results found for: {searchedQuery} </Text>)}
-          {loading && <Loader />}
+          {noResultsFound && (
+            <Text style={{ color: "red" }}>
+              No results found for: {searchedQuery}{" "}
+            </Text>
+          )}
         </>
       )}
     </Box>

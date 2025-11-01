@@ -1,0 +1,15 @@
+
+.searchbox__container {
+  min-width: 300px;
+  width: 40vw;
+  max-width: 600px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .searchbox__container {
+    min-width: 200px;
+    width: 100%;
+    max-width: none;
+  }
+}
