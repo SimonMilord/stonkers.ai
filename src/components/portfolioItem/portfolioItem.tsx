@@ -7,7 +7,7 @@ import {
   Image,
   NumberInput,
 } from "@mantine/core";
-import { RiDeleteBin5Fill, RiMenuFill } from "react-icons/ri";
+import { RiMenuFill, RiDeleteBin5Fill } from "react-icons/ri";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useHistory } from "react-router-dom";
@@ -23,6 +23,7 @@ export interface Holding {
   exchange?: string;
   industry?: string;
   currency?: string;
+  type?: 'stock' | 'cash';
 }
 
 interface PortfolioItemProps {
@@ -57,8 +58,9 @@ export default function PortfolioItem({
   };
 
   const formatPrice = (price: number) => `${price.toFixed(2)}`;
-  const computedGainLossPercent = (((stock.currentPrice - stock.costBasis) / stock.costBasis) * 100).toFixed(2);
-  const computedGainLossDollar = formatPrice(stock.shares * (stock.currentPrice - stock.costBasis));
+  const computedGainLossPercent = stock.type === 'cash' ? '0.00' : (((stock.currentPrice - stock.costBasis) / stock.costBasis) * 100).toFixed(2);
+  const computedGainLossDollar = stock.type === 'cash' ? '0.00' : formatPrice(stock.shares * (stock.currentPrice - stock.costBasis));
+  const isCash = stock.type === 'cash';
 
   // Handle keyboard events for arrow keys
   const handleKeyDown = (event: React.KeyboardEvent, type: 'shares' | 'costBasis', currentValue: number) => {
@@ -103,38 +105,57 @@ export default function PortfolioItem({
       </Table.Td>
       <Table.Td>
         <Flex align="center">
-          {stock.logo && <Image mr={12} h={25} radius="md" src={stock?.logo} />}
+          {stock.logo && <Image mr={12} h={25} w={25} radius="md" src={stock?.logo} fit="cover" />}
           <Text
-            onClick={() => history.push(`/details/${stock.ticker}`)}
-            className="portfolio-item-name"
+            onClick={() => !isCash && history.push(`/details/${stock.ticker}`)}
+            className={isCash ? "" : "portfolio-item-name"}
+            style={{ cursor: isCash ? 'default' : 'pointer' }}
           >
             {stock.name} ({stock.ticker})
           </Text>
         </Flex>
       </Table.Td>
       <Table.Td>
-        <NumberInput
-          step={1}
-          min={0}
-          size="xs"
-          value={stock.shares}
-          hideControls
-          className="portfolio-number-input"
-          onChange={handleSharesChange}
-          onKeyDown={(e) => handleKeyDown(e, 'shares', stock.shares)}
-        />
+        {isCash ? (
+          <Text>-</Text>
+        ) : (
+          <NumberInput
+            step={1}
+            min={0}
+            size="xs"
+            value={stock.shares}
+            hideControls
+            className="portfolio-number-input"
+            onChange={handleSharesChange}
+            onKeyDown={(e) => handleKeyDown(e, 'shares', stock.shares)}
+          />
+        )}
       </Table.Td>
       <Table.Td>
-        <NumberInput
-          step={1}
-          min={0}
-          size="xs"
-          value={stock.costBasis}
-          hideControls
-          className="portfolio-number-input"
-          onChange={handleCostBasisChange}
-          onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
-        />
+        {isCash ? (
+          <NumberInput
+            step={1}
+            min={0}
+            size="xs"
+            value={stock.costBasis}
+            hideControls
+            className="portfolio-number-input"
+            onChange={handleCostBasisChange}
+            onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
+            leftSection="$"
+          />
+        ) : (
+          <NumberInput
+            step={1}
+            min={0}
+            size="xs"
+            value={stock.costBasis}
+            hideControls
+            className="portfolio-number-input"
+            onChange={handleCostBasisChange}
+            onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
+          />
+        )}
       </Table.Td>
       <Table.Td>
         <Text>${formatPrice(stock.currentPrice)}</Text>
@@ -143,10 +164,14 @@ export default function PortfolioItem({
         <Text>${formatPrice(stock.shares * stock.currentPrice)}</Text>
       </Table.Td>
       <Table.Td>
-        <Text c={Number(computedGainLossDollar) < 0 ? 'red' : 'green'}>{computedGainLossDollar}</Text>
+        <Text c={isCash ? 'gray' : (Number(computedGainLossDollar) < 0 ? 'red' : 'green')}>
+          {isCash ? '-' : `$${computedGainLossDollar}`}
+        </Text>
       </Table.Td>
       <Table.Td>
-        <Text c={Number(computedGainLossPercent) < 0 ? 'red' : 'green'}>{computedGainLossPercent}%</Text>
+        <Text c={isCash ? 'gray' : (Number(computedGainLossPercent) < 0 ? 'red' : 'green')}>
+          {isCash ? '-' : `${computedGainLossPercent}%`}
+        </Text>
       </Table.Td>
       <Table.Td>
         <Text>{((stock.shares * stock.currentPrice) / totalPortfolioValue * 100).toFixed(2)}%</Text>
