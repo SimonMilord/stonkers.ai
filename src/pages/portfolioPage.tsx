@@ -11,8 +11,12 @@ import {
   Center,
   UnstyledButton,
   Card,
-  Flex,
   Stack,
+  TextInput,
+  NumberInput,
+  Button,
+  SegmentedControl,
+  Select,
 } from "@mantine/core";
 import {
   RiArrowUpSLine,
@@ -53,8 +57,8 @@ type SortDirection = "asc" | "desc" | null;
 
 interface PortfolioMetric {
   label: string;
-  value: string;
-}
+  value: number | string;
+};
 
 // Sorting utility functions
 const getSortValue = (
@@ -128,6 +132,14 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField | null>("weight");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  // Add New Holding form state
+  const [positionType, setPositionType] = useState<string>("Stock");
+  const [searchTicker, setSearchTicker] = useState<string>("");
+  const [shares, setShares] = useState<number | string>("");
+  const [avgPricePaid, setAvgPricePaid] = useState<number | string>("");
+  const [currency, setCurrency] = useState<string>("USD");
+  const [cashAmount, setCashAmount] = useState<number | string>("");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -227,6 +239,43 @@ export default function PortfolioPage() {
     // TODO: Update backend accordingly
   };
 
+  const handleAddNewHolding = async () => {
+    if (positionType === "Stock") {
+      if (!searchTicker || !shares || !avgPricePaid) {
+        // TODO: Show error message
+        return;
+      }
+
+      // TODO: Fetch stock data from API
+      // For now, creating a placeholder entry
+      const newHolding: Holding = {
+        ticker: searchTicker.toUpperCase(),
+        name: `${searchTicker.toUpperCase()} Company`, // TODO: Get from API
+        shares: Number(shares),
+        costBasis: Number(avgPricePaid),
+        currentPrice: Number(avgPricePaid), // TODO: Get current price from API
+        logo: "", // TODO: Get from API
+      };
+
+      setHoldings((prev) => [...prev, newHolding]);
+    } else {
+      // Handle cash position
+      if (!cashAmount) {
+        // TODO: Show error message
+        return;
+      }
+
+      // TODO: Implement cash position logic
+      console.log(`Adding ${currency} ${cashAmount} cash position`);
+    }
+
+    // Reset form
+    setSearchTicker("");
+    setShares("");
+    setAvgPricePaid("");
+    setCashAmount("");
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -259,11 +308,11 @@ export default function PortfolioPage() {
   const portfolioMetrics: PortfolioMetric[] = [
     {
       label: "Total Market Value",
-      value: `$${formatCurrency(totalMarketValue)}`,
+      value: totalMarketValue,
     },
     {
       label: "Gain/Loss",
-      value: `$${formatCurrency(totalGainLoss)}`,
+      value: totalGainLoss,
     },
     {
       label: "Holdings",
@@ -271,7 +320,7 @@ export default function PortfolioPage() {
     },
     {
       label: "Cash position",
-      value: `$${formatCurrency(totalCashPosition)}`,
+      value: totalCashPosition,
     },
   ];
 
@@ -306,6 +355,81 @@ export default function PortfolioPage() {
                 />
               ))}
             </Group>
+          </Card>
+
+          {/* Add New Holding Form */}
+          <Card radius="md" p="lg" mb="lg">
+            <Stack align="center">
+              {/* Position Type Toggle */}
+              <SegmentedControl
+                value={positionType}
+                onChange={setPositionType}
+                color='gray'
+                data={[
+                  { label: 'Stock', value: 'Stock' },
+                  { label: 'Cash', value: 'Cash' }
+                ]}
+              />
+              {positionType === "Stock" ? (
+                /* Stock Form */
+                <Group justify="center">
+                  <TextInput
+                    placeholder="Search stock ticker"
+                    value={searchTicker}
+                    onChange={(event) => setSearchTicker(event.currentTarget.value)}
+                  />
+                  <NumberInput
+                    placeholder="Shares"
+                    value={shares}
+                    onChange={setShares}
+                    min={0}
+                    decimalScale={4}
+                    hideControls
+                  />
+                  <NumberInput
+                    placeholder="Cost Basis"
+                    value={avgPricePaid}
+                    onChange={setAvgPricePaid}
+                    min={0}
+                    decimalScale={2}
+                    hideControls
+                  />
+                  <Button
+                    onClick={handleAddNewHolding}
+                    disabled={!searchTicker || !shares || !avgPricePaid}
+                  >
+                    Add New Holding
+                  </Button>
+                </Group>
+              ) : (
+                /* Cash Form */
+                <Group justify="center">
+                  <Select
+                    value={currency}
+                    onChange={(value) => setCurrency(value || "USD")}
+                    data={[
+                      { value: 'USD', label: 'USD - $ - US Dollar' },
+                      { value: 'CAD', label: 'CAD - $ - Canadian Dollar' }
+                    ]}
+                    searchable={false}
+                  />
+                  <NumberInput
+                    placeholder="Amount"
+                    value={cashAmount}
+                    onChange={setCashAmount}
+                    min={0}
+                    decimalScale={2}
+                    hideControls
+                  />
+                  <Button
+                    onClick={handleAddNewHolding}
+                    disabled={!cashAmount}
+                  >
+                    Add New Holding
+                  </Button>
+                </Group>
+              )}
+            </Stack>
           </Card>
 
           <Box>
