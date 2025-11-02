@@ -42,6 +42,7 @@ import PortfolioItem, {
 } from "@components/portfolioItem/portfolioItem";
 import PortfolioPieChart from "@components/portfolioPieChart/portfolioPieChart";
 import DataCard from "@components/dataCard/dataCard";
+import "./portfolioPage.css";
 
 type SortField =
   | "name"
@@ -508,6 +509,7 @@ export default function PortfolioPage() {
                 value={positionType}
                 onChange={setPositionType}
                 color='gray'
+                className="portfolio-segmented-control"
                 data={[
                   { label: 'Stock', value: 'Stock' },
                   { label: 'Cash', value: 'Cash' }
@@ -522,6 +524,7 @@ export default function PortfolioPage() {
                       value={searchTicker}
                       onChange={(event) => handleTickerSearch(event.currentTarget.value)}
                       rightSection={searchLoading && <Loader size="sm" />}
+                      className="portfolio-form-input"
                     />
                     <NumberInput
                       placeholder="Shares"
@@ -530,6 +533,7 @@ export default function PortfolioPage() {
                       min={0}
                       decimalScale={4}
                       hideControls
+                      className="portfolio-form-input"
                     />
                     <NumberInput
                       placeholder="Cost Basis"
@@ -538,10 +542,12 @@ export default function PortfolioPage() {
                       min={0}
                       decimalScale={2}
                       hideControls
+                      className="portfolio-form-input"
                     />
                     <Button
                       onClick={handleAddNewHolding}
                       disabled={!foundStock || !shares || !avgPricePaid}
+                      className={(!foundStock || !shares || !avgPricePaid) ? "portfolio-button-disabled" : ""}
                     >
                       Add New Holding
                     </Button>
@@ -565,10 +571,12 @@ export default function PortfolioPage() {
                     min={0}
                     decimalScale={2}
                     hideControls
+                    className="portfolio-form-input"
                   />
                   <Button
                     onClick={handleAddNewHolding}
                     disabled={!cashAmount}
+                    className={!cashAmount ? "portfolio-button-disabled" : ""}
                   >
                     Add New Holding
                   </Button>
