@@ -29,10 +29,18 @@ interface PortfolioItemProps {
   stock: Holding;
   totalPortfolioValue?: number;
   onRemove: (ticker: string) => void;
+  onUpdateShares?: (ticker: string, shares: number) => void;
+  onUpdateCostBasis?: (ticker: string, costBasis: number) => void;
   key?: string;
 }
 
-export default function PortfolioItem({ stock, totalPortfolioValue, onRemove }: PortfolioItemProps) {
+export default function PortfolioItem({
+  stock,
+  totalPortfolioValue,
+  onRemove,
+  onUpdateShares,
+  onUpdateCostBasis
+}: PortfolioItemProps) {
   const {
     attributes,
     listeners,
@@ -51,6 +59,33 @@ export default function PortfolioItem({ stock, totalPortfolioValue, onRemove }: 
   const formatPrice = (price: number) => `${price.toFixed(2)}`;
   const computedGainLossPercent = (((stock.currentPrice - stock.costBasis) / stock.costBasis) * 100).toFixed(2);
   const computedGainLossDollar = formatPrice(stock.shares * (stock.currentPrice - stock.costBasis));
+
+  // Handle keyboard events for arrow keys
+  const handleKeyDown = (event: React.KeyboardEvent, type: 'shares' | 'costBasis', currentValue: number) => {
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+
+    event.preventDefault();
+    const increment = event.key === 'ArrowUp' ? 1 : -1;
+    const newValue = Math.max(0, currentValue + increment);
+
+    const updateFunction = type === 'shares' ? onUpdateShares : onUpdateCostBasis;
+    updateFunction?.(stock.ticker, newValue);
+  };
+
+  // Handle direct value changes
+  const handleSharesChange = (value: string | number) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    if (onUpdateShares) {
+      onUpdateShares(stock.ticker, Math.max(0, numValue));
+    }
+  };
+
+  const handleCostBasisChange = (value: string | number) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    if (onUpdateCostBasis) {
+      onUpdateCostBasis(stock.ticker, Math.max(0, numValue));
+    }
+  };
 
   return (
     <Table.Tr ref={setNodeRef} style={style}>
@@ -78,10 +113,28 @@ export default function PortfolioItem({ stock, totalPortfolioValue, onRemove }: 
         </Flex>
       </Table.Td>
       <Table.Td>
-        <NumberInput step={1} min={0} size="xs" value={stock.shares} />
+        <NumberInput
+          step={1}
+          min={0}
+          size="xs"
+          value={stock.shares}
+          hideControls
+          className="portfolio-number-input"
+          onChange={handleSharesChange}
+          onKeyDown={(e) => handleKeyDown(e, 'shares', stock.shares)}
+        />
       </Table.Td>
       <Table.Td>
-        <NumberInput step={1} min={0} size="xs" value={stock.costBasis} />
+        <NumberInput
+          step={1}
+          min={0}
+          size="xs"
+          value={stock.costBasis}
+          hideControls
+          className="portfolio-number-input"
+          onChange={handleCostBasisChange}
+          onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
+        />
       </Table.Td>
       <Table.Td>
         <Text>${formatPrice(stock.currentPrice)}</Text>

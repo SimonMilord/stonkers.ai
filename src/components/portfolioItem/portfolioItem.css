@@ -7,3 +7,13 @@
 .portfolio-item-name:hover {
   color: var(--mantine-color-gray-6);
 }
+
+.portfolio-number-input input {
+  background-color: #4A5568;
+  border-color: #4A5568;
+  color: #E2E8F0;
+}
+
+.portfolio-number-input input:focus {
+  border-color: #6B73FF;
+}

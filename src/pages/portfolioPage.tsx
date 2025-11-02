@@ -51,7 +51,7 @@ const getSortValue = (holding: Holding, field: SortField, totalPortfolioValue: n
 const sortHoldings = (holdings: Holding[], field: SortField, direction: SortDirection) => {
   if (!field || !direction) return holdings;
 
-  const totalPortfolioValue = holdings.reduce((acc, item) => acc + item.shares * item.currentPrice, 0);
+  const totalPortfolioValue = calculateTotalMarketValue(holdings);
 
   return [...holdings].sort((a, b) => {
     const aValue = getSortValue(a, field, totalPortfolioValue);
@@ -60,6 +60,22 @@ const sortHoldings = (holdings: Holding[], field: SortField, direction: SortDire
     if (aValue < bValue) return direction === 'asc' ? -1 : 1;
     if (aValue > bValue) return direction === 'asc' ? 1 : -1;
     return 0;
+  });
+};
+
+// Portfolio calculation functions
+const calculateTotalMarketValue = (holdings: Holding[]): number => {
+  return holdings.reduce((acc, item) => acc + item.shares * item.currentPrice, 0);
+};
+
+const calculateTotalGainLoss = (holdings: Holding[]): number => {
+  return holdings.reduce((acc, item) => acc + item.shares * (item.currentPrice - item.costBasis), 0);
+};
+
+const formatCurrency = (amount: number): string => {
+  return amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   });
 };
 
@@ -131,8 +147,30 @@ export default function PortfolioPage() {
     return sortHoldings(holdings, 'weight', 'desc');
   }, [holdings]);
 
+  // Portfolio totals calculations
+  const totalMarketValue = useMemo(() => calculateTotalMarketValue(holdings), [holdings]);
+  const totalGainLoss = useMemo(() => calculateTotalGainLoss(holdings), [holdings]);
+
   const removeFromHoldings = (ticker: string) => {
     setHoldings((prev) => prev.filter((item) => item.ticker !== ticker));
+    // TODO: Update backend accordingly
+  };
+
+  const updateShares = (ticker: string, newShares: number) => {
+    setHoldings((prev) =>
+      prev.map((item) =>
+        item.ticker === ticker ? { ...item, shares: newShares } : item
+      )
+    );
+    // TODO: Update backend accordingly
+  };
+
+  const updateCostBasis = (ticker: string, newCostBasis: number) => {
+    setHoldings((prev) =>
+      prev.map((item) =>
+        item.ticker === ticker ? { ...item, costBasis: newCostBasis } : item
+      )
+    );
     // TODO: Update backend accordingly
   };
 
@@ -256,8 +294,10 @@ export default function PortfolioPage() {
                         <PortfolioItem
                           key={stock.ticker}
                           stock={stock}
-                          totalPortfolioValue={holdings.reduce((acc, item) => acc + item.shares * item.currentPrice, 0)}
+                          totalPortfolioValue={totalMarketValue}
                           onRemove={removeFromHoldings}
+                          onUpdateShares={updateShares}
+                          onUpdateCostBasis={updateCostBasis}
                         />
                       ))
                     ) : (
@@ -270,6 +310,34 @@ export default function PortfolioPage() {
                       </Table.Tr>
                     )}
                   </Table.Tbody>
+                  {holdings.length > 0 && (
+                    <Table.Tfoot>
+                      <Table.Tr style={{ borderTop: '2px solid #4A5568' }}>
+                        <Table.Td></Table.Td>
+                        <Table.Td>
+                          <Text fw={700} c="white">Total</Text>
+                        </Table.Td>
+                        <Table.Td></Table.Td>
+                        <Table.Td></Table.Td>
+                        <Table.Td></Table.Td>
+                        <Table.Td>
+                          <Text fw={600} c="white">
+                            ${formatCurrency(totalMarketValue)}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text fw={600} c={totalGainLoss >= 0 ? 'green' : 'red'}>
+                            ${formatCurrency(totalGainLoss)}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td></Table.Td>
+                        <Table.Td>
+                          <Text fw={600} c="white">100.00%</Text>
+                        </Table.Td>
+                        <Table.Td></Table.Td>
+                      </Table.Tr>
+                    </Table.Tfoot>
+                  )}
                 </SortableContext>
               </Table>
             </DndContext>
@@ -287,18 +355,18 @@ const placeholderPortfolio: Holding[] = [
   {
     ticker: "AMZN",
     name: "Amazon.com Inc.",
-    shares: 15,
-    costBasis: 3200.0,
+    shares: 100,
+    costBasis: 111.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png",
-    currentPrice: 3400.0,
+    currentPrice: 244.0,
   },
   {
     ticker: "GOOGL",
     name: "Alphabet Inc.",
-    shares: 20,
-    costBasis: 2800.0,
+    shares: 75,
+    costBasis: 132.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOGL.png",
-    currentPrice: 2950.0,
+    currentPrice: 281.0,
   },
   {
     ticker: "ASML",
@@ -311,10 +379,10 @@ const placeholderPortfolio: Holding[] = [
   {
     ticker: "FICO",
     name: "Fair Isaac Corporation",
-    shares: 8,
-    costBasis: 1100.0,
+    shares: 4,
+    costBasis: 1489.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/FICO.png",
-    currentPrice: 1250.0,
+    currentPrice: 1615.0,
   },
 ];
 
