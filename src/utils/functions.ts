@@ -50,3 +50,15 @@ export const validateMetricsValue = (str: string | number | null, unit?: string)
     return unit === undefined ? `${str}` : `${str}${unit}`;
   }
 }
+
+/**
+ * Formats a number as currency.
+ * @param amount Number to format as currency
+ * @returns Formatted currency string
+ */
+export const formatCurrency = (amount: number): string => {
+  return amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};

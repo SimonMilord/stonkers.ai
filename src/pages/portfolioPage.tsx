@@ -10,8 +10,15 @@ import {
   Loader,
   Center,
   UnstyledButton,
+  Card,
+  Flex,
+  Stack,
 } from "@mantine/core";
-import { RiArrowUpSLine, RiArrowDownSLine, RiExpandUpDownLine } from "react-icons/ri";
+import {
+  RiArrowUpSLine,
+  RiArrowDownSLine,
+  RiExpandUpDownLine,
+} from "react-icons/ri";
 import {
   DndContext,
   closestCenter,
@@ -27,14 +34,34 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import PortfolioItem, { Holding } from "@components/portfolioItem/portfolioItem";
+import PortfolioItem, {
+  Holding,
+} from "@components/portfolioItem/portfolioItem";
 import PortfolioPieChart from "@components/portfolioPieChart/portfolioPieChart";
+import DataCard from "@components/dataCard/dataCard";
 
-type SortField = 'name' | 'shares' | 'costBasis' | 'currentPrice' | 'marketValue' | 'gainLoss' | 'gainLossPercent' | 'weight';
-type SortDirection = 'asc' | 'desc' | null;
+type SortField =
+  | "name"
+  | "shares"
+  | "costBasis"
+  | "currentPrice"
+  | "marketValue"
+  | "gainLoss"
+  | "gainLossPercent"
+  | "weight";
+type SortDirection = "asc" | "desc" | null;
+
+interface PortfolioMetric {
+  label: string;
+  value: string;
+}
 
 // Sorting utility functions
-const getSortValue = (holding: Holding, field: SortField, totalPortfolioValue: number) => {
+const getSortValue = (
+  holding: Holding,
+  field: SortField,
+  totalPortfolioValue: number
+) => {
   const valueMap = {
     name: holding.name.toLowerCase(),
     shares: holding.shares,
@@ -42,13 +69,19 @@ const getSortValue = (holding: Holding, field: SortField, totalPortfolioValue: n
     currentPrice: holding.currentPrice,
     marketValue: holding.shares * holding.currentPrice,
     gainLoss: holding.shares * (holding.currentPrice - holding.costBasis),
-    gainLossPercent: ((holding.currentPrice - holding.costBasis) / holding.costBasis) * 100,
-    weight: (holding.shares * holding.currentPrice) / totalPortfolioValue * 100,
+    gainLossPercent:
+      ((holding.currentPrice - holding.costBasis) / holding.costBasis) * 100,
+    weight:
+      ((holding.shares * holding.currentPrice) / totalPortfolioValue) * 100,
   };
   return valueMap[field];
 };
 
-const sortHoldings = (holdings: Holding[], field: SortField, direction: SortDirection) => {
+const sortHoldings = (
+  holdings: Holding[],
+  field: SortField,
+  direction: SortDirection
+) => {
   if (!field || !direction) return holdings;
 
   const totalPortfolioValue = calculateTotalMarketValue(holdings);
@@ -57,25 +90,35 @@ const sortHoldings = (holdings: Holding[], field: SortField, direction: SortDire
     const aValue = getSortValue(a, field, totalPortfolioValue);
     const bValue = getSortValue(b, field, totalPortfolioValue);
 
-    if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+    if (aValue < bValue) return direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return direction === "asc" ? 1 : -1;
     return 0;
   });
 };
 
 // Portfolio calculation functions
 const calculateTotalMarketValue = (holdings: Holding[]): number => {
-  return holdings.reduce((acc, item) => acc + item.shares * item.currentPrice, 0);
+  return holdings.reduce(
+    (acc, item) => acc + item.shares * item.currentPrice,
+    0
+  );
 };
 
 const calculateTotalGainLoss = (holdings: Holding[]): number => {
-  return holdings.reduce((acc, item) => acc + item.shares * (item.currentPrice - item.costBasis), 0);
+  return holdings.reduce(
+    (acc, item) => acc + item.shares * (item.currentPrice - item.costBasis),
+    0
+  );
+};
+
+const calculateTotalCashPosition = (holdings: Holding[]): number => {
+  return 1234.56; // TODO : Fix later to support cash balances
 };
 
 const formatCurrency = (amount: number): string => {
   return amount.toLocaleString(undefined, {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 };
 
@@ -83,8 +126,8 @@ export default function PortfolioPage() {
   const [opened, setOpened] = useState(false);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortField, setSortField] = useState<SortField | null>('weight');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField | null>("weight");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -112,16 +155,16 @@ export default function PortfolioPage() {
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       // Same field clicked, cycle through: asc -> desc -> null
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
         setSortDirection(null);
         setSortField(null);
       }
     } else {
       // New field clicked, start with ascending
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -129,10 +172,10 @@ export default function PortfolioPage() {
     if (sortField !== field) {
       return <RiExpandUpDownLine size={14} />;
     }
-    if (sortDirection === 'asc') {
+    if (sortDirection === "asc") {
       return <RiArrowUpSLine size={14} />;
     }
-    if (sortDirection === 'desc') {
+    if (sortDirection === "desc") {
       return <RiArrowDownSLine size={14} />;
     }
     return <RiExpandUpDownLine size={14} />;
@@ -144,12 +187,22 @@ export default function PortfolioPage() {
 
   // Chart always shows holdings sorted by weight (descending) regardless of table sorting
   const chartHoldings = useMemo(() => {
-    return sortHoldings(holdings, 'weight', 'desc');
+    return sortHoldings(holdings, "weight", "desc");
   }, [holdings]);
 
   // Portfolio totals calculations
-  const totalMarketValue = useMemo(() => calculateTotalMarketValue(holdings), [holdings]);
-  const totalGainLoss = useMemo(() => calculateTotalGainLoss(holdings), [holdings]);
+  const totalMarketValue = useMemo(
+    () => calculateTotalMarketValue(holdings),
+    [holdings]
+  );
+  const totalGainLoss = useMemo(
+    () => calculateTotalGainLoss(holdings),
+    [holdings]
+  );
+  const totalCashPosition = useMemo(
+    () => calculateTotalCashPosition(holdings),
+    [holdings]
+  );
 
   const removeFromHoldings = (ticker: string) => {
     setHoldings((prev) => prev.filter((item) => item.ticker !== ticker));
@@ -203,6 +256,25 @@ export default function PortfolioPage() {
     }
   };
 
+  const portfolioMetrics: PortfolioMetric[] = [
+    {
+      label: "Total Market Value",
+      value: `$${formatCurrency(totalMarketValue)}`,
+    },
+    {
+      label: "Gain/Loss",
+      value: `$${formatCurrency(totalGainLoss)}`,
+    },
+    {
+      label: "Holdings",
+      value: `${holdings.length.toFixed(0)}`,
+    },
+    {
+      label: "Cash position",
+      value: `$${formatCurrency(totalCashPosition)}`,
+    },
+  ];
+
   if (loading) {
     return (
       <Layout opened={opened} toggle={() => setOpened(!opened)}>
@@ -221,65 +293,133 @@ export default function PortfolioPage() {
     <Layout opened={opened} toggle={() => setOpened(!opened)}>
       <Grid className="portfolioPage">
         <Grid.Col span={12}>
-          <Group justify="space-between" mb="md">
+          <Box justify="space-between" mb="md">
             <Title order={2}>Portfolio</Title>
-          </Group>
+          </Box>
+          <Card radius="md" p="lg" mb="lg">
+            <Group grow>
+              {portfolioMetrics.map((metric, index) => (
+                <DataCard
+                  key={index}
+                  label={metric.label}
+                  data={metric.value}
+                />
+              ))}
+            </Group>
+          </Card>
+
           <Box>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <Table borderColor='gray'>
+              <Table borderColor="gray">
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th></Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('name')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("name")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Holding</Text>
-                        {getSortIcon('name')}
+                        {getSortIcon("name")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('shares')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("shares")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Shares</Text>
-                        {getSortIcon('shares')}
+                        {getSortIcon("shares")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('costBasis')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("costBasis")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Cost Basis</Text>
-                        {getSortIcon('costBasis')}
+                        {getSortIcon("costBasis")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('currentPrice')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("currentPrice")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Current Price</Text>
-                        {getSortIcon('currentPrice')}
+                        {getSortIcon("currentPrice")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('marketValue')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("marketValue")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Market Value</Text>
-                        {getSortIcon('marketValue')}
+                        {getSortIcon("marketValue")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('gainLoss')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("gainLoss")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Gain/Loss ($)</Text>
-                        {getSortIcon('gainLoss')}
+                        {getSortIcon("gainLoss")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('gainLossPercent')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("gainLossPercent")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Gain/Loss (%)</Text>
-                        {getSortIcon('gainLossPercent')}
+                        {getSortIcon("gainLossPercent")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th>
-                      <UnstyledButton onClick={() => handleSort('weight')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <UnstyledButton
+                        onClick={() => handleSort("weight")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
                         <Text fw={600}>Weight</Text>
-                        {getSortIcon('weight')}
+                        {getSortIcon("weight")}
                       </UnstyledButton>
                     </Table.Th>
                     <Table.Th></Table.Th>
@@ -287,7 +427,9 @@ export default function PortfolioPage() {
                 </Table.Thead>
                 <SortableContext
                   items={sortedHoldings.map((item) => item.ticker)}
-                  strategy={verticalListSortingStrategy} children={undefined}                >
+                  strategy={verticalListSortingStrategy}
+                  children={undefined}
+                >
                   <Table.Tbody>
                     {sortedHoldings.length > 0 ? (
                       sortedHoldings.map((stock) => (
@@ -304,7 +446,8 @@ export default function PortfolioPage() {
                       <Table.Tr>
                         <Table.Td colSpan={10}>
                           <Text ta="center" c="dimmed">
-                            No stocks in your portfolio. Add some to get started!
+                            No stocks in your portfolio. Add some to get
+                            started!
                           </Text>
                         </Table.Td>
                       </Table.Tr>
@@ -312,10 +455,12 @@ export default function PortfolioPage() {
                   </Table.Tbody>
                   {holdings.length > 0 && (
                     <Table.Tfoot>
-                      <Table.Tr style={{ borderTop: '2px solid #4A5568' }}>
+                      <Table.Tr style={{ borderTop: "2px solid #4A5568" }}>
                         <Table.Td></Table.Td>
                         <Table.Td>
-                          <Text fw={700} c="white">Total</Text>
+                          <Text fw={700} c="white">
+                            Total
+                          </Text>
                         </Table.Td>
                         <Table.Td></Table.Td>
                         <Table.Td></Table.Td>
@@ -326,13 +471,18 @@ export default function PortfolioPage() {
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text fw={600} c={totalGainLoss >= 0 ? 'green' : 'red'}>
+                          <Text
+                            fw={600}
+                            c={totalGainLoss >= 0 ? "green" : "red"}
+                          >
                             ${formatCurrency(totalGainLoss)}
                           </Text>
                         </Table.Td>
                         <Table.Td></Table.Td>
                         <Table.Td>
-                          <Text fw={600} c="white">100.00%</Text>
+                          <Text fw={600} c="white">
+                            100.00%
+                          </Text>
                         </Table.Td>
                         <Table.Td></Table.Td>
                       </Table.Tr>
@@ -342,11 +492,9 @@ export default function PortfolioPage() {
               </Table>
             </DndContext>
           </Box>
-
-          {/* Portfolio Pie Chart */}
-          <PortfolioPieChart holdings={chartHoldings} title="Portfolio Allocation" />
         </Grid.Col>
       </Grid>
+      <PortfolioPieChart holdings={chartHoldings} />
     </Layout>
   );
 }
