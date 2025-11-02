@@ -27,7 +27,7 @@ export default function CompanyMetricsCard({
   const notAvailable: string = "N/A";
   const metrics: any = metricsData?.metric;
   const fcfPerShare: number =
-    metricsData?.series?.quarterly?.fcfPerShareTTM[0].v;
+    metricsData?.series?.quarterly?.fcfPerShareTTM[0]?.v;
   const stockPrice: number = quoteData?.c;
   const fcfPerShareArray = metricsData?.series?.quarterly?.fcfPerShareTTM;
 
@@ -141,7 +141,7 @@ export default function CompanyMetricsCard({
     {
       key: "ROIC:",
       value: validateMetricsValue(
-        `${roundToDecimal(metricsData?.series?.annual?.roic[0].v * 100, 2)}`,
+        `${roundToDecimal(metricsData?.series?.annual?.roic[0]?.v * 100, 2)}`,
         "%"
       ),
     },
@@ -149,7 +149,7 @@ export default function CompanyMetricsCard({
       key: "FCF margin:",
       value:
         `${roundToDecimal(
-          metricsData?.series?.annual?.fcfMargin[0].v * 100,
+          metricsData?.series?.annual?.fcfMargin[0]?.v * 100,
           2
         )}%` || notAvailable,
     },
