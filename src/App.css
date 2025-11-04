@@ -1,8 +1,65 @@
+/*
+================================================================================
+STONKERS.AI CSS VARIABLES
+================================================================================
+This file contains the global CSS custom properties (variables) used throughout
+the application. This approach ensures consistency, maintainability, and makes
+theming changes easier.
+
+Usage in components:
+- background-color: var(--color-background-dark);
+- color: var(--color-text-light);
+- border-color: var(--input-border-focus);
+
+Benefits:
+- Single source of truth for colors and values
+- Easy theme changes by modifying only this file
+- Better maintainability and consistency
+- Reduced duplication across components
+================================================================================
+*/
+
+/* CSS Custom Properties (Variables) */
+:root {
+  /* Color Palette */
+  --color-primary-blue: #339AF0;
+  --color-background-dark: #4A5568;
+  --color-text-light: #E2E8F0;
+  --color-text-white: #FFFFFF;
+  --color-text-muted: #A0AEC0;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+
+  /* App Background Colors */
+  --color-app-background: #282c34;
+  --color-scrollbar-track: #1a1b1e;
+  --color-scrollbar-thumb: #373a40;
+  --color-scrollbar-thumb-hover: #4a4d55;
+  --color-scrollbar-corner: #1a1b1e;
+  --color-scrollbar-border: #2c2e33;
+
+  /* Component Specific */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --transition-standard: all 0.2s ease;
+
+  /* Form Elements */
+  --input-background: var(--color-background-dark);
+  --input-border: var(--color-background-dark);
+  --input-border-focus: var(--color-primary-blue);
+  --input-text: var(--color-text-light);
+
+  /* Buttons */
+  --button-disabled-bg: var(--color-background-dark);
+  --button-disabled-text: var(--color-text-muted);
+  --button-disabled-border: var(--color-background-dark);
+}
+
 .App {
-  background-color: #282c34;
+  background-color: var(--color-app-background);
   min-height: 100vh;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--color-text-white);
 }
 
 /* Custom Scrollbar Styles */
@@ -12,28 +69,28 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1b1e;
-  border-radius: 4px;
+  background: var(--color-scrollbar-track);
+  border-radius: var(--border-radius-sm);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #373a40;
-  border-radius: 4px;
-  border: 1px solid #2c2e33;
+  background: var(--color-scrollbar-thumb);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-scrollbar-border);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4d55;
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 ::-webkit-scrollbar-corner {
-  background: #1a1b1e;
+  background: var(--color-scrollbar-corner);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #373a40 #1a1b1e;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
 }
 
 /* For better dark theme support */

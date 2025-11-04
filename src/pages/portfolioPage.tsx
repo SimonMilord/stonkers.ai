@@ -58,7 +58,7 @@ type SortDirection = "asc" | "desc" | null;
 interface PortfolioMetric {
   label: string;
   value: number | string;
-};
+}
 
 // Sorting utility functions
 const getSortValue = (
@@ -117,7 +117,7 @@ const calculateTotalGainLoss = (holdings: Holding[]): number => {
 
 const calculateTotalCashPosition = (holdings: Holding[]): number => {
   return holdings
-    .filter(holding => holding.type === 'cash')
+    .filter((holding) => holding.type === "cash")
     .reduce((acc, item) => acc + item.shares * item.currentPrice, 0);
 };
 
@@ -256,8 +256,12 @@ export default function PortfolioPage() {
       prev.map((item) => {
         if (item.ticker === ticker) {
           // For cash positions, also update currentPrice to match costBasis
-          if (item.type === 'cash') {
-            return { ...item, costBasis: newCostBasis, currentPrice: newCostBasis };
+          if (item.type === "cash") {
+            return {
+              ...item,
+              costBasis: newCostBasis,
+              currentPrice: newCostBasis,
+            };
           }
           return { ...item, costBasis: newCostBasis };
         }
@@ -326,7 +330,9 @@ export default function PortfolioPage() {
     } catch (error) {
       console.error("Error searching for stock:", error);
       setFoundStock(null);
-      setSearchError(`Error searching for "${symbol.toUpperCase()}". Please try again.`);
+      setSearchError(
+        `Error searching for "${symbol.toUpperCase()}". Please try again.`
+      );
     }
 
     setSearchLoading(false);
@@ -389,7 +395,7 @@ export default function PortfolioPage() {
         costBasis: Number(avgPricePaid),
         currentPrice: foundStock.currentPrice,
         logo: foundStock.logo,
-        type: 'stock',
+        type: "stock",
       };
 
       setHoldings((prev) => [...prev, newHolding]);
@@ -400,14 +406,14 @@ export default function PortfolioPage() {
       }
 
       const cashHolding: Holding = {
-        ticker: 'USD',
-        name: 'Cash',
+        ticker: "USD",
+        name: "Cash",
         shares: 1, // For cash, we use 1 share
         costBasis: Number(cashAmount),
         currentPrice: Number(cashAmount), // Cash value equals current price
-        logo: 'https://flagcdn.com/w320/us.png',
-        type: 'cash',
-        currency: 'USD',
+        logo: "https://flagcdn.com/w320/us.png",
+        type: "cash",
+        currency: "USD",
       };
 
       setHoldings((prev) => [...prev, cashHolding]);
@@ -420,7 +426,8 @@ export default function PortfolioPage() {
     setCashAmount("");
     setFoundStock(null);
     setSearchError("");
-  };  const handleDragEnd = (event: DragEndEvent) => {
+  };
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -502,65 +509,66 @@ export default function PortfolioPage() {
           </Card>
 
           {/* Add New Holding Form */}
-          <Card radius="md" p="lg" mb="lg">
+          <Card radius="md" p="lg">
             <Stack align="center">
               {/* Position Type Toggle */}
               <SegmentedControl
                 value={positionType}
                 onChange={setPositionType}
-                color='gray'
+                color="gray"
+                radius="md"
                 className="portfolio-segmented-control"
                 data={[
-                  { label: 'Stock', value: 'Stock' },
-                  { label: 'Cash', value: 'Cash' }
+                  { label: "Stock", value: "Stock" },
+                  { label: "Cash", value: "Cash" },
                 ]}
               />
               {positionType === "Stock" ? (
                 /* Stock Form */
-                <Stack align="center" gap="sm">
-                  <Group justify="center">
-                    <TextInput
-                      placeholder="Search stock ticker"
-                      value={searchTicker}
-                      onChange={(event) => handleTickerSearch(event.currentTarget.value)}
-                      rightSection={searchLoading && <Loader size="sm" />}
-                      className="portfolio-form-input"
-                    />
-                    <NumberInput
-                      placeholder="Shares"
-                      value={shares}
-                      onChange={setShares}
-                      min={0}
-                      decimalScale={4}
-                      hideControls
-                      className="portfolio-form-input"
-                    />
-                    <NumberInput
-                      placeholder="Cost Basis"
-                      value={avgPricePaid}
-                      onChange={setAvgPricePaid}
-                      min={0}
-                      decimalScale={2}
-                      hideControls
-                      className="portfolio-form-input"
-                    />
-                    <Button
-                      onClick={handleAddNewHolding}
-                      disabled={!foundStock || !shares || !avgPricePaid}
-                      className={(!foundStock || !shares || !avgPricePaid) ? "portfolio-button-disabled" : ""}
-                    >
-                      Add New Holding
-                    </Button>
-                  </Group>
-                  {/* Error message container with fixed height */}
-                  <Box style={{ minHeight: '20px' }}>
-                    {searchError && (
-                      <Text size="sm" c="red" ta="center">
-                        {searchError}
-                      </Text>
-                    )}
-                  </Box>
-                </Stack>
+                <Group justify="center">
+                  <TextInput
+                    placeholder="Search stock ticker"
+                    value={searchTicker}
+                    radius='md'
+                    onChange={(event) =>
+                      handleTickerSearch(event.currentTarget.value)
+                    }
+                    rightSection={searchLoading && <Loader size="sm" />}
+                    className="portfolio-form-input"
+                  />
+                  <NumberInput
+                    placeholder="Shares"
+                    value={shares}
+                    onChange={setShares}
+                    min={0}
+                    decimalScale={4}
+                    hideControls
+                    className="portfolio-form-input"
+                    radius="md"
+                  />
+                  <NumberInput
+                    placeholder="Cost Basis"
+                    value={avgPricePaid}
+                    onChange={setAvgPricePaid}
+                    min={0}
+                    decimalScale={2}
+                    hideControls
+                    className="portfolio-form-input"
+                    radius="md"
+                  />
+                  <Button
+                    onClick={handleAddNewHolding}
+                    disabled={!foundStock || !shares || !avgPricePaid}
+                    radius="md"
+                    className={
+                      !foundStock || !shares || !avgPricePaid
+                        ? "portfolio-button-disabled"
+                        : ""
+                    }
+                  >
+                    Add New Holding
+                  </Button>
+                </Group>
               ) : (
                 /* Cash Form */
                 <Group justify="center">
@@ -572,19 +580,28 @@ export default function PortfolioPage() {
                     decimalScale={2}
                     hideControls
                     className="portfolio-form-input"
+                    radius="md"
                   />
                   <Button
                     onClick={handleAddNewHolding}
                     disabled={!cashAmount}
+                    radius="md"
                     className={!cashAmount ? "portfolio-button-disabled" : ""}
                   >
                     Add New Holding
                   </Button>
                 </Group>
               )}
+              {/* Error message container with fixed height */}
+              <Box style={{ minHeight: "20px" }}>
+                {searchError && (
+                  <Text size="sm" c="red" ta="center">
+                    {searchError}
+                  </Text>
+                )}
+              </Box>
             </Stack>
           </Card>
-
           <Box>
             <DndContext
               sensors={sensors}
@@ -784,7 +801,7 @@ const placeholderPortfolio: Holding[] = [
     costBasis: 111.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png",
     currentPrice: 244.0,
-    type: 'stock',
+    type: "stock",
   },
   {
     ticker: "GOOGL",
@@ -793,7 +810,7 @@ const placeholderPortfolio: Holding[] = [
     costBasis: 132.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOGL.png",
     currentPrice: 281.0,
-    type: 'stock',
+    type: "stock",
   },
   {
     ticker: "ASML",
@@ -802,7 +819,7 @@ const placeholderPortfolio: Holding[] = [
     costBasis: 650.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/ASML.AS.png",
     currentPrice: 720.0,
-    type: 'stock',
+    type: "stock",
   },
   {
     ticker: "FICO",
@@ -811,7 +828,7 @@ const placeholderPortfolio: Holding[] = [
     costBasis: 1489.0,
     logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/FICO.png",
     currentPrice: 1615.0,
-    type: 'stock',
+    type: "stock",
   },
 ];
 
