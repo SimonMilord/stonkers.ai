@@ -1,46 +1,66 @@
 /* Portfolio form input styling */
 .portfolio-form-input input {
-  background-color: #4A5568;
-  border-color: #4A5568;
-  color: #E2E8F0;
+  background-color: var(--input-background);
+  border-color: var(--input-border);
+  color: var(--input-text);
 }
 
 .portfolio-form-input input:focus {
-  border-color: #6B73FF;
+  border-color: var(--input-border-focus);
 }
 
 /* SegmentedControl styling */
 .portfolio-segmented-control {
-  background-color: #4A5568 !important;
+  background-color: var(--color-background-dark);
+  min-width: 200px;
 }
 
 .portfolio-segmented-control .mantine-SegmentedControl-root {
-  background-color: #4A5568 !important;
+  background-color: var(--color-background-dark);
+  border: 1px solid var(--color-primary-blue);
 }
 
 .portfolio-segmented-control .mantine-SegmentedControl-indicator {
-  background-color: #6B73FF !important;
+  background-color: var(--color-primary-blue);
 }
 
 .portfolio-segmented-control .mantine-SegmentedControl-control {
-  border-color: #4A5568 !important;
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--color-text-light);
+  font-weight: 500;
+  transition: var(--transition-standard);
+}
+
+.portfolio-segmented-control .mantine-SegmentedControl-control:hover {
+  color: var(--color-text-white);
 }
 
 .portfolio-segmented-control .mantine-SegmentedControl-control[data-active="false"] {
-  color: #E2E8F0 !important;
+  color: var(--color-text-light);
+  background-color: transparent;
 }
 
 .portfolio-segmented-control .mantine-SegmentedControl-control[data-active="true"] {
-  color: #FFFFFF !important;
+  color: var(--color-text-white);
+  background-color: transparent;
+  z-index: 2;
+  font-weight: 600;
+}
+
+.portfolio-segmented-control .mantine-SegmentedControl-label {
+  color: inherit;
+  font-weight: inherit;
+  font-size: 14px;
 }
 
 /* Disabled button styling */
 .portfolio-button-disabled {
-  background-color: #4A5568 !important;
-  color: #A0AEC0 !important;
-  border-color: #4A5568 !important;
+  background-color: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border-color: var(--button-disabled-border);
 }
 
 .portfolio-button-disabled:hover {
-  background-color: #4A5568 !important;
+  background-color: var(--button-disabled-bg);
 }
