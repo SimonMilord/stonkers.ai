@@ -11,49 +11,60 @@ export default function GeneratedContentCard({
   generatedContent: string;
 }) {
   const parseMarkdownContent = (content: string) => {
-    // Split content by bullet points (*) and filter out empty items
-    const items = content.split('* ').filter(item => item.trim().length > 0);
-
-    if (items.length <= 1) {
-      // If no bullet points, just handle bold formatting
-      return (
-        <Text className="formatted-content">
-          {formatBoldText(content)}
-        </Text>
-      );
+    if (!content || content.trim() === "") {
+      return <Text c="dimmed">No content available</Text>;
     }
 
-    // Render each item as a separate paragraph without bullets
+    // Split content into lines and process each line
+    const generatedContentLines = content
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
+
     return (
       <div className="formatted-content">
-        {items.map((item, index) => (
-          <Text key={index} mb="md">
-            {formatBoldText(item.trim())}
-          </Text>
-        ))}
+        {generatedContentLines.map((line, index) => {
+          const trimmedLine = line.trim();
+
+          // Handle bullet points (lines starting with *)
+          if (trimmedLine.startsWith("* ")) {
+            const bulletContent = trimmedLine.substring(2).trim();
+            return (
+              <Text key={index} mb="sm" className="bullet-item">
+                {formatBoldText(bulletContent)}
+              </Text>
+            );
+          }
+
+          // Handle regular paragraphs
+          return (
+            <Text key={index} mb="md">
+              {formatBoldText(trimmedLine)}
+            </Text>
+          );
+        })}
       </div>
     );
   };
 
   const formatBoldText = (text: string) => {
-    // Split text by **bold** patterns
-    const parts = text.split(/(\*\*.*?\*\*)/g);
+    // Handle **bold** formatting
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
 
     return parts.map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
+      if (part.startsWith("**") && part.endsWith("**")) {
         // Remove ** and make bold
         const boldText = part.slice(2, -2);
         return <strong key={index}>{boldText}</strong>;
       }
-      return part;
+      return <span key={index}>{part}</span>;
     });
-  };  return (
+  };
+
+  return (
     <div>
       <Paper withBorder radius="md" p="lg">
         <Flex justify="space-between" align="center" mb="8">
-          <Title order={3}>
-            {title}
-          </Title>
+          <Title order={3}>{title}</Title>
           <GenerativeAIBadge />
         </Flex>
         <Divider mb="lg" />
