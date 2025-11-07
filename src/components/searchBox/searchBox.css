@@ -1,8 +1,13 @@
-
 .searchbox__container {
   min-width: 300px;
   width: 40vw;
   max-width: 600px;
+  position: relative;
+}
+
+.searchbox__error {
+  color: #ff0000;
+  font-size: 13px;
 }
 
 /* Mobile responsive adjustments */
@@ -11,5 +16,9 @@
     min-width: 200px;
     width: 100%;
     max-width: none;
+  }
+
+  .searchbox__error {
+    font-size: 13px;
   }
 }

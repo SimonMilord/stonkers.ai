@@ -8,6 +8,7 @@ import {
   getBasicFinancials,
   getReportedFinancials,
   getStockSymbol,
+  validateSymbolSupport,
 } from "../../utils/requests";
 import { roundToDecimal } from "../../utils/functions";
 import { getFCFperShareGrowth } from "../../utils/metrics";
@@ -23,6 +24,7 @@ export default function SearchBox(props: { variant: string }) {
   const [searchedQuery, setSearchedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [noResultsFound, setNoResultsFound] = useState(false);
+  const [validationError, setValidationError] = useState<string>("");
   const history = useHistory();
   const location = useLocation();
   const { setCurrentStock } = useStockInfo();
@@ -33,30 +35,44 @@ export default function SearchBox(props: { variant: string }) {
     const trimmedQuery = query.trim();
     if (event.key === "Enter" && trimmedQuery !== "") {
       setNoResultsFound(false);
+      setValidationError("");
 
       try {
         const queriedSymbol = await searchForSymbol(trimmedQuery);
         setSearchedQuery(trimmedQuery);
-        // This check avoids the situation where a query like "amamaz" sends a request with a [object, object] value.
-        if (queriedSymbol !== null) {
-          // Check current location and navigate accordingly
-          if (location.pathname === "/calculator") {
-            // If on calculator page, fetch stock data and update context without navigation
-            await fetchAndSetStockData(queriedSymbol);
-          } else {
-            // Default behavior - navigate to details page
-            history.push(`/details/${queriedSymbol}`, {
-              symbol: queriedSymbol,
-            });
-          }
-        } else {
+
+        if (queriedSymbol === null) {
           console.warn(
             `No symbol found for: ${trimmedQuery}. Please try again with a different symbol.`
           );
           setNoResultsFound(true);
         }
+        // Check current location and handle accordingly
+        if (location.pathname === "/calculator") {
+          // If on calculator page, fetch stock data and update context without navigation
+          await fetchAndSetStockData(queriedSymbol);
+        } else {
+          // For navigation to details page, validate symbol support first
+          const validation = await validateSymbolSupport(queriedSymbol);
+
+          if (validation.isSupported) {
+            // Symbol is fully supported, proceed with navigation
+            history.push(`/details/${queriedSymbol}`, {
+              symbol: queriedSymbol,
+            });
+          } else {
+            // Symbol is not fully supported, show error message
+            setValidationError(
+              `Symbol "${queriedSymbol}" is not supported. Please try a different US listed stock.`
+            );
+            console.warn("Symbol validation failed:", validation);
+          }
+        }
       } catch (error) {
         console.error(`Error searching for stock: ${trimmedQuery}`, error);
+        setValidationError(
+          "An error occurred while searching. Please try again."
+        );
       }
       setQuery(trimmedQuery);
     }
@@ -161,9 +177,9 @@ export default function SearchBox(props: { variant: string }) {
             onKeyDown={handleKeyDown}
             rightSection={loading && <Loader size="sm" />}
           />
-          {noResultsFound && (
-            <Text style={{ color: "red" }}>
-              No results found for: {searchedQuery}{" "}
+          {(noResultsFound || validationError) && (
+            <Text className="searchbox__error">
+              {validationError || `No results found for: ${searchedQuery}`}
             </Text>
           )}
         </>
@@ -181,9 +197,9 @@ export default function SearchBox(props: { variant: string }) {
             onKeyDown={handleKeyDown}
             rightSection={loading && <Loader size="sm" />}
           />
-          {noResultsFound && (
-            <Text style={{ color: "red" }}>
-              No results found for: {searchedQuery}{" "}
+          {(noResultsFound || validationError) && (
+            <Text className="searchbox__error">
+              {validationError || `No results found for: ${searchedQuery}`}
             </Text>
           )}
         </>

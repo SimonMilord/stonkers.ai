@@ -1,28 +1,5 @@
 const backendFinnhubUrl = `${import.meta.env.VITE_BACKEND_URL}/finnhub`;
 
-// Standardized error handling helper
-const handleApiResponse = async (
-  response: Response,
-  endpoint: string,
-  symbol?: string
-) => {
-  if (!response.ok) {
-    const baseMessage = symbol
-      ? `Unable to complete network request for ${endpoint} with symbol: ${symbol}`
-      : `Unable to complete network request for ${endpoint}`;
-
-    if (response.status === 404) {
-      throw new Error(
-        `${endpoint} not found${symbol ? ` for symbol: ${symbol}` : ""} (404)`
-      );
-    }
-
-    throw new Error(`${baseMessage}. Status: ${response.status}`);
-  }
-
-  return await response.json();
-};
-
 // ==== API Requests to Finnhub api routes =====
 /**
  * Fetch the stock symbol for a given query.
@@ -47,7 +24,21 @@ export const getStockSymbol = async (
       );
     }
 
-    return await response.json();
+    const result = await response.json();
+
+    // If backend returns just a string (the symbol), return it directly
+    if (typeof result === "string") {
+      return result;
+    }
+
+    // If backend returns an object with symbol property, extract it
+    if (result && typeof result === "object" && result.symbol) {
+      return result.symbol;
+    }
+
+    // If none of the above, return null
+    console.warn("Unexpected response format from search API:", result);
+    return null;
   } catch (error) {
     console.error(`Error searching for symbol ${symbol}:`, error);
     // Only throw for non-404 errors
@@ -226,3 +217,72 @@ export const generateInvestmentRisks = async (companyName: string) => {
 };
 
 // ==== Database Requests to our backend service =====
+
+// ==== Helper function to handle API responses =====
+// Standardized error handling helper
+const handleApiResponse = async (
+  response: Response,
+  endpoint: string,
+  symbol?: string
+) => {
+  if (!response.ok) {
+    const baseMessage = symbol
+      ? `Unable to complete network request for ${endpoint} with symbol: ${symbol}`
+      : `Unable to complete network request for ${endpoint}`;
+
+    if (response.status === 404) {
+      throw new Error(
+        `${endpoint} not found${symbol ? ` for symbol: ${symbol}` : ""} (404)`
+      );
+    }
+
+    throw new Error(`${baseMessage}. Status: ${response.status}`);
+  }
+
+  return await response.json();
+};
+
+// Validation function to check if a symbol has full data support
+export const validateSymbolSupport = async (
+  symbol: string
+): Promise<{
+  isSupported: boolean;
+  availableData: string[];
+  missingData: string[];
+  errors: string[];
+}> => {
+  const dataChecks = [
+    { name: "quote", fn: () => getQuote(symbol) },
+    { name: "profile", fn: () => getCompanyProfile(symbol) },
+    { name: "basicFinancials", fn: () => getBasicFinancials(symbol) },
+  ];
+
+  const results = await Promise.allSettled(
+    dataChecks.map((check) => check.fn())
+  );
+
+  const availableData: string[] = [];
+  const missingData: string[] = [];
+  const errors: string[] = [];
+
+  results.forEach((result, index) => {
+    const checkName = dataChecks[index].name;
+    if (result.status === "fulfilled") {
+      availableData.push(checkName);
+    } else {
+      missingData.push(checkName);
+      errors.push(`${checkName}: ${result.reason?.message || "Unknown error"}`);
+    }
+  });
+
+  // A symbol is considered supported if it has at least quote and profile data
+  const isSupported =
+    availableData.includes("quote") && availableData.includes("profile");
+
+  return {
+    isSupported,
+    availableData,
+    missingData,
+    errors,
+  };
+};

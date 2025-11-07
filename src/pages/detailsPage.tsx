@@ -73,7 +73,9 @@ export default function DetailsPage() {
 
   const fetchStockData = async (symbol: string) => {
     setLoading(true);
+
     try {
+      // Fetch all data with graceful error handling
       const [
         quote,
         companyProfile,
@@ -83,7 +85,7 @@ export default function DetailsPage() {
         recommendationTrends,
         basicFinancials,
         reportedFinancials,
-      ] = await Promise.all([
+      ] = await Promise.allSettled([
         getQuote(symbol),
         getCompanyProfile(symbol),
         getEarningsCalendar(symbol),
@@ -94,45 +96,78 @@ export default function DetailsPage() {
         getReportedFinancials(symbol),
       ]);
 
-      const stockData = {
-        quoteData: quote,
-        companyProfileData: companyProfile,
-        earningsCalendarData: earningsCalendar,
-        earningsSurpriseData: earningsSurprise,
-        companyNewsData: companyNews,
-        recommendationTrendsData: recommendationTrends,
-        basicFinancialsData: basicFinancials,
-        reportedFinancialsData: reportedFinancials,
-      };
+      // Extract successful data, ignore failed requests
+      const stockData: any = {};
+
+      if (quote.status === "fulfilled") {
+        stockData.quoteData = quote.value;
+      }
+
+      if (companyProfile.status === "fulfilled") {
+        stockData.companyProfileData = companyProfile.value;
+      }
+
+      if (earningsCalendar.status === "fulfilled") {
+        stockData.earningsCalendarData = earningsCalendar.value;
+      }
+
+      if (earningsSurprise.status === "fulfilled") {
+        stockData.earningsSurpriseData = earningsSurprise.value;
+      }
+
+      if (companyNews.status === "fulfilled") {
+        stockData.companyNewsData = companyNews.value;
+      }
+
+      if (recommendationTrends.status === "fulfilled") {
+        stockData.recommendationTrendsData = recommendationTrends.value;
+      }
+
+      if (basicFinancials.status === "fulfilled") {
+        stockData.basicFinancialsData = basicFinancials.value;
+      }
+
+      if (reportedFinancials.status === "fulfilled") {
+        stockData.reportedFinancialsData = reportedFinancials.value;
+      }
 
       setStockDetails(stockData);
-      setCurrentStock({
-        logo: companyProfile?.logo,
-        name: companyProfile?.name,
-        ticker: companyProfile?.ticker || symbol,
-        currency: companyProfile?.currency,
-        price: quote?.c,
-        change: quote?.d,
-        changePercent: quote?.dp,
-        epsTTM: basicFinancials?.metric?.epsTTM,
-        peRatioTTM: basicFinancials?.metric?.peTTM,
-        epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
-        fcfPerShareTTM: basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v,
-        fcfYieldTTM: roundToDecimal(
-          (basicFinancials?.series?.quarterly?.fcfPerShareTTM[0].v / quote?.c) *
-            100,
-          2
-        ),
-        fcfPerShareGrowthTTM: roundToDecimal(
-          Number(
-            getFCFperShareGrowth(
-              basicFinancials?.series?.quarterly?.fcfPerShareTTM,
-              1
-            )
+
+      // Update stock context if we have basic data
+      if (stockData.quoteData && stockData.companyProfileData) {
+        setCurrentStock({
+          logo: stockData.companyProfileData?.logo,
+          name: stockData.companyProfileData?.name,
+          ticker: stockData.companyProfileData?.ticker || symbol,
+          currency: stockData.companyProfileData?.currency,
+          price: stockData.quoteData?.c,
+          change: stockData.quoteData?.d,
+          changePercent: stockData.quoteData?.dp,
+          epsTTM: stockData.basicFinancialsData?.metric?.epsTTM,
+          peRatioTTM: stockData.basicFinancialsData?.metric?.peTTM,
+          epsGrowthTTM: stockData.basicFinancialsData?.metric?.epsGrowthTTMYoy,
+          fcfPerShareTTM:
+            stockData.basicFinancialsData?.series?.quarterly
+              ?.fcfPerShareTTM?.[0]?.v,
+          fcfYieldTTM: roundToDecimal(
+            (stockData.basicFinancialsData?.series?.quarterly
+              ?.fcfPerShareTTM?.[0]?.v /
+              stockData.quoteData?.c) *
+              100,
+            2
           ),
-          2
-        ),
-      });
+          fcfPerShareGrowthTTM: roundToDecimal(
+            Number(
+              getFCFperShareGrowth(
+                stockData.basicFinancialsData?.series?.quarterly
+                  ?.fcfPerShareTTM,
+                1
+              )
+            ),
+            2
+          ),
+        });
+      }
     } catch (error) {
       console.error("Error fetching stock data: ", error);
     }
