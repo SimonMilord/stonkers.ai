@@ -5,6 +5,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useHistory } from "react-router-dom";
 import "./watchListItem.css";
+import { formatCurrency } from "@utils/functions";
 
 export interface WatchlistItemData {
   symbol: string;
@@ -35,8 +36,6 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
 
   const formatChange = (changeValue: number) => {
     const isPositive = changeValue >= 0;
@@ -75,7 +74,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Text>{formatPrice(stock.price)}</Text>
+        <Text>{formatCurrency(stock.price)}</Text>
       </Table.Td>
       <Table.Td>
         <Badge color={changeDollarData.color} variant="light" size="sm">
