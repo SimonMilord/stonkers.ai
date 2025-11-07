@@ -91,48 +91,81 @@ export default function CompanyMetricsCard({
   const companyGrowthItems = [
     {
       key: "Rev growth TTM:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowthTTMYoy, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.revenueGrowthTTMYoy, 2)}`,
+        "%"
+      ),
     },
     {
       key: "Rev growth 3Y:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowth3Y, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.revenueGrowth3Y, 2)}`,
+        "%"
+      ),
     },
     {
       key: "Rev growth 5Y:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.revenueGrowth5Y, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.revenueGrowth5Y, 2)}`,
+        "%"
+      ),
     },
     {
       key: "EPS growth TTM:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowthTTMYoy, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.epsGrowthTTMYoy, 2)}`,
+        "%"
+      ),
     },
     {
       key: "EPS growth 3Y:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowth3Y, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.epsGrowth3Y, 2)}`,
+        "%"
+      ),
     },
     {
       key: "EPS growth 5Y:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.epsGrowth5Y, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.epsGrowth5Y, 2)}`,
+        "%"
+      ),
     },
-    { key: "FCF/Sh growth 3Y:", value: `${getFCFperShareGrowth(fcfPerShareArray, 3) ?? "--.--%"}` },
-    { key: "FCF/Sh growth 5Y:", value: `${getFCFperShareGrowth(fcfPerShareArray, 5) ?? "--.--%"}` },
+    {
+      key: "FCF/Sh growth 3Y:",
+      value: `${getFCFperShareGrowth(fcfPerShareArray, 3) ?? "--.--"}%`,
+    },
+    {
+      key: "FCF/Sh growth 5Y:",
+      value: `${getFCFperShareGrowth(fcfPerShareArray, 5) ?? "--.--"}%`,
+    },
   ];
 
   const companyProfitabilityItems = [
     {
       key: "Gross margin TTM:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.grossMarginTTM, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.grossMarginTTM, 2)}`,
+        "%"
+      ),
     },
     {
       key: "Operating margin TTM:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.operatingMarginTTM, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.operatingMarginTTM, 2)}`,
+        "%"
+      ),
     },
     {
       key: "Profit margin TTM:",
-      value: validateMetricsValue(`${roundToDecimal(metrics?.netProfitMarginTTM, 2)}`, "%"),
+      value: validateMetricsValue(
+        `${roundToDecimal(metrics?.netProfitMarginTTM, 2)}`,
+        "%"
+      ),
     },
     {
       key: "ROA:",
-      value:validateMetricsValue(`${roundToDecimal(metrics?.roaTTM, 2)}`, "%"),
+      value: validateMetricsValue(`${roundToDecimal(metrics?.roaTTM, 2)}`, "%"),
     },
     {
       key: "ROE:",

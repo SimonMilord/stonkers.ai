@@ -32,7 +32,8 @@ export default function CalculatorResultsCard({
   calculationResults: CalculationResults;
   desiredReturn: number;
 }) {
-  const { fairValue, currentPrice, targetPrice5yr, projectedCagr } = calculationResults;
+  const { fairValue, currentPrice, targetPrice5yr, projectedCagr } =
+    calculationResults;
   const upsideColor = projectedCagr >= 0 ? "green" : "red";
 
   // Generate 5-year projection data
@@ -46,7 +47,7 @@ export default function CalculatorResultsCard({
       currentYear + 4,
       currentYear + 5,
     ];
-    const growthRate = projectedCagr / 100 / 5; // Distribute the total upside over 5 years
+    const growthRate = projectedCagr / 100;
 
     const projectionData = years.map((_, index) => {
       if (index === 0) return currentPrice;
@@ -81,6 +82,9 @@ export default function CalculatorResultsCard({
     maintainAspectRatio: false,
     plugins: {
       legend: {
+        display: false,
+      },
+      datalabels: {
         display: false,
       },
       tooltip: {
