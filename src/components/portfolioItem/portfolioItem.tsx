@@ -12,6 +12,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useHistory } from "react-router-dom";
 import "./portfolioItem.css";
+import { formatCurrency } from "../../utils/functions";
 
 export interface Holding {
   name: string;
@@ -23,7 +24,7 @@ export interface Holding {
   exchange?: string;
   industry?: string;
   currency?: string;
-  type?: 'stock' | 'cash';
+  type?: "stock" | "cash";
 }
 
 interface PortfolioItemProps {
@@ -40,7 +41,7 @@ export default function PortfolioItem({
   totalPortfolioValue,
   onRemove,
   onUpdateShares,
-  onUpdateCostBasis
+  onUpdateCostBasis,
 }: PortfolioItemProps) {
   const {
     attributes,
@@ -57,33 +58,47 @@ export default function PortfolioItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const formatPrice = (price: number) => `${price.toFixed(2)}`;
-  const computedGainLossPercent = stock.type === 'cash' ? '0.00' : (((stock.currentPrice - stock.costBasis) / stock.costBasis) * 100).toFixed(2);
-  const computedGainLossDollar = stock.type === 'cash' ? '0.00' : formatPrice(stock.shares * (stock.currentPrice - stock.costBasis));
-  const isCash = stock.type === 'cash';
+  // const formatPrice = (price: number) => `${price.toFixed(2)}`;
+  const computedGainLossPercent =
+    stock.type === "cash"
+      ? "0.00"
+      : (
+          ((stock.currentPrice - stock.costBasis) / stock.costBasis) *
+          100
+        ).toFixed(2);
+  const computedGainLossDollar =
+    stock.type === "cash"
+      ? "0.00"
+      : formatCurrency(stock.shares * (stock.currentPrice - stock.costBasis));
+  const isCash = stock.type === "cash";
 
   // Handle keyboard events for arrow keys
-  const handleKeyDown = (event: React.KeyboardEvent, type: 'shares' | 'costBasis', currentValue: number) => {
-    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  const handleKeyDown = (
+    event: React.KeyboardEvent,
+    type: "shares" | "costBasis",
+    currentValue: number
+  ) => {
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
 
     event.preventDefault();
-    const increment = event.key === 'ArrowUp' ? 1 : -1;
+    const increment = event.key === "ArrowUp" ? 1 : -1;
     const newValue = Math.max(0, currentValue + increment);
 
-    const updateFunction = type === 'shares' ? onUpdateShares : onUpdateCostBasis;
+    const updateFunction =
+      type === "shares" ? onUpdateShares : onUpdateCostBasis;
     updateFunction?.(stock.ticker, newValue);
   };
 
   // Handle direct value changes
   const handleSharesChange = (value: string | number) => {
-    const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
     if (onUpdateShares) {
       onUpdateShares(stock.ticker, Math.max(0, numValue));
     }
   };
 
   const handleCostBasisChange = (value: string | number) => {
-    const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
     if (onUpdateCostBasis) {
       onUpdateCostBasis(stock.ticker, Math.max(0, numValue));
     }
@@ -105,11 +120,20 @@ export default function PortfolioItem({
       </Table.Td>
       <Table.Td>
         <Flex align="center">
-          {stock.logo && <Image mr={12} h={25} w={25} radius="md" src={stock?.logo} fit="cover" />}
+          {stock.logo && (
+            <Image
+              mr={12}
+              h={25}
+              w={25}
+              radius="md"
+              src={stock?.logo}
+              fit="cover"
+            />
+          )}
           <Text
             onClick={() => !isCash && history.push(`/details/${stock.ticker}`)}
             className={isCash ? "" : "portfolio-item-name"}
-            style={{ cursor: isCash ? 'default' : 'pointer' }}
+            style={{ cursor: isCash ? "default" : "pointer" }}
           >
             {stock.name} ({stock.ticker})
           </Text>
@@ -127,7 +151,7 @@ export default function PortfolioItem({
             hideControls
             className="portfolio-number-input"
             onChange={handleSharesChange}
-            onKeyDown={(e) => handleKeyDown(e, 'shares', stock.shares)}
+            onKeyDown={(e) => handleKeyDown(e, "shares", stock.shares)}
           />
         )}
       </Table.Td>
@@ -141,7 +165,7 @@ export default function PortfolioItem({
             hideControls
             className="portfolio-number-input"
             onChange={handleCostBasisChange}
-            onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
+            onKeyDown={(e) => handleKeyDown(e, "costBasis", stock.costBasis)}
             leftSection="$"
           />
         ) : (
@@ -153,28 +177,50 @@ export default function PortfolioItem({
             hideControls
             className="portfolio-number-input"
             onChange={handleCostBasisChange}
-            onKeyDown={(e) => handleKeyDown(e, 'costBasis', stock.costBasis)}
+            onKeyDown={(e) => handleKeyDown(e, "costBasis", stock.costBasis)}
           />
         )}
       </Table.Td>
       <Table.Td>
-        <Text>${formatPrice(stock.currentPrice)}</Text>
+        <Text>${formatCurrency(stock.currentPrice)}</Text>
       </Table.Td>
       <Table.Td>
-        <Text>${formatPrice(stock.shares * stock.currentPrice)}</Text>
+        <Text>${formatCurrency(stock.shares * stock.currentPrice)}</Text>
       </Table.Td>
       <Table.Td>
-        <Text c={isCash ? 'gray' : (Number(computedGainLossDollar) < 0 ? 'red' : 'green')}>
-          {isCash ? '-' : `$${computedGainLossDollar}`}
+        <Text
+          c={
+            isCash
+              ? "gray"
+              : Number(computedGainLossDollar) < 0
+              ? "red"
+              : "green"
+          }
+        >
+          {isCash ? "-" : `$${computedGainLossDollar}`}
         </Text>
       </Table.Td>
       <Table.Td>
-        <Text c={isCash ? 'gray' : (Number(computedGainLossPercent) < 0 ? 'red' : 'green')}>
-          {isCash ? '-' : `${computedGainLossPercent}%`}
+        <Text
+          c={
+            isCash
+              ? "gray"
+              : Number(computedGainLossPercent) < 0
+              ? "red"
+              : "green"
+          }
+        >
+          {isCash ? "-" : `${computedGainLossPercent}%`}
         </Text>
       </Table.Td>
       <Table.Td>
-        <Text>{((stock.shares * stock.currentPrice) / totalPortfolioValue * 100).toFixed(2)}%</Text>
+        <Text>
+          {(
+            ((stock.shares * stock.currentPrice) / totalPortfolioValue) *
+            100
+          ).toFixed(2)}
+          %
+        </Text>
       </Table.Td>
       <Table.Td>
         <ActionIcon
