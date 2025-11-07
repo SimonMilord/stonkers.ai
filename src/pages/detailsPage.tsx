@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
 import { Flex, Grid, Button, Tooltip } from "@mantine/core";
@@ -27,7 +27,9 @@ import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 
 export default function DetailsPage() {
   const location = useLocation();
-  const symbol = location?.state?.symbol || "";
+  const { id } = useParams<{ id: string }>();
+  const symbol = id || location?.state?.symbol || "";
+
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stockDetails, setStockDetails] = useState({});
