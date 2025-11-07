@@ -102,7 +102,7 @@ export default function WatchlistPage() {
             <Title order={2}>Watchlist</Title>
           </Group>
           <Box>
-            <Table borderColor='gray'>
+            <Table borderColor="gray">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th></Table.Th>
@@ -183,17 +183,7 @@ const placeholderWatchlist: WatchlistItemData[] = [
 ];
 
 const fetchUserWatchlist = async (): Promise<WatchlistItemData[]> => {
-  // TODO
-  // const response = await fetch(
-  //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/watchlist`,
-  //   {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     credentials: "include",
-  //   }
-  // );
+  // TODO: Fetch watchlist from backend for the logged-in user
   const res = new Promise((resolve) => {
     setTimeout(() => {
       resolve(placeholderWatchlist);

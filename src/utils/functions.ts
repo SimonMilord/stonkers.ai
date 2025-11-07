@@ -13,7 +13,7 @@ export const roundToDecimal = (num: number, decimalPlaces: number): number => {
     decimalPlaces = 2;
   }
   return Number(num.toFixed(decimalPlaces));
-}
+};
 
 /**
  * Helper function that formats a number into a dollar amount with appropriate suffixes (T, B, M).
@@ -38,7 +38,10 @@ export const formatDollarAmount = (amount: number) => {
  * @param str The string to validate
  * @param unit Optional unit to append to the string like "%", "$", etc.
  */
-export const validateMetricsValue = (str: string | number | null, unit?: string) => {
+export const validateMetricsValue = (
+  str: string | number | null,
+  unit?: string
+) => {
   const notAvailable: string = "N/A";
   if (typeof str === "number") {
     str = str.toString();
@@ -49,7 +52,7 @@ export const validateMetricsValue = (str: string | number | null, unit?: string)
   } else {
     return unit === undefined ? `${str}` : `${str}${unit}`;
   }
-}
+};
 
 /**
  * Formats a number as currency.
