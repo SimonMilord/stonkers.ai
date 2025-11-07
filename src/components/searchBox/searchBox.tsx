@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, TextInput, Loader, Text, Flex } from "@mantine/core";
+import { Box, TextInput, Loader, Text } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
 import { useStockInfo } from "../../contexts/stockContext";
 import {
@@ -7,6 +7,7 @@ import {
   getCompanyProfile,
   getBasicFinancials,
   getReportedFinancials,
+  getStockSymbol,
 } from "../../utils/requests";
 import { roundToDecimal } from "../../utils/functions";
 import { getFCFperShareGrowth } from "../../utils/metrics";
@@ -64,53 +65,17 @@ export default function SearchBox(props: { variant: string }) {
   /**
    * This function will search for a stock symbol using the Finnhub API and return the symbol.
    * @param symbol
-   * @returns string
+   * @returns string | null
    */
-  const searchForSymbol = async (symbol: string) => {
+  const searchForSymbol = async (symbol: string): Promise<string | null> => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
-    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
-    const request = {
-      method: "GET",
-      headers: {
-        "X-Finnhub-Token": apiKey,
-        "Content-Type": "application/json",
-      },
-    };
-
-    const response = await fetch(`${apiUrl}/search?q=${symbol}`, request);
-    if (!response.ok) {
-      throw new Error(
-        "Unable complete network request for this symbol: " + query
-      );
-    }
-
-    const data = await response.json();
-    if (data?.count === 0) {
-      console.warn(`No symbol found for: ${query}`);
-      setLoading(false);
-      return null;
-    }
-
-    const symbolFound: string = findSymbolInResults(data, symbol);
-    setLoading(false);
-    return symbolFound;
-  };
-
-  /**
-   * The API returns an array of objects and the first one is not always the most relevant.
-   * This function will return the first symbol that matches the query or the first symbol in the array if no match is found.
-   * @param data
-   * @returns string
-   */
-  const findSymbolInResults = (data: any, symbol: string): string => {
     try {
-      const symbolToReturn = data.result.find((result: any) => {
-        return result.symbol === symbol.toUpperCase();
-      });
-      return symbolToReturn.symbol;
+      const symbolFound = await getStockSymbol(symbol);
+      setLoading(false);
+      return symbolFound;
     } catch (error) {
-      return data.result[0];
+      setLoading(false);
+      throw error;
     }
   };
 
@@ -121,37 +86,48 @@ export default function SearchBox(props: { variant: string }) {
   const fetchAndSetStockData = async (symbol: string) => {
     try {
       const [quote, companyProfile, basicFinancials, reportedFinancials] =
-        await Promise.all([
+        await Promise.allSettled([
           getQuote(symbol),
           getCompanyProfile(symbol),
           getBasicFinancials(symbol),
           getReportedFinancials(symbol),
         ]);
 
+      // Extract data from settled promises, providing fallbacks for failed requests
+      const quoteData = quote.status === "fulfilled" ? quote.value : null;
+      const profileData =
+        companyProfile.status === "fulfilled" ? companyProfile.value : null;
+      const basicFinancialsData =
+        basicFinancials.status === "fulfilled" ? basicFinancials.value : null;
+      const reportedFinancialsData =
+        reportedFinancials.status === "fulfilled"
+          ? reportedFinancials.value
+          : null;
+
       setCurrentStock({
-        logo: companyProfile?.logo,
-        name: companyProfile?.name,
-        ticker: companyProfile?.ticker || symbol,
-        currency: companyProfile?.currency,
-        price: quote?.c,
-        change: quote?.d,
-        changePercent: quote?.dp,
+        logo: profileData?.logo,
+        name: profileData?.name,
+        ticker: profileData?.ticker || symbol,
+        currency: profileData?.currency,
+        price: quoteData?.c,
+        change: quoteData?.d,
+        changePercent: quoteData?.dp,
         // Use the same mapping as detailsPage for consistency
-        epsTTM: basicFinancials?.metric?.epsTTM,
-        peRatioTTM: basicFinancials?.metric?.peTTM,
-        epsGrowthTTM: basicFinancials?.metric?.epsGrowthTTMYoy,
+        epsTTM: basicFinancialsData?.metric?.epsTTM,
+        peRatioTTM: basicFinancialsData?.metric?.peTTM,
+        epsGrowthTTM: basicFinancialsData?.metric?.epsGrowthTTMYoy,
         fcfPerShareTTM:
-          basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
+          basicFinancialsData?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
         fcfYieldTTM: roundToDecimal(
-          (basicFinancials?.series?.quarterly?.fcfPerShareTTM?.[0]?.v /
-            quote?.c) *
+          (basicFinancialsData?.series?.quarterly?.fcfPerShareTTM?.[0]?.v /
+            (quoteData?.c || 1)) *
             100,
           2
         ),
         fcfPerShareGrowthTTM: roundToDecimal(
           Number(
             getFCFperShareGrowth(
-              basicFinancials?.series?.quarterly?.fcfPerShareTTM,
+              basicFinancialsData?.series?.quarterly?.fcfPerShareTTM,
               1
             )
           ),
@@ -160,6 +136,14 @@ export default function SearchBox(props: { variant: string }) {
       });
     } catch (error) {
       console.error("Error fetching stock data:", error);
+      // Still set minimal stock data even if detailed data fails
+      setCurrentStock({
+        ticker: symbol,
+        name: symbol,
+        price: 0,
+        change: 0,
+        changePercent: 0,
+      });
     }
   };
   return (

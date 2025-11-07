@@ -43,6 +43,8 @@ import PortfolioItem, {
 import PortfolioPieChart from "@components/portfolioPieChart/portfolioPieChart";
 import DataCard from "@components/dataCard/dataCard";
 import "./portfolioPage.css";
+import { getQuote, getCompanyProfile, getStockSymbol } from "../utils/requests";
+import { formatCurrency } from "../utils/functions";
 
 type SortField =
   | "name"
@@ -119,13 +121,6 @@ const calculateTotalCashPosition = (holdings: Holding[]): number => {
   return holdings
     .filter((holding) => holding.type === "cash")
     .reduce((acc, item) => acc + item.shares * item.currentPrice, 0);
-};
-
-const formatCurrency = (amount: number): string => {
-  return amount.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 };
 
 export default function PortfolioPage() {
@@ -283,95 +278,63 @@ export default function PortfolioPage() {
     setSearchError("");
 
     try {
-      const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
-      const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
+      // Use the backend search function
+      const symbolFound = await getStockSymbol(symbol);
 
-      const request = {
-        method: "GET",
-        headers: {
-          "X-Finnhub-Token": apiKey,
-          "Content-Type": "application/json",
-        },
-      };
-
-      const response = await fetch(`${apiUrl}/search?q=${symbol}`, request);
-      if (!response.ok) {
-        throw new Error("Unable to complete network request");
-      }
-
-      const data = await response.json();
-      if (data?.count === 0) {
-        setFoundStock(null);
-        setSearchError(`No stock found with ticker "${symbol.toUpperCase()}"`);
-        setSearchLoading(false);
-        return;
-      }
-
-      // Find exact match or use first result
-      const symbolFound = findSymbolInResults(data, symbol);
       if (symbolFound) {
-        // Fetch additional stock data
-        const [quote, companyProfile] = await Promise.all([
-          getQuote(symbolFound),
-          getCompanyProfile(symbolFound),
-        ]);
+        try {
+          // Fetch additional stock data with individual error handling
+          const [quote, companyProfile] = await Promise.allSettled([
+            getQuote(symbolFound),
+            getCompanyProfile(symbolFound),
+          ]);
 
-        setFoundStock({
-          ticker: symbolFound,
-          name: companyProfile?.name || `${symbolFound} Company`,
-          currentPrice: quote?.c || 0,
-          logo: companyProfile?.logo || "",
-        });
-        setSearchError("");
+          // Extract data from settled promises, providing fallbacks for failed requests
+          const quoteData = quote.status === "fulfilled" ? quote.value : null;
+          const profileData =
+            companyProfile.status === "fulfilled" ? companyProfile.value : null;
+
+          setFoundStock({
+            ticker: symbolFound,
+            name: profileData?.name || `${symbolFound} Company`,
+            currentPrice: quoteData?.c || 0,
+            logo: profileData?.logo || "",
+          });
+          setSearchError("");
+        } catch (dataError) {
+          // If we can't get quote/profile data, still show the found symbol but with limited info
+          console.warn("Error fetching additional stock data:", dataError);
+          setFoundStock({
+            ticker: symbolFound,
+            name: `${symbolFound} Company`,
+            currentPrice: 0,
+            logo: "",
+          });
+          setSearchError(""); // Clear any previous errors since we found the symbol
+        }
       } else {
         setFoundStock(null);
         setSearchError(`No stock found with ticker "${symbol.toUpperCase()}"`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error searching for stock:", error);
       setFoundStock(null);
-      setSearchError(
-        `Error searching for "${symbol.toUpperCase()}". Please try again.`
-      );
+
+      // Handle different types of errors more gracefully
+      if (error.message && error.message.includes("404")) {
+        setSearchError(`Stock "${symbol.toUpperCase()}" not found.`);
+      } else if (error.message && error.message.includes("network")) {
+        setSearchError(
+          `Network error. Please check your connection and try again.`
+        );
+      } else {
+        setSearchError(
+          `Error searching for "${symbol.toUpperCase()}". Please try again.`
+        );
+      }
     }
 
     setSearchLoading(false);
-  };
-
-  const findSymbolInResults = (data: any, symbol: string): string | null => {
-    try {
-      const exactMatch = data.result.find((result: any) => {
-        return result.symbol === symbol.toUpperCase();
-      });
-      if (exactMatch) {
-        return exactMatch.symbol;
-      }
-      // Return first result if no exact match
-      return data.result[0]?.symbol || null;
-    } catch (error) {
-      return null;
-    }
-  };
-
-  // Import the API functions (you'll need to add these imports at the top)
-  const getQuote = async (symbol: string) => {
-    const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
-    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
-
-    const response = await fetch(`${apiUrl}/quote?symbol=${symbol}`, {
-      headers: { "X-Finnhub-Token": apiKey },
-    });
-    return response.json();
-  };
-
-  const getCompanyProfile = async (symbol: string) => {
-    const apiUrl = import.meta.env.VITE_FINNHUB_API_URL;
-    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
-
-    const response = await fetch(`${apiUrl}/stock/profile2?symbol=${symbol}`, {
-      headers: { "X-Finnhub-Token": apiKey },
-    });
-    return response.json();
   };
 
   const handleTickerSearch = (value: string) => {
@@ -529,7 +492,7 @@ export default function PortfolioPage() {
                   <TextInput
                     placeholder="Search stock ticker"
                     value={searchTicker}
-                    radius='md'
+                    radius="md"
                     onChange={(event) =>
                       handleTickerSearch(event.currentTarget.value)
                     }

@@ -4,6 +4,7 @@ import { Paper, Title, Text, Divider, Table, Flex } from "@mantine/core";
 import "./companyProfileCard.css";
 import "../cardStyles.css";
 import GenerativeAIBadge from "@components/generativeAIBadge/generativeAIBadge";
+import { generateCompanyDescription } from "@utils/requests";
 
 export default function CompanyProfileCard({
   profileData,
@@ -44,31 +45,6 @@ export default function CompanyProfileCard({
     { key: "Exchange:", value: profileData?.exchange || notAvailable },
     { key: "Website:", value: companyWebsiteLink || notAvailable },
   ];
-
-  const generateCompanyDescription = async (companyName: string) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-company-description`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ companyName }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to generate company description");
-      }
-
-      const data = await response.json();
-      return data.content;
-    } catch (error) {
-      console.error("Error generating company description:", error);
-      return null;
-    }
-  };
 
   useEffect(() => {
     const fetchCompanyDescription = async () => {

@@ -17,6 +17,8 @@ import {
   getRecommendationTrends,
   getBasicFinancials,
   getReportedFinancials,
+  generateCompetitiveAdvantages,
+  generateInvestmentRisks,
 } from "@utils/requests";
 import { useStockInfo } from "../contexts/stockContext";
 import { roundToDecimal } from "@utils/functions";
@@ -30,12 +32,10 @@ export default function DetailsPage() {
   const [loading, setLoading] = useState(false);
   const [stockDetails, setStockDetails] = useState({});
   const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [investmentRisks, setInvestmentRisks] = useState<string | null>(
-    null
-  );
-  const [competitiveAdvantages, setCompetitiveAdvantages] = useState<string | null>(
-    null
-  );
+  const [investmentRisks, setInvestmentRisks] = useState<string | null>(null);
+  const [competitiveAdvantages, setCompetitiveAdvantages] = useState<
+    string | null
+  >(null);
   const { setCurrentStock } = useStockInfo();
 
   useEffect(() => {
@@ -123,62 +123,20 @@ export default function DetailsPage() {
             100,
           2
         ),
-        fcfPerShareGrowthTTM: roundToDecimal(Number(getFCFperShareGrowth(basicFinancials?.series?.quarterly?.fcfPerShareTTM, 1)), 2),
+        fcfPerShareGrowthTTM: roundToDecimal(
+          Number(
+            getFCFperShareGrowth(
+              basicFinancials?.series?.quarterly?.fcfPerShareTTM,
+              1
+            )
+          ),
+          2
+        ),
       });
     } catch (error) {
       console.error("Error fetching stock data: ", error);
     }
     setLoading(false);
-  };
-
-  const generateCompetitiveAdvantages = async (companyName: string) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-competitive-advantages-analysis`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ companyName }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to generate competitive advantages analysis");
-      }
-
-      const data = await response.json();
-      return data.content;
-    } catch (error) {
-      console.error("Error generating competitive advantages:", error);
-      return null;
-    }
-  };
-
-  const generateInvestmentRisks = async (companyName: string) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/ai/generate-investment-risks-analysis`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ companyName }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to generate investment risks analysis");
-      }
-
-      const data = await response.json();
-      return data.content;
-    } catch (error) {
-      console.error("Error generating investment risks:", error);
-      return null;
-    }
   };
 
   // Fetch AI-generated content when company profile data is available
@@ -218,11 +176,19 @@ export default function DetailsPage() {
           </div>
           <div className="details-page-button-container">
             {stockDetails.quoteData && stockDetails.companyProfileData && (
-              <Tooltip label={`${isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}`}>
+              <Tooltip
+                label={`${
+                  isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"
+                }`}
+              >
                 <Button
                   variant={"light"}
                   color={isInWatchlist ? "red" : "blue"}
-                  onClick={isInWatchlist ? handleRemoveFromWatchlist : handleAddToWatchlist}
+                  onClick={
+                    isInWatchlist
+                      ? handleRemoveFromWatchlist
+                      : handleAddToWatchlist
+                  }
                   size="md"
                 >
                   {isInWatchlist ? <RiSubtractLine /> : <RiAddLargeLine />}
@@ -257,7 +223,10 @@ export default function DetailsPage() {
             />
           </Grid.Col>
           <Grid.Col span={6}>
-            <CompanyNewsCard title={`Recent News`} newsData={stockDetails?.companyNewsData} />
+            <CompanyNewsCard
+              title={`Recent News`}
+              newsData={stockDetails?.companyNewsData}
+            />
           </Grid.Col>
         </Grid>
       </>
