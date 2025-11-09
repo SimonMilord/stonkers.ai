@@ -1,17 +1,8 @@
 import React, { useState } from "react";
 import { Box, TextInput, Loader, Text } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
-import { useStockInfo } from "../../contexts/stockContext";
-import {
-  getQuote,
-  getCompanyProfile,
-  getBasicFinancials,
-  getReportedFinancials,
-  getStockSymbol,
-  validateSymbolSupport,
-} from "../../utils/requests";
-import { roundToDecimal } from "../../utils/functions";
-import { getFCFperShareGrowth } from "../../utils/metrics";
+import { useStockData } from "../../hooks/useStockData";
+import { getStockSymbol, validateSymbolSupport } from "../../utils/requests";
 import "./searchBox.css";
 
 /**
@@ -27,7 +18,7 @@ export default function SearchBox(props: { variant: string }) {
   const [validationError, setValidationError] = useState<string>("");
   const history = useHistory();
   const location = useLocation();
-  const { setCurrentStock } = useStockInfo();
+  const { fetchAndSetStockData } = useStockData();
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
@@ -95,73 +86,6 @@ export default function SearchBox(props: { variant: string }) {
     }
   };
 
-  /**
-   * Fetch stock data and update the stock context for calculator page
-   * @param symbol
-   */
-  const fetchAndSetStockData = async (symbol: string) => {
-    try {
-      const [quote, companyProfile, basicFinancials, reportedFinancials] =
-        await Promise.allSettled([
-          getQuote(symbol),
-          getCompanyProfile(symbol),
-          getBasicFinancials(symbol),
-          getReportedFinancials(symbol),
-        ]);
-
-      // Extract data from settled promises, providing fallbacks for failed requests
-      const quoteData = quote.status === "fulfilled" ? quote.value : null;
-      const profileData =
-        companyProfile.status === "fulfilled" ? companyProfile.value : null;
-      const basicFinancialsData =
-        basicFinancials.status === "fulfilled" ? basicFinancials.value : null;
-      const reportedFinancialsData =
-        reportedFinancials.status === "fulfilled"
-          ? reportedFinancials.value
-          : null;
-
-      setCurrentStock({
-        logo: profileData?.logo,
-        name: profileData?.name,
-        ticker: profileData?.ticker || symbol,
-        currency: profileData?.currency,
-        price: quoteData?.c,
-        change: quoteData?.d,
-        changePercent: quoteData?.dp,
-        // Use the same mapping as detailsPage for consistency
-        epsTTM: basicFinancialsData?.metric?.epsTTM,
-        peRatioTTM: basicFinancialsData?.metric?.peTTM,
-        epsGrowthTTM: basicFinancialsData?.metric?.epsGrowthTTMYoy,
-        fcfPerShareTTM:
-          basicFinancialsData?.series?.quarterly?.fcfPerShareTTM?.[0]?.v,
-        fcfYieldTTM: roundToDecimal(
-          (basicFinancialsData?.series?.quarterly?.fcfPerShareTTM?.[0]?.v /
-            (quoteData?.c || 1)) *
-            100,
-          2
-        ),
-        fcfPerShareGrowthTTM: roundToDecimal(
-          Number(
-            getFCFperShareGrowth(
-              basicFinancialsData?.series?.quarterly?.fcfPerShareTTM,
-              1
-            )
-          ),
-          2
-        ),
-      });
-    } catch (error) {
-      console.error("Error fetching stock data:", error);
-      // Still set minimal stock data even if detailed data fails
-      setCurrentStock({
-        ticker: symbol,
-        name: symbol,
-        price: 0,
-        change: 0,
-        changePercent: 0,
-      });
-    }
-  };
   return (
     <Box className="searchbox__container">
       {props.variant === "standalone" && (
