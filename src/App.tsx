@@ -14,6 +14,7 @@ import DetailsPage from "./pages/detailsPage";
 import CalculatorPage from "./pages/calculatorPage";
 import PortfolioPage from "./pages/portfolioPage";
 import WatchlistPage from "./pages/watchlistPage";
+import LoginPage from "./pages/loginPage";
 import { StockProvider } from "./contexts/stockContext";
 
 export default class App extends Component {
@@ -26,6 +27,11 @@ export default class App extends Component {
               <AutoTitleManager />
               <div className="App">
                 <Switch>
+                  <Route
+                    path="/login"
+                    exact
+                    render={(routerProps) => <LoginPage {...routerProps} />}
+                  />
                   <Route
                     path="/"
                     exact
@@ -75,6 +81,7 @@ function AutoTitleManager() {
   useEffect(() => {
     const routeTitles: Record<string, string> = {
       "/": "Stonkers.ai - Stock Analysis Platform",
+      "/login": "Login - Stonkers.ai",
       "/calculator": "Calculator - Stonkers.ai",
       "/watchlist": "Watchlist - Stonkers.ai",
       "/portfolio": "Portfolio - Stonkers.ai",

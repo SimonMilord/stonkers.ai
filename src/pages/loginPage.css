@@ -1,0 +1,66 @@
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--color-app-background) 0%,
+    #1a1a2e 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-title {
+  color: var(--color-text-white);
+  background: linear-gradient(
+    45deg,
+    var(--color-text-white),
+    var(--color-text-light)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.google-login-btn,
+.guest-login-btn {
+  border-color: var(--input-border);
+  background-color: var(--color-app-background);
+  color: var(--color-text-white);
+  transition: var(--transition-standard);
+}
+
+.google-login-btn:hover,
+.guest-login-btn:hover {
+  background-color: var(--input-background);
+  border-color: var(--input-border-focus);
+  transform: translateY(-1px);
+}
+
+.login-divider {
+  --divider-color: var(--color-text-muted);
+}
+
+.login-divider .mantine-Divider-label {
+  color: var(--color-text-muted);
+}
+
+/* Paper styling */
+.login-page .mantine-Paper-root {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-color: var(--input-border);
+  backdrop-filter: blur(10px);
+  min-width: 400px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-page .mantine-Paper-root {
+    min-width: auto;
+    margin: 20px;
+  }
+
+  .login-page .mantine-Container-root {
+    padding: 0 16px;
+  }
+}

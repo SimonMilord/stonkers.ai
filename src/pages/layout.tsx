@@ -2,7 +2,7 @@ import React from "react";
 import { AppShell, Flex, Group, Burger, NavLink, Box } from "@mantine/core";
 import { Link } from "react-router-dom";
 import SearchBox from "@components/searchBox/searchBox";
-import { CiCalculator1, CiHome, CiCircleList } from "react-icons/ci";
+import { CiCalculator1, CiHome, CiCircleList, CiLogin } from "react-icons/ci";
 import { FaChartPie } from "react-icons/fa";
 import "./layout.css";
 
@@ -18,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
     { label: "Calculator", icon: CiCalculator1, href: `/calculator` },
     { label: "Watchlist", icon: CiCircleList, href: `/watchlist` },
     { label: "Portfolio", icon: FaChartPie, href: `/portfolio` },
+    { label: "Log out", icon: CiLogin, href: `/login` },
   ];
 
   return (
