@@ -153,28 +153,28 @@ export default function WatchlistPage() {
 
 const placeholderWatchlist: WatchlistItemData[] = [
   {
-    symbol: "AAPL",
+    ticker: "AAPL",
     name: "Apple Inc.",
     price: 266.24,
     changeDollar: 2.94,
     changePercent: 1.35,
   },
   {
-    symbol: "GOOGL",
+    ticker: "GOOGL",
     name: "Alphabet Inc.",
     price: 262.12,
     changeDollar: -15.2,
     changePercent: -0.53,
   },
   {
-    symbol: "AMZN",
+    ticker: "AMZN",
     name: "Amazon.com Inc.",
     price: 222.21,
     changeDollar: 10.1,
     changePercent: 0.29,
   },
   {
-    symbol: "MSFT",
+    ticker: "MSFT",
     name: "Microsoft Corp.",
     price: 510.95,
     changeDollar: 3.0,

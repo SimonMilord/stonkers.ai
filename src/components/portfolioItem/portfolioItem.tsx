@@ -13,6 +13,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useHistory } from "react-router-dom";
 import "./portfolioItem.css";
 import { formatCurrency } from "../../utils/functions";
+import { modals } from "@mantine/modals";
 
 export interface Holding {
   name: string;
@@ -102,6 +103,25 @@ export default function PortfolioItem({
     if (onUpdateCostBasis) {
       onUpdateCostBasis(stock.ticker, Math.max(0, numValue));
     }
+  };
+
+  const handleDeleteConfirmation = () => {
+    modals.openConfirmModal({
+      title: "Remove from Portfolio",
+      children: (
+        <Text size="sm" py="md">
+          Are you sure you want to remove <strong>{stock.ticker}</strong> (
+          {stock.name}) from your portfolio?
+        </Text>
+      ),
+      labels: { confirm: "Remove", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      centered: true,
+      onConfirm: () => onRemove(stock.ticker),
+      classNames: {
+        content: "confirmation-modal",
+      },
+    });
   };
 
   return (
@@ -227,7 +247,7 @@ export default function PortfolioItem({
           radius="md"
           variant="subtle"
           color="red"
-          onClick={() => onRemove(stock.ticker)}
+          onClick={handleDeleteConfirmation}
         >
           <RiDeleteBin5Fill />
         </ActionIcon>

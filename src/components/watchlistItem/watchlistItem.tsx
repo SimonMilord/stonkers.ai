@@ -4,11 +4,12 @@ import { RiDeleteBin5Fill, RiMenuFill } from "react-icons/ri";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useHistory } from "react-router-dom";
+import { modals } from "@mantine/modals";
 import "./watchListItem.css";
 import { formatCurrency } from "@utils/functions";
 
 export interface WatchlistItemData {
-  symbol: string;
+  ticker: string;
   name: string;
   price: number;
   changeDollar: number;
@@ -29,7 +30,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: stock.symbol });
+  } = useSortable({ id: stock.ticker });
   const history = useHistory();
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -48,6 +49,25 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
   const changePercentData = formatChange(stock.changePercent);
   const changeDollarData = formatChange(stock.changeDollar);
 
+  const handleDeleteConfirmation = () => {
+    modals.openConfirmModal({
+      title: "Remove from Watchlist",
+      children: (
+        <Text size="sm" py="md">
+          Are you sure you want to remove <strong>{stock.ticker}</strong> (
+          {stock.name}) from your watchlist?
+        </Text>
+      ),
+      labels: { confirm: "Remove", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      centered: true,
+      onConfirm: () => onRemove(stock.ticker),
+      classNames: {
+        content: "confirmation-modal",
+      },
+    });
+  };
+
   return (
     <Table.Tr ref={setNodeRef} style={style}>
       <Table.Td>
@@ -63,11 +83,11 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         </ActionIcon>
       </Table.Td>
       <Table.Td>
-        <Text fw={500}>{stock.symbol}</Text>
+        <Text fw={500}>{stock.ticker}</Text>
       </Table.Td>
       <Table.Td>
         <Text
-          onClick={() => history.push(`/details/${stock.symbol}`)}
+          onClick={() => history.push(`/details/${stock.ticker}`)}
           className="watchlist-item-name"
         >
           {stock.name}
@@ -91,7 +111,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
           radius="md"
           variant="subtle"
           color="red"
-          onClick={() => onRemove(stock.symbol)}
+          onClick={handleDeleteConfirmation}
         >
           <RiDeleteBin5Fill />
         </ActionIcon>

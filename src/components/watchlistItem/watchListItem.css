@@ -1,3 +1,5 @@
+@import "../../styles/modalStyles.css";
+
 .watchlist-item-name {
   cursor: pointer;
   color: var(--mantine-color-white-0);
