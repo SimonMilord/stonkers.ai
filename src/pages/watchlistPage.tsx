@@ -57,8 +57,8 @@ export default function WatchlistPage() {
     fetchData();
   }, []);
 
-  const removeFromWatchlist = (symbol: string) => {
-    setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
+  const removeFromWatchlist = (ticker: string) => {
+    setWatchlist((prev) => prev.filter((item) => item.ticker !== ticker));
     // TODO: Update backend accordingly
   };
 
@@ -67,13 +67,13 @@ export default function WatchlistPage() {
 
     if (active.id !== over?.id) {
       setWatchlist((items) => {
-        const oldIndex = items.findIndex((item) => item.symbol === active.id);
-        const newIndex = items.findIndex((item) => item.symbol === over?.id);
+        const oldIndex = items.findIndex((item) => item.ticker === active.id);
+        const newIndex = items.findIndex((item) => item.ticker === over?.id);
 
         const newOrder = arrayMove(items, oldIndex, newIndex);
 
         // TODO: Update backend with new order
-        // updateWatchlistOrder(newOrder.map(item => item.symbol));
+        // updateWatchlistOrder(newOrder.map(item => item.ticker));
 
         return newOrder;
       });
@@ -102,48 +102,51 @@ export default function WatchlistPage() {
             <Title order={2}>Watchlist</Title>
           </Group>
           <Box>
-            <Table borderColor="gray">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th></Table.Th>
-                  <Table.Th>Symbol</Table.Th>
-                  <Table.Th>Name</Table.Th>
-                  <Table.Th>Price</Table.Th>
-                  <Table.Th>Change ($)</Table.Th>
-                  <Table.Th>Change (%)</Table.Th>
-                  <Table.Th></Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {watchlist.length > 0 ? (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={watchlist.map((item) => item.symbol)}
-                      strategy={verticalListSortingStrategy}
-                      children={watchlist.map((stock) => (
-                        <WatchlistItem
-                          key={stock.symbol}
-                          stock={stock}
-                          onRemove={removeFromWatchlist}
-                        />
-                      ))}
-                    />
-                  </DndContext>
-                ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <Table borderColor="gray">
+                <Table.Thead>
                   <Table.Tr>
-                    <Table.Td colSpan={7}>
-                      <Text ta="center" c="dimmed">
-                        No stocks in your watchlist. Add some to get started!
-                      </Text>
-                    </Table.Td>
+                    <Table.Th></Table.Th>
+                    <Table.Th>Symbol</Table.Th>
+                    <Table.Th>Name</Table.Th>
+                    <Table.Th>Price</Table.Th>
+                    <Table.Th>Change ($)</Table.Th>
+                    <Table.Th>Change (%)</Table.Th>
+                    <Table.Th></Table.Th>
                   </Table.Tr>
-                )}
-              </Table.Tbody>
-            </Table>
+                </Table.Thead>
+                <Table.Tbody>
+                  <SortableContext
+                    items={watchlist.map((item) => item.ticker)}
+                    strategy={verticalListSortingStrategy}
+                    children={
+                      watchlist.length > 0 ? (
+                        watchlist.map((stock) => (
+                          <WatchlistItem
+                            key={stock.ticker}
+                            stock={stock}
+                            onRemove={removeFromWatchlist}
+                          />
+                        ))
+                      ) : (
+                        <Table.Tr>
+                          <Table.Td colSpan={7}>
+                            <Text ta="center" c="dimmed">
+                              No stocks in your watchlist. Add some to get
+                              started!
+                            </Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      )
+                    }
+                  />
+                </Table.Tbody>
+              </Table>
+            </DndContext>
           </Box>
         </Grid.Col>
       </Grid>
