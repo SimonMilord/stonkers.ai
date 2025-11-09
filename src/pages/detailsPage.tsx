@@ -9,20 +9,14 @@ import GeneratedContentCard from "@components/generatedContentCard/generatedCont
 import CompanyNewsCard from "@components/companyNewsCard/companyNewsCard";
 import "./detailsPage.css";
 import {
-  getQuote,
-  getCompanyProfile,
   getEarningsCalendar,
   getEarningsSurprise,
   getCompanyNews,
   getRecommendationTrends,
-  getBasicFinancials,
-  getReportedFinancials,
   generateCompetitiveAdvantages,
   generateInvestmentRisks,
 } from "@utils/requests";
-import { useStockInfo } from "../contexts/stockContext";
-import { roundToDecimal } from "@utils/functions";
-import { getFCFperShareGrowth } from "@utils/metrics";
+import { useStockData } from "../hooks/useStockData";
 import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 
 export default function DetailsPage() {
@@ -38,7 +32,7 @@ export default function DetailsPage() {
   const [competitiveAdvantages, setCompetitiveAdvantages] = useState<
     string | null
   >(null);
-  const { setCurrentStock } = useStockInfo();
+  const { fetchAndSetStockData } = useStockData();
 
   useEffect(() => {
     fetchStockData(symbol);
@@ -77,38 +71,31 @@ export default function DetailsPage() {
     setLoading(true);
 
     try {
-      // Fetch all data with graceful error handling
+      // Use hook to fetch core stock data and update context
+      const coreData = await fetchAndSetStockData(symbol);
+
+      // Fetch additional data needed only for details page
       const [
-        quote,
-        companyProfile,
         earningsCalendar,
         earningsSurprise,
         companyNews,
         recommendationTrends,
-        basicFinancials,
-        reportedFinancials,
       ] = await Promise.allSettled([
-        getQuote(symbol),
-        getCompanyProfile(symbol),
         getEarningsCalendar(symbol),
         getEarningsSurprise(symbol),
         getCompanyNews(symbol),
         getRecommendationTrends(symbol),
-        getBasicFinancials(symbol),
-        getReportedFinancials(symbol),
       ]);
 
-      // Extract successful data, ignore failed requests
-      const stockData: any = {};
+      // Combine core data from hook with additional details page data
+      const stockData: any = {
+        quoteData: coreData.quoteData,
+        companyProfileData: coreData.profileData,
+        basicFinancialsData: coreData.basicFinancialsData,
+        reportedFinancialsData: coreData.reportedFinancialsData,
+      };
 
-      if (quote.status === "fulfilled") {
-        stockData.quoteData = quote.value;
-      }
-
-      if (companyProfile.status === "fulfilled") {
-        stockData.companyProfileData = companyProfile.value;
-      }
-
+      // Add additional data if successful
       if (earningsCalendar.status === "fulfilled") {
         stockData.earningsCalendarData = earningsCalendar.value;
       }
@@ -125,51 +112,7 @@ export default function DetailsPage() {
         stockData.recommendationTrendsData = recommendationTrends.value;
       }
 
-      if (basicFinancials.status === "fulfilled") {
-        stockData.basicFinancialsData = basicFinancials.value;
-      }
-
-      if (reportedFinancials.status === "fulfilled") {
-        stockData.reportedFinancialsData = reportedFinancials.value;
-      }
-
       setStockDetails(stockData);
-
-      // Update stock context if we have basic data
-      if (stockData.quoteData && stockData.companyProfileData) {
-        setCurrentStock({
-          logo: stockData.companyProfileData?.logo,
-          name: stockData.companyProfileData?.name,
-          ticker: stockData.companyProfileData?.ticker || symbol,
-          currency: stockData.companyProfileData?.currency,
-          price: stockData.quoteData?.c,
-          change: stockData.quoteData?.d,
-          changePercent: stockData.quoteData?.dp,
-          epsTTM: stockData.basicFinancialsData?.metric?.epsTTM,
-          peRatioTTM: stockData.basicFinancialsData?.metric?.peTTM,
-          epsGrowthTTM: stockData.basicFinancialsData?.metric?.epsGrowthTTMYoy,
-          fcfPerShareTTM:
-            stockData.basicFinancialsData?.series?.quarterly
-              ?.fcfPerShareTTM?.[0]?.v,
-          fcfYieldTTM: roundToDecimal(
-            (stockData.basicFinancialsData?.series?.quarterly
-              ?.fcfPerShareTTM?.[0]?.v /
-              stockData.quoteData?.c) *
-              100,
-            2
-          ),
-          fcfPerShareGrowthTTM: roundToDecimal(
-            Number(
-              getFCFperShareGrowth(
-                stockData.basicFinancialsData?.series?.quarterly
-                  ?.fcfPerShareTTM,
-                1
-              )
-            ),
-            2
-          ),
-        });
-      }
     } catch (error) {
       console.error("Error fetching stock data: ", error);
     }
