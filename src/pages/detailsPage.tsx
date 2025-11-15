@@ -19,6 +19,8 @@ import {
 import { useStockData } from "../hooks/useStockData";
 import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export default function DetailsPage() {
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -40,19 +42,43 @@ export default function DetailsPage() {
   }, [symbol]);
 
   const checkIfInWatchlist = async (symbol: string) => {
-    // TODO: Check if stock is already in watchlist
-    // This would typically be an API call to check the user's watchlist
-    setIsInWatchlist(false);
+    try {
+      const response = await fetch(`${backendUrl}/watchlist/check/${symbol}`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await response.json();
+      setIsInWatchlist(data.inWatchlist);
+    } catch (error) {
+      console.error("Error checking watchlist status:", error);
+    }
   };
 
   const handleAddToWatchlist = async () => {
-    try {
-      // TODO: Add API call to add stock to watchlist
-      console.log(`Adding ${symbol} to watchlist`);
-      setIsInWatchlist(true);
-      // You can add a notification here
-    } catch (error) {
-      console.error("Error adding to watchlist:", error);
+    if (!isInWatchlist) {
+      try {
+        const response = await fetch(`${backendUrl}/watchlist`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ticker: stockDetails.companyProfileData.ticker,
+            companyName: stockDetails.companyProfileData.name,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add stock to watchlist");
+        }
+
+        await response.json();
+        setIsInWatchlist(true);
+        // You can add a notification here
+      } catch (error) {
+        console.error("Error adding to watchlist:", error);
+      }
     }
   };
 

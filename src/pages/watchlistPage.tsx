@@ -28,6 +28,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { getBulkQuotes } from "../utils/requests";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function WatchlistPage() {
   const [opened, setOpened] = useState(false);
@@ -57,26 +60,73 @@ export default function WatchlistPage() {
     fetchData();
   }, []);
 
-  const removeFromWatchlist = (ticker: string) => {
-    setWatchlist((prev) => prev.filter((item) => item.ticker !== ticker));
-    // TODO: Update backend accordingly
+  const fetchUserWatchlist = async (): Promise<WatchlistItemData[]> => {
+    const response = await fetch(`${backendUrl}/watchlist`, {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch watchlist");
+    }
+
+    const { data: watchlistItems } = await response.json();
+
+    const arrayOfTickers = watchlistItems.map((item: any) => item.ticker);
+    const { data: bulkQuotes } = await getBulkQuotes(arrayOfTickers);
+
+    const mappedWatchlistItems: WatchlistItemData[] = watchlistItems.map(
+      (item: any) => ({
+        ticker: item.ticker,
+        name: item.companyName,
+        price: bulkQuotes[item.ticker]?.c || 0,
+        changeDollar: bulkQuotes[item.ticker]?.d || 0,
+        changePercent: bulkQuotes[item.ticker]?.dp || 0,
+      })
+    );
+    return mappedWatchlistItems;
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const removeFromWatchlist = async (ticker: string) => {
+    setWatchlist((prev) => prev.filter((item) => item.ticker !== ticker));
+    try {
+      await fetch(`${backendUrl}/watchlist/${ticker}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Failed to remove from watchlist:", error);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      setWatchlist((items) => {
-        const oldIndex = items.findIndex((item) => item.ticker === active.id);
-        const newIndex = items.findIndex((item) => item.ticker === over?.id);
+      const oldIndex = watchlist.findIndex((item) => item.ticker === active.id);
+      const newIndex = watchlist.findIndex((item) => item.ticker === over?.id);
+      const newOrder = arrayMove(watchlist, oldIndex, newIndex);
 
-        const newOrder = arrayMove(items, oldIndex, newIndex);
+      // Update UI optimistically
+      setWatchlist(newOrder);
 
-        // TODO: Update backend with new order
-        // updateWatchlistOrder(newOrder.map(item => item.ticker));
-
-        return newOrder;
-      });
+      try {
+        // Send the updated order to backend
+        await fetch(`${backendUrl}/watchlist/move`, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ticker: active.id as string,
+            newPosition: newIndex,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to update watchlist order:", error);
+        // Revert the order on error
+        setWatchlist(watchlist);
+      }
     }
   };
 
@@ -153,45 +203,3 @@ export default function WatchlistPage() {
     </Layout>
   );
 }
-
-const placeholderWatchlist: WatchlistItemData[] = [
-  {
-    ticker: "AAPL",
-    name: "Apple Inc.",
-    price: 266.24,
-    changeDollar: 2.94,
-    changePercent: 1.35,
-  },
-  {
-    ticker: "GOOGL",
-    name: "Alphabet Inc.",
-    price: 262.12,
-    changeDollar: -15.2,
-    changePercent: -0.53,
-  },
-  {
-    ticker: "AMZN",
-    name: "Amazon.com Inc.",
-    price: 222.21,
-    changeDollar: 10.1,
-    changePercent: 0.29,
-  },
-  {
-    ticker: "MSFT",
-    name: "Microsoft Corp.",
-    price: 510.95,
-    changeDollar: 3.0,
-    changePercent: 1.01,
-  },
-];
-
-const fetchUserWatchlist = async (): Promise<WatchlistItemData[]> => {
-  // TODO: Fetch watchlist from backend for the logged-in user
-  const res = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(placeholderWatchlist);
-    }, 1000);
-  });
-
-  return res as Promise<WatchlistItemData[]>;
-};
