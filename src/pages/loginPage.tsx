@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Container,
   Paper,
@@ -11,17 +11,27 @@ import {
 } from "@mantine/core";
 import { FcGoogle } from "react-icons/fc";
 import { RiUserLine } from "react-icons/ri";
+import { useHistory } from "react-router-dom";
+import { useAuth } from "../contexts/authContext";
 import "./loginPage.css";
 
 export default function LoginPage() {
+  const history = useHistory();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      history.push("/home");
+    }
+  }, [isAuthenticated, isLoading, history]);
+
   const handleGoogleLogin = () => {
-    // TODO: Implement Google OAuth login
-    console.log("Google login clicked");
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
 
   const handleGuestLogin = () => {
-    // TODO: Implement guest login
-    console.log("Guest login clicked");
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/guest`;
   };
 
   return (
