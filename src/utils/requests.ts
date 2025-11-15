@@ -60,6 +60,22 @@ export const getQuote = async (symbol: string) => {
 };
 
 /**
+ * Fetch bulk quotes for multiple symbols.
+ * @param symbols Array of stock symbols to fetch quotes for.
+ * @returns An object mapping each symbol to its quote data.
+ */
+export const getBulkQuotes = async (symbols: string[]) => {
+  const response = await fetch(`${backendFinnhubUrl}/quotes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ symbols }),
+  });
+  return await handleApiResponse(response, "bulk stock quotes");
+};
+
+/**
  * Fetch the company profile for a given symbol.
  * @param symbol The stock symbol to fetch the company profile for.
  * @returns The company profile data if found, otherwise null.
