@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import SearchBox from "@components/searchBox/searchBox";
 import { CiCalculator1, CiHome, CiCircleList, CiLogin } from "react-icons/ci";
 import { FaChartPie } from "react-icons/fa";
+import { useAuth } from "../contexts/authContext";
 import "./layout.css";
 
 interface LayoutProps {
@@ -13,12 +14,33 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    // Use the auth context logout method
+    logout();
+  };
+
   const navLinks = [
-    { label: "Home", icon: CiHome, href: `/` },
-    { label: "Calculator", icon: CiCalculator1, href: `/calculator` },
-    { label: "Watchlist", icon: CiCircleList, href: `/watchlist` },
-    { label: "Portfolio", icon: FaChartPie, href: `/portfolio` },
-    { label: "Log out", icon: CiLogin, href: `/login` },
+    { label: "Home", icon: CiHome, href: `/home`, isExternal: false },
+    {
+      label: "Calculator",
+      icon: CiCalculator1,
+      href: `/calculator`,
+      isExternal: false,
+    },
+    {
+      label: "Watchlist",
+      icon: CiCircleList,
+      href: `/watchlist`,
+      isExternal: false,
+    },
+    {
+      label: "Portfolio",
+      icon: FaChartPie,
+      href: `/portfolio`,
+      isExternal: false,
+    },
   ];
 
   return (
@@ -58,6 +80,13 @@ const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
             active={window.location.pathname === navLink.href}
           />
         ))}
+        <NavLink
+          className="layout__navlink"
+          leftSection={<CiLogin size={20} />}
+          label="Log out"
+          onClick={handleLogout}
+          style={{ cursor: "pointer" }}
+        />
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>

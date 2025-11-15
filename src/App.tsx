@@ -1,12 +1,7 @@
 import "@mantine/core/styles.css";
 import "./App.css";
-import React, { Component, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  useLocation,
-} from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import HomePage from "./pages/homePage";
@@ -16,86 +11,69 @@ import PortfolioPage from "./pages/portfolioPage";
 import WatchlistPage from "./pages/watchlistPage";
 import LoginPage from "./pages/loginPage";
 import { StockProvider } from "./contexts/stockContext";
+import { AuthProvider } from "./contexts/authContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import usePageTitle from "./hooks/usePageTitle";
 
-export default class App extends Component {
-  render() {
-    return (
-      <MantineProvider>
-        <ModalsProvider>
+export default function App() {
+  return (
+    <MantineProvider>
+      <ModalsProvider>
+        <AuthProvider>
           <StockProvider>
             <Router>
-              <AutoTitleManager />
-              <div className="App">
-                <Switch>
-                  <Route
-                    path="/login"
-                    exact
-                    render={(routerProps) => <LoginPage {...routerProps} />}
-                  />
-                  <Route
-                    path="/"
-                    exact
-                    render={(routerProps) => <HomePage {...routerProps} />}
-                  />
-                  <Route
-                    path="/details/:id"
-                    exact
-                    render={(routerProps) => <DetailsPage {...routerProps} />}
-                  />
-                  <Route
-                    path="/calculator"
-                    exact
-                    render={(routerProps) => (
-                      <CalculatorPage {...routerProps} />
-                    )}
-                  />
-                  <Route
-                    path="/watchlist"
-                    exact
-                    render={(routerProps) => <WatchlistPage {...routerProps} />}
-                  />
-                  <Route
-                    path="/portfolio"
-                    exact
-                    render={(routerProps) => <PortfolioPage {...routerProps} />}
-                  />
-                  <Route
-                    path="*"
-                    exact
-                    render={(routerProps) => <HomePage {...routerProps} />}
-                  />
-                </Switch>
-              </div>
+              <AppContent />
             </Router>
           </StockProvider>
-        </ModalsProvider>
-      </MantineProvider>
-    );
-  }
+        </AuthProvider>
+      </ModalsProvider>
+    </MantineProvider>
+  );
 }
 
-// Auto title manager that requires no changes to individual pages
-function AutoTitleManager() {
-  const location = useLocation();
+// This component is inside the Router context
+function AppContent() {
+  usePageTitle(); // Now this works because it's inside Router
 
-  useEffect(() => {
-    const routeTitles: Record<string, string> = {
-      "/": "Stonkers.ai - Stock Analysis Platform",
-      "/login": "Login - Stonkers.ai",
-      "/calculator": "Calculator - Stonkers.ai",
-      "/watchlist": "Watchlist - Stonkers.ai",
-      "/portfolio": "Portfolio - Stonkers.ai",
-    };
+  return (
+    <div className="App">
+      <Switch>
+        {/* Public routes */}
+        <Route
+          path="/"
+          exact
+          render={(routerProps) => <LoginPage {...routerProps} />}
+        />
+        <Route
+          path="/login"
+          exact
+          render={(routerProps) => <LoginPage {...routerProps} />}
+        />
 
-    // Handle dynamic routes
-    if (location.pathname.startsWith("/details/")) {
-      const symbol = location.pathname.split("/")[2];
-      document.title = `${symbol.toUpperCase()} - Stock Details - Stonkers.ai`;
-    } else {
-      // Use static route titles
-      document.title = routeTitles[location.pathname] || "Stonkers.ai";
-    }
-  }, [location.pathname]);
+        {/* Protected routes - require authentication */}
+        <ProtectedRoute path="/home" exact>
+          <HomePage />
+        </ProtectedRoute>
 
-  return null;
+        <ProtectedRoute path="/details/:id" exact>
+          <DetailsPage />
+        </ProtectedRoute>
+
+        <ProtectedRoute path="/calculator" exact>
+          <CalculatorPage />
+        </ProtectedRoute>
+
+        <ProtectedRoute path="/watchlist" exact>
+          <WatchlistPage />
+        </ProtectedRoute>
+
+        <ProtectedRoute path="/portfolio" exact>
+          <PortfolioPage />
+        </ProtectedRoute>
+
+        {/* Fallback - redirect to login for unauthenticated users */}
+        <Route path="*" render={() => <LoginPage />} />
+      </Switch>
+    </div>
+  );
 }
