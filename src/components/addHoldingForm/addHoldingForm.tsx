@@ -70,8 +70,10 @@ export default function AddHoldingForm({
       }
       onCashHolding(Number(cashAmount));
     }
+    resetNewHoldingForm();
+  };
 
-    // Reset form
+  const resetNewHoldingForm = () => {
     setSearchTicker("");
     setShares("");
     setAvgPricePaid("");

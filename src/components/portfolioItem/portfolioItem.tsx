@@ -16,6 +16,7 @@ import { formatCurrency } from "../../utils/functions";
 import { modals } from "@mantine/modals";
 
 export interface Holding {
+  id?: string; // Unique identifier for each holding
   name: string;
   ticker: string;
   shares: number;
@@ -32,8 +33,7 @@ interface PortfolioItemProps {
   stock: Holding;
   totalPortfolioValue?: number;
   onRemove: (ticker: string) => void;
-  onUpdateShares?: (ticker: string, shares: number) => void;
-  onUpdateCostBasis?: (ticker: string, costBasis: number) => void;
+  onUpdateHolding?: (ticker: string, shares: number, costBasis: number) => void;
   key?: string;
 }
 
@@ -41,8 +41,7 @@ export default function PortfolioItem({
   stock,
   totalPortfolioValue,
   onRemove,
-  onUpdateShares,
-  onUpdateCostBasis,
+  onUpdateHolding,
 }: PortfolioItemProps) {
   const {
     attributes,
@@ -59,19 +58,19 @@ export default function PortfolioItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // const formatPrice = (price: number) => `${price.toFixed(2)}`;
-  const computedGainLossPercent =
-    stock.type === "cash"
-      ? "0.00"
-      : (
-          ((stock.currentPrice - stock.costBasis) / stock.costBasis) *
-          100
-        ).toFixed(2);
-  const computedGainLossDollar =
-    stock.type === "cash"
-      ? "0.00"
-      : formatCurrency(stock.shares * (stock.currentPrice - stock.costBasis));
   const isCash = stock.type === "cash";
+  const computedGainLossPercent = isCash
+    ? "0.00"
+    : (
+        ((stock.currentPrice - stock.costBasis) / stock.costBasis) *
+        100
+      ).toFixed(2);
+  const rawGainLossDollar = isCash
+    ? 0
+    : stock.shares * (stock.currentPrice - stock.costBasis);
+  const computedGainLossDollar = isCash
+    ? "0.00"
+    : formatCurrency(Math.abs(rawGainLossDollar));
 
   // Handle keyboard events for arrow keys
   const handleKeyDown = (
@@ -85,26 +84,31 @@ export default function PortfolioItem({
     const increment = event.key === "ArrowUp" ? 1 : -1;
     const newValue = Math.max(0, currentValue + increment);
 
-    const updateFunction =
-      type === "shares" ? onUpdateShares : onUpdateCostBasis;
-    updateFunction?.(stock.ticker, newValue);
+    if (type === "shares" && onUpdateHolding) {
+      onUpdateHolding(stock.ticker, newValue, stock.costBasis);
+    } else if (type === "costBasis" && onUpdateHolding) {
+      onUpdateHolding(stock.ticker, stock.shares, newValue);
+    }
   };
 
   // Handle direct value changes
   const handleSharesChange = (value: string | number) => {
     const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
-    if (onUpdateShares) {
-      onUpdateShares(stock.ticker, Math.max(0, numValue));
+    const newShares = Math.max(0, numValue);
+
+    if (onUpdateHolding) {
+      onUpdateHolding(stock.ticker, newShares, stock.costBasis);
     }
   };
 
   const handleCostBasisChange = (value: string | number) => {
     const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
-    if (onUpdateCostBasis) {
-      onUpdateCostBasis(stock.ticker, Math.max(0, numValue));
+    const newCostBasis = Math.max(0, numValue);
+
+    if (onUpdateHolding) {
+      onUpdateHolding(stock.ticker, stock.shares, newCostBasis);
     }
   };
-
   const handleDeleteConfirmation = () => {
     modals.openConfirmModal({
       title: "Remove from Portfolio",
@@ -202,22 +206,21 @@ export default function PortfolioItem({
         )}
       </Table.Td>
       <Table.Td>
-        <Text>${formatCurrency(stock.currentPrice)}</Text>
+        <Text>{isCash ? "-" : `$${formatCurrency(stock.currentPrice)}`}</Text>
       </Table.Td>
       <Table.Td>
-        <Text>${formatCurrency(stock.shares * stock.currentPrice)}</Text>
+        <Text>
+          $
+          {formatCurrency(
+            isCash ? stock.costBasis : stock.shares * stock.currentPrice
+          )}
+        </Text>
       </Table.Td>
       <Table.Td>
-        <Text
-          c={
-            isCash
-              ? "gray"
-              : Number(computedGainLossDollar) < 0
-              ? "red"
-              : "green"
-          }
-        >
-          {isCash ? "-" : `$${computedGainLossDollar}`}
+        <Text c={isCash ? "gray" : rawGainLossDollar < 0 ? "red" : "green"}>
+          {isCash
+            ? "-"
+            : `${rawGainLossDollar < 0 ? "-" : ""}$${computedGainLossDollar}`}
         </Text>
       </Table.Td>
       <Table.Td>
