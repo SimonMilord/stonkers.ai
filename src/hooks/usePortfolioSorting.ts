@@ -80,8 +80,8 @@ const sortHoldings = (
  * @returns Object containing sorting state and functions.
  */
 export const usePortfolioSorting = (holdings: Holding[]) => {
-  const [sortField, setSortField] = useState<SortField | null>("weight");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

@@ -32,8 +32,7 @@ interface PortfolioTableProps {
   onSort: (field: SortField) => void;
   onDragEnd: (event: DragEndEvent) => void;
   onRemove: (ticker: string) => void;
-  onUpdateShares: (ticker: string, shares: number) => void;
-  onUpdateCostBasis: (ticker: string, costBasis: number) => void;
+  onUpdateHolding: (ticker: string, shares: number, costBasis: number) => void;
 }
 
 export default function PortfolioTable({
@@ -45,8 +44,7 @@ export default function PortfolioTable({
   onSort,
   onDragEnd,
   onRemove,
-  onUpdateShares,
-  onUpdateCostBasis,
+  onUpdateHolding,
 }: PortfolioTableProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -120,8 +118,7 @@ export default function PortfolioTable({
                       stock={stock}
                       totalPortfolioValue={totalMarketValue}
                       onRemove={onRemove}
-                      onUpdateShares={onUpdateShares}
-                      onUpdateCostBasis={onUpdateCostBasis}
+                      onUpdateHolding={onUpdateHolding}
                     />
                   ))
                 ) : (

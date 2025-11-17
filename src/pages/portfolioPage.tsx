@@ -16,11 +16,14 @@ import {
   calculateTotalCashPosition,
 } from "../hooks/usePortfolioSorting";
 import { usePortfolioHoldings } from "../hooks/usePortfolioHoldings";
+import { getBulkQuotes } from "../utils/requests";
 
 interface PortfolioMetric {
   label: string;
   value: number | string;
 }
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function PortfolioPageRefactored() {
   const [opened, setOpened] = useState(false);
@@ -31,8 +34,7 @@ export default function PortfolioPageRefactored() {
     holdings,
     setHoldings,
     removeFromHoldings,
-    updateShares,
-    updateCostBasis,
+    updateHolding,
     addStockHolding,
     addCashHolding,
   } = usePortfolioHoldings();
@@ -77,45 +79,196 @@ export default function PortfolioPageRefactored() {
     fetchData();
   }, [setHoldings]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const fetchUserPortfolioHoldings = async (): Promise<Holding[]> => {
+    try {
+      const response = await fetch(`${backendUrl}/portfolio`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch portfolio holdings");
+      }
+      const { data: portfolioHoldings } = await response.json();
+
+      // Sort holdings by orderIndex to maintain user-defined order
+      portfolioHoldings.sort((a: any, b: any) => {
+        const orderA = a.orderIndex ?? 999; // Default high value for undefined orderIndex
+        const orderB = b.orderIndex ?? 999;
+        return orderA - orderB;
+      });
+
+      const stockTickers = portfolioHoldings
+        .filter((holding: any) => holding.holdingType === "stock")
+        .map((holding: any) => holding.ticker);
+
+      const { data: bulkQuotes } = await getBulkQuotes(stockTickers);
+
+      const mappedHoldings: Holding[] = portfolioHoldings.map(
+        (holding: any) => {
+          if (holding.holdingType === "cash") {
+            return {
+              ticker: "USD",
+              name: "Cash",
+              shares: 1,
+              costBasis: parseFloat(holding.costBasis),
+              currentPrice: parseFloat(holding.costBasis),
+              logo: "https://flagcdn.com/w320/us.png",
+              type: "cash",
+              currency: "USD",
+            };
+          } else {
+            return {
+              ticker: holding.ticker,
+              name: holding.companyName,
+              shares: parseFloat(holding.shares),
+              costBasis: parseFloat(holding.costBasis),
+              currentPrice: bulkQuotes[holding.ticker]?.c || 0,
+              logo: holding.logo,
+              type: "stock",
+            };
+          }
+        }
+      );
+
+      return mappedHoldings;
+    } catch (error) {
+      console.error("Error fetching portfolio holdings:", error);
+      return [];
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
+      let reorderedHoldings;
+
       // When sorting is active, we need to work with sortedHoldings and then update the original holdings
       if (sortField && sortDirection) {
         // If we're in a sorted state, we should clear the sort first to allow manual reordering
         setSortField(null);
         setSortDirection(null);
 
-        // Then apply the drag operation to the original holdings
-        setHoldings((items) => {
-          const oldIndex = items.findIndex((item) => item.ticker === active.id);
-          const newIndex = items.findIndex((item) => item.ticker === over?.id);
-          return arrayMove(items, oldIndex, newIndex);
-        });
+        // Use the current sorted holdings as the base for reordering
+        const currentSortedHoldings = sortedHoldings;
+        const oldIndex = currentSortedHoldings.findIndex(
+          (item) => item.ticker === active.id
+        );
+        const newIndex = currentSortedHoldings.findIndex(
+          (item) => item.ticker === over?.id
+        );
+
+        reorderedHoldings = arrayMove(
+          currentSortedHoldings,
+          oldIndex,
+          newIndex
+        );
+        setHoldings(reorderedHoldings);
       } else {
         // Normal drag operation when no sorting is active
         setHoldings((items) => {
           const oldIndex = items.findIndex((item) => item.ticker === active.id);
           const newIndex = items.findIndex((item) => item.ticker === over?.id);
-          return arrayMove(items, oldIndex, newIndex);
+
+          reorderedHoldings = arrayMove(items, oldIndex, newIndex);
+
+          return reorderedHoldings;
         });
       }
 
-      // TODO: Update backend with new order
+      // Update backend with new order
+      if (reorderedHoldings) {
+        try {
+          const newOrder = reorderedHoldings.map((item, index) => ({
+            ticker: item.ticker,
+            index: index,
+          }));
+
+          console.log("Sending order to backend:", newOrder);
+
+          const response = await fetch(`${backendUrl}/portfolio/reorder`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              newOrder: reorderedHoldings.map((item) => ({
+                ticker: item.ticker,
+              })),
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to update portfolio order");
+          }
+        } catch (error) {
+          console.error("Failed to update portfolio order:", error);
+        }
+      }
     }
   };
 
-  const handleStockHolding = (
+  const handleStockHolding = async (
     foundStock: any,
     shares: number,
     avgPricePaid: number
   ) => {
     addStockHolding(foundStock, shares, avgPricePaid);
+    try {
+      const response = await fetch(`${backendUrl}/portfolio`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          holdingType: "stock",
+          ticker: foundStock.ticker,
+          companyName: foundStock.name,
+          shares,
+          costBasis: avgPricePaid,
+          logo: foundStock.logo,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to add stock holding:", errorData);
+        throw new Error(errorData.error || "Failed to add stock holding");
+      }
+      await response.json();
+    } catch (error) {
+      console.error("Error adding stock holding:", error);
+    }
   };
 
-  const handleCashHolding = (cashAmount: number) => {
+  const handleCashHolding = async (cashAmount: number) => {
     addCashHolding(cashAmount);
+    try {
+      const response = await fetch(`${backendUrl}/portfolio`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          holdingType: "cash",
+          companyName: "USD",
+          costBasis: cashAmount,
+          logo: "https://flagcdn.com/w320/us.png",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to add cash holding:", errorData);
+        throw new Error(errorData.error || "Failed to add cash holding");
+      }
+
+      await response.json();
+    } catch (error) {
+      console.error("Error adding cash holding:", error);
+    }
   };
 
   const portfolioMetrics: PortfolioMetric[] = [
@@ -189,8 +342,7 @@ export default function PortfolioPageRefactored() {
             onSort={handleSort}
             onDragEnd={handleDragEnd}
             onRemove={removeFromHoldings}
-            onUpdateShares={updateShares}
-            onUpdateCostBasis={updateCostBasis}
+            onUpdateHolding={updateHolding}
           />
         </Grid.Col>
       </Grid>
@@ -200,54 +352,3 @@ export default function PortfolioPageRefactored() {
     </Layout>
   );
 }
-
-// Keep the existing data fetching logic
-const placeholderPortfolio: Holding[] = [
-  {
-    ticker: "AMZN",
-    name: "Amazon.com Inc.",
-    shares: 100,
-    costBasis: 111.0,
-    logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png",
-    currentPrice: 244.0,
-    type: "stock",
-  },
-  {
-    ticker: "GOOGL",
-    name: "Alphabet Inc.",
-    shares: 75,
-    costBasis: 132.0,
-    logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOGL.png",
-    currentPrice: 281.0,
-    type: "stock",
-  },
-  {
-    ticker: "ASML",
-    name: "ASML Holding N.V.",
-    shares: 12,
-    costBasis: 650.0,
-    logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/ASML.AS.png",
-    currentPrice: 720.0,
-    type: "stock",
-  },
-  {
-    ticker: "FICO",
-    name: "Fair Isaac Corporation",
-    shares: 4,
-    costBasis: 1489.0,
-    logo: "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/FICO.png",
-    currentPrice: 1615.0,
-    type: "stock",
-  },
-];
-
-const fetchUserPortfolioHoldings = async (): Promise<Holding[]> => {
-  // TODO
-  const res = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(placeholderPortfolio);
-    }, 1000);
-  });
-
-  return res as Promise<Holding[]>;
-};

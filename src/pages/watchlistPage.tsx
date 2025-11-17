@@ -62,6 +62,7 @@ export default function WatchlistPage() {
 
   const fetchUserWatchlist = async (): Promise<WatchlistItemData[]> => {
     const response = await fetch(`${backendUrl}/watchlist`, {
+      method: "GET",
       credentials: "include",
     });
 
