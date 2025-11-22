@@ -204,8 +204,6 @@ export default function PortfolioPageRefactored() {
             index: index,
           }));
 
-          console.log("Sending order to backend:", newOrder);
-
           const response = await fetch(`${backendUrl}/portfolio/reorder`, {
             method: "PUT",
             credentials: "include",

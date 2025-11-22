@@ -5,6 +5,7 @@ import SearchBox from "@components/searchBox/searchBox";
 import { CiCalculator1, CiHome, CiCircleList, CiLogin } from "react-icons/ci";
 import { FaChartPie } from "react-icons/fa";
 import { useAuth } from "../contexts/authContext";
+import { useStockInfo } from "../contexts/stockContext";
 import "./layout.css";
 
 interface LayoutProps {
@@ -15,6 +16,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
   const { logout } = useAuth();
+  const { currentStock } = useStockInfo();
 
   const handleLogout = () => {
     // Use the auth context logout method
@@ -22,7 +24,12 @@ const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
   };
 
   const navLinks = [
-    { label: "Home", icon: CiHome, href: `/home`, isExternal: false },
+    {
+      label: "Home",
+      icon: CiHome,
+      href: currentStock?.ticker ? `/details/${currentStock.ticker}` : `/home`,
+      isExternal: false,
+    },
     {
       label: "Calculator",
       icon: CiCalculator1,

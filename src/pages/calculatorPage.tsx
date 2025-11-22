@@ -163,9 +163,7 @@ export default function CalculatorPage() {
         </Center>
       ) : (
         <Flex direction="column" align="center" mb="xl">
-          <Text c="dimmed">
-            No stock selected. Visit a stock details page first.
-          </Text>
+          <Text c="dimmed">No stock selected. Search for a stock first.</Text>
         </Flex>
       )}
       <Center mb={"lg"}>
