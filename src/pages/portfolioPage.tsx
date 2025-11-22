@@ -16,7 +16,7 @@ import {
   calculateTotalCashPosition,
 } from "../hooks/usePortfolioSorting";
 import { usePortfolioHoldings } from "../hooks/usePortfolioHoldings";
-import { getBulkQuotes } from "../utils/requests";
+import { getBulkQuotes, getQuote } from "../utils/requests";
 
 interface PortfolioMetric {
   label: string;
@@ -101,7 +101,27 @@ export default function PortfolioPageRefactored() {
         .filter((holding: any) => holding.holdingType === "stock")
         .map((holding: any) => holding.ticker);
 
-      const { data: bulkQuotes } = await getBulkQuotes(stockTickers);
+      // Try bulk quotes first, fall back to individual requests if not available
+      let bulkQuotes = {};
+      try {
+        const bulkResponse = await getBulkQuotes(stockTickers);
+        bulkQuotes = bulkResponse.data;
+      } catch (error) {
+        console.warn(
+          "Bulk quotes not available, fetching individual quotes:",
+          error
+        );
+        // Fallback: fetch quotes individually
+        for (const ticker of stockTickers) {
+          try {
+            const quote = await getQuote(ticker);
+            bulkQuotes[ticker] = quote;
+          } catch (quoteError) {
+            console.error(`Failed to fetch quote for ${ticker}:`, quoteError);
+            bulkQuotes[ticker] = { c: 0 }; // Default to 0 if quote fails
+          }
+        }
+      }
 
       const mappedHoldings: Holding[] = portfolioHoldings.map(
         (holding: any) => {
