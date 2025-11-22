@@ -38,7 +38,7 @@ const defaultDesiredReturn = 15;
 
 export default function CalculatorPage() {
   const [opened, setOpened] = useState(false);
-  const [isEPSMethod, setIsEPSMethod] = useState(false);
+  const [isEPSMethod, setIsEPSMethod] = useState(true);
   const { currentStock } = useStockInfo();
 
   // Initialize form values based on current stock data

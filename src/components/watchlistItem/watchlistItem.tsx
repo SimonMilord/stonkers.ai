@@ -41,7 +41,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
   const formatChange = (changeValue: number) => {
     const isPositive = changeValue >= 0;
     return {
-      value: `${isPositive ? "+" : ""}${changeValue.toFixed(2)}%`,
+      value: `${isPositive ? "+" : ""}${changeValue.toFixed(2)}`,
       color: isPositive ? "green" : "red",
     };
   };
@@ -94,7 +94,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Text>{formatCurrency(stock.price)}</Text>
+        <Text>${formatCurrency(stock.price)}</Text>
       </Table.Td>
       <Table.Td>
         <Badge color={changeDollarData.color} variant="light" size="sm">
@@ -103,7 +103,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
       </Table.Td>
       <Table.Td>
         <Badge color={changePercentData.color} variant="light" size="sm">
-          {changePercentData.value}
+          {changePercentData.value}%
         </Badge>
       </Table.Td>
       <Table.Td>

@@ -5,3 +5,10 @@
   width: 100%;
   min-width: 0;
 }
+
+.calculator-number-input input {
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  color: var(--color-text-white);
+  transition: var(--transition-standard);
+}
