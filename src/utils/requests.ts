@@ -70,6 +70,7 @@ export const getBulkQuotes = async (symbols: string[]) => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify({ symbols }),
   });
   return await handleApiResponse(response, "bulk stock quotes");
