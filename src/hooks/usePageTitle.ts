@@ -17,7 +17,7 @@ const usePageTitle = () => {
     // Handle dynamic routes
     if (location.pathname.startsWith("/details/")) {
       const symbol = location.pathname.split("/")[2];
-      document.title = `${symbol.toUpperCase()} - Stock Details - Stonkers.ai`;
+      document.title = `${symbol.toUpperCase()} - Stonkers.ai`;
     } else {
       // Use static route titles
       document.title = routeTitles[location.pathname] || "Stonkers.ai";
