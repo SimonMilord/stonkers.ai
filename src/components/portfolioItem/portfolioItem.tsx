@@ -130,7 +130,7 @@ export default function PortfolioItem({
 
   return (
     <Table.Tr ref={setNodeRef} style={style}>
-      <Table.Td>
+      <Table.Td className="portfolio-action-column">
         <ActionIcon
           radius="md"
           variant="subtle"
@@ -142,7 +142,7 @@ export default function PortfolioItem({
           <RiMenuFill />
         </ActionIcon>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-holding-column">
         <Flex align="center">
           {stock.logo && (
             <Image
@@ -163,7 +163,7 @@ export default function PortfolioItem({
           </Text>
         </Flex>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         {isCash ? (
           <Text>-</Text>
         ) : (
@@ -179,7 +179,7 @@ export default function PortfolioItem({
           />
         )}
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         {isCash ? (
           <NumberInput
             step={1}
@@ -205,10 +205,10 @@ export default function PortfolioItem({
           />
         )}
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         <Text>{isCash ? "-" : `$${formatCurrency(stock.currentPrice)}`}</Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         <Text>
           $
           {formatCurrency(
@@ -216,14 +216,14 @@ export default function PortfolioItem({
           )}
         </Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         <Text c={isCash ? "gray" : rawGainLossDollar < 0 ? "red" : "green"}>
           {isCash
             ? "-"
             : `${rawGainLossDollar < 0 ? "-" : ""}$${computedGainLossDollar}`}
         </Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         <Text
           c={
             isCash
@@ -236,7 +236,7 @@ export default function PortfolioItem({
           {isCash ? "-" : `${computedGainLossPercent}%`}
         </Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-data-column">
         <Text>
           {(
             ((stock.shares * stock.currentPrice) / totalPortfolioValue) *
@@ -245,7 +245,7 @@ export default function PortfolioItem({
           %
         </Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="portfolio-action-column">
         <ActionIcon
           radius="md"
           variant="subtle"

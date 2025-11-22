@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Box, TextInput, Loader, Text } from "@mantine/core";
+import { Box, TextInput, Loader, ActionIcon } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
 import { useStockData } from "../../hooks/useStockData";
 import { getStockSymbol, validateSymbolSupport } from "../../utils/requests";
+import { RiCloseLine } from "react-icons/ri";
 import "./searchBox.css";
 
 /**
@@ -19,6 +20,13 @@ export default function SearchBox(props: { variant: string }) {
   const history = useHistory();
   const location = useLocation();
   const { fetchAndSetStockData } = useStockData();
+
+  const clearSearch = () => {
+    setQuery("");
+    setSearchedQuery("");
+    setNoResultsFound(false);
+    setValidationError("");
+  };
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
@@ -46,7 +54,7 @@ export default function SearchBox(props: { variant: string }) {
           // For navigation to details page, validate symbol support first
           const validation = await validateSymbolSupport(queriedSymbol);
 
-          if (validation.isSupported) {
+          if (validation.isSupported && !!queriedSymbol) {
             // Symbol is fully supported, proceed with navigation
             history.push(`/details/${queriedSymbol}`, {
               symbol: queriedSymbol,
@@ -54,7 +62,7 @@ export default function SearchBox(props: { variant: string }) {
           } else {
             // Symbol is not fully supported, show error message
             setValidationError(
-              `Symbol "${queriedSymbol}" is not supported. Please try a different US listed stock.`
+              `Symbol "${trimmedQuery}" is not supported. Please try a different US listed stock.`
             );
             console.warn("Symbol validation failed:", validation);
           }
@@ -90,42 +98,84 @@ export default function SearchBox(props: { variant: string }) {
     <Box className="searchbox__container">
       {props.variant === "standalone" && (
         <>
-          <TextInput
-            variant="unstyled"
-            radius="xl"
-            size="lg"
-            placeholder="Search for a stock"
-            aria-label="Search box"
-            value={query}
-            onChange={(event) => setQuery(event.currentTarget.value)}
-            onKeyDown={handleKeyDown}
-            rightSection={loading && <Loader size="sm" />}
-          />
-          {(noResultsFound || validationError) && (
-            <Text className="searchbox__error">
-              {validationError || `No results found for: ${searchedQuery}`}
-            </Text>
-          )}
+          <div
+            className={`searchbox__input-wrapper ${
+              noResultsFound || validationError ? "dropdown-open" : ""
+            }`}
+          >
+            <TextInput
+              variant="unstyled"
+              radius="md"
+              size="lg"
+              placeholder="Search for a stock"
+              aria-label="Search box"
+              value={query}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+              rightSection={
+                loading ? (
+                  <Loader size="sm" />
+                ) : query ? (
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={clearSearch}
+                    className="searchbox__clear-btn"
+                  >
+                    <RiCloseLine size={16} />
+                  </ActionIcon>
+                ) : null
+              }
+            />
+            {(noResultsFound || validationError) && (
+              <div className="searchbox__dropdown">
+                <div className="searchbox__dropdown-item">
+                  {validationError || `No results found for: ${searchedQuery}`}
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
       {props.variant === "header" && (
         <>
-          <TextInput
-            variant="filled"
-            radius="xl"
-            size="lg"
-            placeholder="Search for a stock"
-            aria-label="Search box"
-            value={query}
-            onChange={(event) => setQuery(event.currentTarget.value)}
-            onKeyDown={handleKeyDown}
-            rightSection={loading && <Loader size="sm" />}
-          />
-          {(noResultsFound || validationError) && (
-            <Text className="searchbox__error">
-              {validationError || `No results found for: ${searchedQuery}`}
-            </Text>
-          )}
+          <div
+            className={`searchbox__input-wrapper ${
+              noResultsFound || validationError ? "dropdown-open" : ""
+            }`}
+          >
+            <TextInput
+              variant="filled"
+              radius="md"
+              size="lg"
+              placeholder="Search for a stock"
+              aria-label="Search box"
+              value={query}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+              rightSection={
+                loading ? (
+                  <Loader size="sm" />
+                ) : query ? (
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={clearSearch}
+                    className="searchbox__clear-btn"
+                  >
+                    <RiCloseLine size={16} />
+                  </ActionIcon>
+                ) : null
+              }
+            />
+            {(noResultsFound || validationError) && (
+              <div className="searchbox__dropdown">
+                <div className="searchbox__dropdown-item">
+                  {validationError || `No results found for: ${searchedQuery}`}
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
     </Box>

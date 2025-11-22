@@ -19,3 +19,33 @@
 .portfolio-number-input input:focus {
   border-color: var(--input-border-focus);
 }
+
+/* Column width styles */
+.portfolio-action-column {
+  width: 48px;
+  max-width: 48px;
+}
+
+.portfolio-holding-column {
+  min-width: 200px;
+}
+
+.portfolio-data-column {
+  width: 150px;
+  max-width: 150px;
+}
+
+/* Column width styles */
+.portfolio-action-column {
+  width: 48px;
+  max-width: 48px;
+}
+
+.portfolio-holding-column {
+  min-width: 200px;
+}
+
+.portfolio-data-column {
+  width: 150px;
+  max-width: 150px;
+}

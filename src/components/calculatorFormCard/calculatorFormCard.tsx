@@ -79,6 +79,7 @@ export default function CalculatorFormCard({
       {methodName === "Cash Flows" ? (
         <Box className="calculator-form">
           <NumberInput
+            className="calculator-number-input"
             label="FCF/Share (TTM)"
             variant="filled"
             allowDecimal
@@ -90,6 +91,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("fcfPerShare", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="FCF/Share Growth rate (%)"
             variant="filled"
             allowDecimal
@@ -102,6 +104,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("fcfGrowthRate", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="Target FCF Yield (%)"
             variant="filled"
             allowDecimal
@@ -114,6 +117,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("targetFcfYield", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="Desired Return (%)"
             variant="filled"
             allowDecimal
@@ -129,6 +133,7 @@ export default function CalculatorFormCard({
       ) : (
         <Box className="calculator-form">
           <NumberInput
+            className="calculator-number-input"
             label="EPS (TTM)"
             variant="filled"
             allowDecimal
@@ -140,6 +145,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("eps", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="EPS Growth rate (%)"
             variant="filled"
             allowDecimal
@@ -152,6 +158,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("epsGrowthRate", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="Target P/E multiple"
             variant="filled"
             allowDecimal
@@ -163,6 +170,7 @@ export default function CalculatorFormCard({
             onChange={(value) => onInputChange("targetPeRatio", value || 0)}
           />
           <NumberInput
+            className="calculator-number-input"
             label="Desired Return (%)"
             variant="filled"
             allowDecimal
