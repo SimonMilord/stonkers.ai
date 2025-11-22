@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, ActionIcon, Text, Badge } from "@mantine/core";
+import { Table, ActionIcon, Text, Badge, Image, Flex } from "@mantine/core";
 import { RiDeleteBin5Fill, RiMenuFill } from "react-icons/ri";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -7,6 +7,9 @@ import { useHistory } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import "./watchListItem.css";
 import { formatCurrency } from "@utils/functions";
+
+const finnhubImgUrl =
+  "https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/";
 
 export interface WatchlistItemData {
   ticker: string;
@@ -83,15 +86,24 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
         </ActionIcon>
       </Table.Td>
       <Table.Td>
-        <Text fw={500}>{stock.ticker}</Text>
-      </Table.Td>
-      <Table.Td>
-        <Text
-          onClick={() => history.push(`/details/${stock.ticker}`)}
-          className="watchlist-item-name"
-        >
-          {stock.name}
-        </Text>
+        <Flex>
+          <Image
+            src={`${finnhubImgUrl}${stock.ticker}.png`}
+            alt={stock.ticker}
+            className="watchlist-item-logo"
+            mr={12}
+            h={25}
+            w={25}
+            radius="md"
+            fit="cover"
+          />
+          <Text
+            onClick={() => history.push(`/details/${stock.ticker}`)}
+            className="watchlist-item-name"
+          >
+            {stock.name} ({stock.ticker})
+          </Text>
+        </Flex>
       </Table.Td>
       <Table.Td>
         <Text>${formatCurrency(stock.price)}</Text>
