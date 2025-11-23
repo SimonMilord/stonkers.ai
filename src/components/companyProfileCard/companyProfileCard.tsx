@@ -1,20 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { formatDollarAmount } from "@utils/functions";
-import { Paper, Title, Text, Divider, Table, Flex } from "@mantine/core";
+import {
+  Paper,
+  Title,
+  Text,
+  Divider,
+  Table,
+  Flex,
+  Loader,
+} from "@mantine/core";
 import "./companyProfileCard.css";
 import "../cardStyles.css";
 import GenerativeAIBadge from "@components/generativeAIBadge/generativeAIBadge";
-import { generateCompanyDescription } from "@utils/requests";
 
 export default function CompanyProfileCard({
   profileData,
+  companyDescription,
+  isGeneratingDescription,
 }: {
   profileData: any;
+  companyDescription: string | null;
+  isGeneratingDescription: boolean;
 }) {
-  const [companyDescription, setCompanyDescription] = useState<string | null>(
-    null
-  );
-
   const notAvailable: String = "Not Available";
   const formattedMarketCap = formatDollarAmount(
     profileData?.marketCapitalization * 1000000
@@ -46,17 +53,6 @@ export default function CompanyProfileCard({
     { key: "Website:", value: companyWebsiteLink || notAvailable },
   ];
 
-  useEffect(() => {
-    const fetchCompanyDescription = async () => {
-      if (profileData?.name) {
-        const description = await generateCompanyDescription(profileData.name);
-        setCompanyDescription(description);
-      }
-    };
-
-    fetchCompanyDescription();
-  }, [profileData?.name]);
-
   const rows = profileDataTableElements.map((item, index) => (
     <Table.Tr key={index}>
       <Table.Td>{item.key}</Table.Td>
@@ -79,10 +75,14 @@ export default function CompanyProfileCard({
           <Title order={4}>Overview</Title>
           <GenerativeAIBadge />
         </Flex>
-        {companyDescription ? (
+        {isGeneratingDescription ? (
+          <Flex justify="center" align="center" style={{ minHeight: 100 }}>
+            <Loader />
+          </Flex>
+        ) : companyDescription ? (
           <Text className="formatted-description">{companyDescription}</Text>
         ) : (
-          <Text>Loading...</Text>
+          <Text c="dimmed">No description available.</Text>
         )}
       </Paper>
     </div>
