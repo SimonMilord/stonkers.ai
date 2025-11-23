@@ -2,7 +2,7 @@ import "@mantine/core/styles.css";
 import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
+import { Loader, MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import HomePage from "./pages/homePage";
 import DetailsPage from "./pages/detailsPage";
@@ -57,7 +57,7 @@ function AppContent() {
           render={() => {
             // After successful OAuth, redirect to home
             window.location.href = "/home";
-            return <div>Redirecting...</div>;
+            return <Loader />;
           }}
         />
 

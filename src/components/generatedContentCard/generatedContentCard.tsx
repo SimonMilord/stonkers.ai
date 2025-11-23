@@ -57,10 +57,15 @@ export default function GeneratedContentCard({
   };
 
   const formatBoldText = (text: string) => {
-    // Handle **bold** formatting
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    // Handle *bold:** and **bold** formatting
+    const parts = text.split(/(\*.*?\*\*)/g);
 
     return parts.map((part, index) => {
+      if (part.startsWith("*") && part.endsWith("**")) {
+        // Remove * and ** and make bold
+        const boldText = part.slice(1, -2);
+        return <strong key={index}>{boldText}</strong>;
+      }
       if (part.startsWith("**") && part.endsWith("**")) {
         // Remove ** and make bold
         const boldText = part.slice(2, -2);
