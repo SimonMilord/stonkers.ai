@@ -47,7 +47,7 @@ export default function SearchBox(props: { variant: string }) {
           setNoResultsFound(true);
         }
         // Check current location and handle accordingly
-        if (location.pathname === "/calculator") {
+        if (location.pathname === "/calculator" && !!queriedSymbol) {
           // If on calculator page, fetch stock data and update context without navigation
           await fetchAndSetStockData(queriedSymbol);
         } else {

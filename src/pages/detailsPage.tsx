@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
@@ -34,9 +34,17 @@ export default function DetailsPage() {
   const [competitiveAdvantages, setCompetitiveAdvantages] = useState<
     string | null
   >(null);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const currentCompanyRef = useRef<string | null>(null); // Track current company to prevent race conditions
   const { fetchAndSetStockData } = useStockData();
 
   useEffect(() => {
+    // Clear previous AI content when switching stocks
+    setInvestmentRisks(null);
+    setCompetitiveAdvantages(null);
+    setIsGeneratingContent(false);
+    currentCompanyRef.current = null; // Reset the current company ref
+
     fetchStockData(symbol);
     checkIfInWatchlist(symbol);
   }, [symbol]);
@@ -84,10 +92,7 @@ export default function DetailsPage() {
 
   const handleRemoveFromWatchlist = async () => {
     try {
-      // TODO: Add API call to remove stock from watchlist
-      console.log(`Removing ${symbol} from watchlist`);
       setIsInWatchlist(false);
-      // You can add a notification here
     } catch (error) {
       console.error("Error removing from watchlist:", error);
     }
@@ -148,22 +153,59 @@ export default function DetailsPage() {
   // Fetch AI-generated content when company profile data is available
   useEffect(() => {
     const fetchAIContent = async () => {
-      if (stockDetails.companyProfileData?.name) {
+      if (stockDetails.companyProfileData?.name && !isGeneratingContent) {
         const companyName = stockDetails.companyProfileData.name;
 
-        // Fetch both analyses in parallel
-        const [advantages, risks] = await Promise.all([
-          generateCompetitiveAdvantages(companyName),
-          generateInvestmentRisks(companyName),
-        ]);
+        // Skip if we're already generating content for this company
+        if (currentCompanyRef.current === companyName) {
+          return;
+        }
 
-        setCompetitiveAdvantages(advantages);
-        setInvestmentRisks(risks);
+        // Skip if we already have content for this company (check if both exist and are not empty)
+        if (investmentRisks?.trim() && competitiveAdvantages?.trim()) {
+          return;
+        }
+
+        currentCompanyRef.current = companyName;
+        setIsGeneratingContent(true);
+
+        try {
+          // Only fetch content that we don't have yet
+          const promises = [];
+
+          if (!competitiveAdvantages?.trim()) {
+            promises.push(generateCompetitiveAdvantages(companyName));
+          } else {
+            promises.push(Promise.resolve(competitiveAdvantages));
+          }
+
+          if (!investmentRisks?.trim()) {
+            promises.push(generateInvestmentRisks(companyName));
+          } else {
+            promises.push(Promise.resolve(investmentRisks));
+          }
+
+          const [advantages, risks] = await Promise.all(promises);
+
+          // Only update state if we're still looking at the same company
+          if (currentCompanyRef.current === companyName) {
+            setCompetitiveAdvantages(advantages);
+            setInvestmentRisks(risks);
+          }
+        } catch (error) {
+          console.error("Error generating AI content:", error);
+        } finally {
+          setIsGeneratingContent(false);
+          // Clear the ref if we're still processing the same company
+          if (currentCompanyRef.current === companyName) {
+            currentCompanyRef.current = null;
+          }
+        }
       }
     };
 
     fetchAIContent();
-  }, [stockDetails.companyProfileData?.name]);
+  }, [stockDetails.companyProfileData?.name]); // Remove isGeneratingContent and content dependencies to prevent loops
 
   return (
     <Layout loading={loading} opened={opened} toggle={() => setOpened(!opened)}>
