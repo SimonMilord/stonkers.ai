@@ -50,6 +50,17 @@ function AppContent() {
           render={(routerProps) => <LoginPage {...routerProps} />}
         />
 
+        {/* OAuth success callback route */}
+        <Route
+          path="/auth/success"
+          exact
+          render={() => {
+            // After successful OAuth, redirect to home
+            window.location.href = "/home";
+            return <div>Redirecting...</div>;
+          }}
+        />
+
         {/* Protected routes - require authentication */}
         <ProtectedRoute path="/home" exact>
           <HomePage />
