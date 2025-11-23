@@ -1,16 +1,26 @@
 import React from "react";
-import { Paper, Title, Divider, Text, Flex } from "@mantine/core";
+import { Paper, Title, Divider, Text, Flex, Loader } from "@mantine/core";
 import "../cardStyles.css";
 import GenerativeAIBadge from "@components/generativeAIBadge/generativeAIBadge";
 
 export default function GeneratedContentCard({
   title,
   generatedContent,
+  isLoading,
 }: {
   title: string;
-  generatedContent: string;
+  generatedContent: string | null;
+  isLoading: boolean;
 }) {
-  const parseMarkdownContent = (content: string) => {
+  const parseMarkdownContent = (content: string | null) => {
+    if (isLoading) {
+      return (
+        <Flex justify="center" align="center" style={{ minHeight: 100 }}>
+          <Loader />
+        </Flex>
+      );
+    }
+
     if (!content || content.trim() === "") {
       return <Text c="dimmed">No content available</Text>;
     }

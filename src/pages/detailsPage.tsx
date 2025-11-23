@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
-import { Flex, Grid, Button, Tooltip } from "@mantine/core";
+import { Flex, Button, Tooltip, Loader } from "@mantine/core";
 import CompanyProfileCard from "@components/companyProfileCard/companyProfileCard";
 import CompanyMetricsCard from "@components/companyMetricsCard/companyMetricsCard";
 import GeneratedContentCard from "@components/generatedContentCard/generatedContentCard";
@@ -13,6 +13,7 @@ import {
   getEarningsSurprise,
   getCompanyNews,
   getRecommendationTrends,
+  generateCompanyDescription,
   generateCompetitiveAdvantages,
   generateInvestmentRisks,
 } from "@utils/requests";
@@ -34,6 +35,9 @@ export default function DetailsPage() {
   const [competitiveAdvantages, setCompetitiveAdvantages] = useState<
     string | null
   >(null);
+  const [companyDescription, setCompanyDescription] = useState<string | null>(
+    null
+  );
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const currentCompanyRef = useRef<string | null>(null); // Track current company to prevent race conditions
   const { fetchAndSetStockData } = useStockData();
@@ -42,6 +46,7 @@ export default function DetailsPage() {
     // Clear previous AI content when switching stocks
     setInvestmentRisks(null);
     setCompetitiveAdvantages(null);
+    setCompanyDescription(null);
     setIsGeneratingContent(false);
     currentCompanyRef.current = null; // Reset the current company ref
 
@@ -161,8 +166,12 @@ export default function DetailsPage() {
           return;
         }
 
-        // Skip if we already have content for this company (check if both exist and are not empty)
-        if (investmentRisks?.trim() && competitiveAdvantages?.trim()) {
+        // Skip if we already have content for this company (check if all exist and are not empty)
+        if (
+          investmentRisks?.trim() &&
+          competitiveAdvantages?.trim() &&
+          companyDescription?.trim()
+        ) {
           return;
         }
 
@@ -185,12 +194,19 @@ export default function DetailsPage() {
             promises.push(Promise.resolve(investmentRisks));
           }
 
-          const [advantages, risks] = await Promise.all(promises);
+          if (!companyDescription?.trim()) {
+            promises.push(generateCompanyDescription(companyName));
+          } else {
+            promises.push(Promise.resolve(companyDescription));
+          }
+
+          const [advantages, risks, description] = await Promise.all(promises);
 
           // Only update state if we're still looking at the same company
           if (currentCompanyRef.current === companyName) {
             setCompetitiveAdvantages(advantages);
             setInvestmentRisks(risks);
+            setCompanyDescription(description);
           }
         } catch (error) {
           console.error("Error generating AI content:", error);
@@ -219,7 +235,7 @@ export default function DetailsPage() {
                 companyProfileData={stockDetails.companyProfileData}
               />
             ) : (
-              <p>Loading...</p>
+              <Loader />
             )}
           </div>
           <div className="details-page-button-container">
@@ -255,7 +271,13 @@ export default function DetailsPage() {
           wrap="wrap"
         >
           <div className="card-container">
-            <CompanyProfileCard profileData={stockDetails.companyProfileData} />
+            <CompanyProfileCard
+              profileData={stockDetails.companyProfileData}
+              companyDescription={companyDescription}
+              isGeneratingDescription={
+                isGeneratingContent && !companyDescription
+              }
+            />
           </div>
           <div className="card-container">
             <CompanyMetricsCard
@@ -268,13 +290,15 @@ export default function DetailsPage() {
           <div className="card-container">
             <GeneratedContentCard
               title="Competitive Advantages"
-              generatedContent={competitiveAdvantages || "Generating..."}
+              generatedContent={competitiveAdvantages}
+              isLoading={isGeneratingContent && !competitiveAdvantages}
             />
           </div>
           <div className="card-container">
             <GeneratedContentCard
               title="Investment Risks"
-              generatedContent={investmentRisks || "Generating..."}
+              generatedContent={investmentRisks}
+              isLoading={isGeneratingContent && !investmentRisks}
             />
           </div>
           <div className="card-container">
