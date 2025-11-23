@@ -246,37 +246,44 @@ export default function DetailsPage() {
           </div>
         </Flex>
 
-        <Grid>
-          <Grid.Col span={6}>
+        <Flex
+          mih={50}
+          gap="md"
+          justify="flex-start"
+          align="flex-start"
+          direction="row"
+          wrap="wrap"
+        >
+          <div className="card-container">
             <CompanyProfileCard profileData={stockDetails.companyProfileData} />
-          </Grid.Col>
-          <Grid.Col span={6}>
+          </div>
+          <div className="card-container">
             <CompanyMetricsCard
               quoteData={stockDetails.quoteData}
               metricsData={stockDetails.basicFinancialsData}
               profileData={stockDetails.companyProfileData}
               reportedFinancialData={stockDetails.reportedFinancialsData}
             />
-          </Grid.Col>
-          <Grid.Col span={6}>
+          </div>
+          <div className="card-container">
             <GeneratedContentCard
               title="Competitive Advantages"
               generatedContent={competitiveAdvantages || "Generating..."}
             />
-          </Grid.Col>
-          <Grid.Col span={6}>
+          </div>
+          <div className="card-container">
             <GeneratedContentCard
               title="Investment Risks"
               generatedContent={investmentRisks || "Generating..."}
             />
-          </Grid.Col>
-          <Grid.Col span={6}>
+          </div>
+          <div className="card-container">
             <CompanyNewsCard
               title={`Recent News`}
               newsData={stockDetails?.companyNewsData}
             />
-          </Grid.Col>
-        </Grid>
+          </div>
+        </Flex>
       </>
     </Layout>
   );
