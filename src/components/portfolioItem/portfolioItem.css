@@ -35,17 +35,35 @@
   max-width: 150px;
 }
 
-/* Column width styles */
-.portfolio-action-column {
-  width: 48px;
-  max-width: 48px;
-}
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
 
-.portfolio-holding-column {
-  min-width: 200px;
-}
+  .portfolio-action-column {
+    width: 30px;
+    max-width: 30px;
+  }
 
-.portfolio-data-column {
-  width: 150px;
-  max-width: 150px;
+  .portfolio-holding-column {
+    min-width: 80px;
+    width: 80px;
+  }
+
+  .portfolio-holding-column .portfolio-item-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75px;
+  }
+
+  .portfolio-data-column {
+    width: 50px;
+    max-width: 50px;
+    min-width: 50px;
+  }
+
+  .portfolio-number-input {
+    max-width: 50px;
+  }
 }

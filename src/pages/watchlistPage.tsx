@@ -28,6 +28,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import "./watchlistPage.css";
 import { getBulkQuotes } from "../utils/requests";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -164,7 +165,7 @@ export default function WatchlistPage() {
                     <Table.Th></Table.Th>
                     <Table.Th>Company</Table.Th>
                     <Table.Th>Price</Table.Th>
-                    <Table.Th>Change ($)</Table.Th>
+                    <Table.Th className="hide-on-mobile">Change ($)</Table.Th>
                     <Table.Th>Change (%)</Table.Th>
                     <Table.Th></Table.Th>
                   </Table.Tr>

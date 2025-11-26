@@ -78,7 +78,7 @@ export default function PortfolioTable({
   ];
 
   return (
-    <Box>
+    <Box className="portfolio-table-container">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

@@ -5,3 +5,8 @@
 .formatted-description {
   white-space: pre-line;
 }
+
+.tableRow__value {
+  word-break: break-word;
+  white-space: normal;
+}

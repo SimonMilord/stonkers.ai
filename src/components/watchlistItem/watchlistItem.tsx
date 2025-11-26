@@ -108,7 +108,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
       <Table.Td>
         <Text>${formatCurrency(stock.price)}</Text>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="hide-on-mobile">
         <Badge color={changeDollarData.color} variant="light" size="sm">
           {changeDollarData.value}
         </Badge>

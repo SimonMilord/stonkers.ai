@@ -332,7 +332,7 @@ export default function PortfolioPageRefactored() {
 
           {/* Portfolio Metrics */}
           <Card radius="md" p="lg" mb="lg">
-            <Group grow>
+            <Group grow className="portfolio-metrics-group">
               {portfolioMetrics.map((metric, index) => (
                 <DataCard
                   key={index}

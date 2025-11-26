@@ -1,10 +1,16 @@
 .portfolio-pie-chart {
-  background-color: #1a1a1a;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
+  max-width: 100%;
+  /* overflow: hidden; */
 }
 
-.portfolio-pie-chart canvas {
-  max-height: 400px !important;
+@media (max-width: 768px) {
+  .portfolio-pie-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    padding: 8px;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+  }
 }

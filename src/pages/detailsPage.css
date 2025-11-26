@@ -25,3 +25,29 @@
   min-width: 300px; /* Minimum width before wrapping */
   max-width: 50%;
 }
+
+@media (max-width: 768px) {
+  .details-page-header {
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+  }
+
+  .details-page-spacer {
+    display: none;
+  }
+
+  .details-page-quote-container {
+    order: 1;
+  }
+
+  .details-page-button-container {
+    order: 2;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card-container {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+}

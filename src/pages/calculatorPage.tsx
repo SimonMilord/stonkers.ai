@@ -176,14 +176,14 @@ export default function CalculatorPage() {
         />
       </Center>
       <Grid className="calculatorPage">
-        <Grid.Col span={6} className="calculator-grid-col">
+        <Grid.Col span={{ base: 12, md: 6 }} className="calculator-grid-col">
           <CalculatorFormCard
             method={isEPSMethod ? earningsMethodInfo : cashFlowMethodInfo}
             formValues={formValues}
             onInputChange={handleInputChange}
           />
         </Grid.Col>
-        <Grid.Col span={6} className="calculator-grid-col">
+        <Grid.Col span={{ base: 12, md: 6 }} className="calculator-grid-col">
           <CalculatorResultsCard
             calculationResults={calculationResults}
             desiredReturn={formValues.desiredReturn}

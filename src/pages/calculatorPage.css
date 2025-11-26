@@ -8,3 +8,15 @@
   min-width: 0;
   max-width: 100%;
 }
+
+@media (max-width: 768px) {
+  .calculatorPage {
+    flex-direction: column;
+  }
+
+  .calculatorPage .calculator-grid-col {
+    flex-basis: 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+}
