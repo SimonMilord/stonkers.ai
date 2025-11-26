@@ -1,3 +1,71 @@
+.portfolio-metrics-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-md);
+}
+
+.portfolioPage {
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .portfolioPage {
+    padding: 0 8px;
+  }
+
+  .portfolio-metrics-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--mantine-spacing-md);
+  }
+
+  .portfolio-metrics-group > * {
+    flex-basis: auto;
+    max-width: none;
+  }
+
+  .add-holding-form-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .add-holding-form-group > * {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .portfolioPage .mantine-Table-root {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 16px; /* Increased from 14px */
+    min-width: 900px; /* Increased from 700px for much more breathing room */
+  }
+
+  .portfolioPage .mantine-Table-th,
+  .portfolioPage .mantine-Table-td {
+    padding: 12px 8px; /* Increased from 8px 6px */
+    word-break: break-word;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1.5; /* Better line spacing */
+  }
+
+  .portfolioPage .mantine-Table-th {
+    font-size: 14px; /* Increased from 12px */
+    font-weight: 600;
+    white-space: nowrap; /* Prevent header text from wrapping */
+  }
+
+  /* Add horizontal scroll container */
+  .portfolio-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 0; /* Add some vertical breathing room */
+    margin: 0 -4px; /* Compensate for padding */
+  }
+}
+
 /* Portfolio form input styling */
 .portfolio-form-input input {
   background-color: var(--input-background);
@@ -36,12 +104,14 @@
   color: var(--color-text-white);
 }
 
-.portfolio-segmented-control .mantine-SegmentedControl-control[data-active="false"] {
+.portfolio-segmented-control
+  .mantine-SegmentedControl-control[data-active="false"] {
   color: var(--color-text-light);
   background-color: transparent;
 }
 
-.portfolio-segmented-control .mantine-SegmentedControl-control[data-active="true"] {
+.portfolio-segmented-control
+  .mantine-SegmentedControl-control[data-active="true"] {
   color: var(--color-text-white);
   background-color: transparent;
   z-index: 2;

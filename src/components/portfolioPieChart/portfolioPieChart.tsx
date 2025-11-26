@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Box, Title } from "@mantine/core";
 import { Holding } from "@components/portfolioItem/portfolioItem";
+import "./portfolioPieChart.css";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -116,9 +117,10 @@ export default function PortfolioPieChart({
         </Title>
       )}
       <Box
+        className="portfolio-pie-chart"
         style={{
-          height: "500px",
-          width: "600px",
+          height: `500px`,
+          width: `600px`,
           margin: "0 auto",
           position: "relative",
         }}

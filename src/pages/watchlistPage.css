@@ -1,0 +1,25 @@
+@media (max-width: 768px) {
+  .watchlistPage .mantine-Table-root {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .watchlistPage .mantine-Table-th,
+  .watchlistPage .mantine-Table-td {
+    padding: 8px;
+    font-size: 12px;
+    word-break: break-word;
+  }
+
+  .watchlistPage .hide-on-mobile {
+    display: none;
+  }
+
+  .watchlist-item-name {
+    font-size: 12px;
+  }
+
+  .watchlist-item-logo {
+    display: none;
+  }
+}

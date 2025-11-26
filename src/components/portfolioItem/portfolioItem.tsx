@@ -190,7 +190,6 @@ export default function PortfolioItem({
             className="portfolio-number-input"
             onChange={handleCostBasisChange}
             onKeyDown={(e) => handleKeyDown(e, "costBasis", stock.costBasis)}
-            leftSection="$"
           />
         ) : (
           <NumberInput

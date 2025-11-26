@@ -99,7 +99,7 @@ export default function AddHoldingForm({
         />
         {positionType === "Stock" ? (
           /* Stock Form */
-          <Group justify="center">
+          <Group justify="center" className="add-holding-form-group">
             <TextInput
               placeholder="Search stock ticker"
               value={searchTicker}
@@ -145,7 +145,7 @@ export default function AddHoldingForm({
           </Group>
         ) : (
           /* Cash Form */
-          <Group justify="center">
+          <Group justify="center" className="add-holding-form-group">
             <NumberInput
               placeholder="USD Amount"
               value={cashAmount}
