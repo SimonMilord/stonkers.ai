@@ -5,7 +5,7 @@ import {
   validateMetricsValue,
   roundToDecimal,
 } from "@utils/functions";
-import { getFCFperShareGrowth } from "@utils/metrics";
+import { getFCFperShareGrowth } from "@utils/functions";
 import "../cardStyles.css";
 
 type RowItem = {
