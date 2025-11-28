@@ -1,9 +1,11 @@
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Loader, MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
 import HomePage from "./pages/homePage";
 import DetailsPage from "./pages/detailsPage";
 import CalculatorPage from "./pages/calculatorPage";
@@ -18,6 +20,7 @@ import usePageTitle from "./hooks/usePageTitle";
 export default function App() {
   return (
     <MantineProvider>
+      <Notifications position="top-right" />
       <ModalsProvider>
         <AuthProvider>
           <StockProvider>
