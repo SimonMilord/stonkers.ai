@@ -300,7 +300,7 @@ export default function PortfolioPageRefactored() {
     },
     {
       label: "Holdings",
-      value: `${holdings.length.toFixed(0) - 1}`, // Exclude cash position from holdings count
+      value: `${holdings.length ? (holdings.length - 1).toFixed(0) : 0}`, // Exclude cash position from holdings count
     },
     {
       label: "Cash position",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Box, TextInput, Loader, ActionIcon } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
 import { useStockData } from "../../hooks/useStockData";
@@ -17,15 +17,45 @@ export default function SearchBox(props: { variant: string }) {
   const [loading, setLoading] = useState(false);
   const [noResultsFound, setNoResultsFound] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
+  const searchBoxRef = useRef<HTMLDivElement>(null);
   const history = useHistory();
   const location = useLocation();
   const { fetchAndSetStockData } = useStockData();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchBoxRef.current &&
+        !searchBoxRef.current.contains(event.target as Node)
+      ) {
+        setNoResultsFound(false);
+        setValidationError("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const clearSearch = () => {
     setQuery("");
     setSearchedQuery("");
     setNoResultsFound(false);
     setValidationError("");
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.currentTarget.value;
+    setQuery(newValue);
+    
+    // Close dropdown if input is cleared
+    if (newValue.trim() === "") {
+      setNoResultsFound(false);
+      setValidationError("");
+    }
   };
 
   const handleKeyDown = async (
@@ -95,7 +125,7 @@ export default function SearchBox(props: { variant: string }) {
   };
 
   return (
-    <Box className="searchbox__container">
+    <Box className="searchbox__container" ref={searchBoxRef}>
       {props.variant === "standalone" && (
         <>
           <div
@@ -110,7 +140,7 @@ export default function SearchBox(props: { variant: string }) {
               placeholder="Search for a stock"
               aria-label="Search box"
               value={query}
-              onChange={(event) => setQuery(event.currentTarget.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               rightSection={
                 loading ? (
@@ -151,7 +181,7 @@ export default function SearchBox(props: { variant: string }) {
               placeholder="Search for a stock"
               aria-label="Search box"
               value={query}
-              onChange={(event) => setQuery(event.currentTarget.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               rightSection={
                 loading ? (
