@@ -7,7 +7,7 @@ import {
   getReportedFinancials,
 } from "../utils/requests";
 import { roundToDecimal } from "../utils/functions";
-import { getFCFperShareGrowth } from "../utils/metrics";
+import { getFCFperShareGrowth } from "../utils/functions";
 
 /**
  * Custom hook for fetching stock data and updating the stock context.
