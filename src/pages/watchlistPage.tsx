@@ -73,6 +73,11 @@ export default function WatchlistPage() {
 
     const { data: watchlistItems } = await response.json();
 
+    // Return early if watchlist is empty
+    if (!watchlistItems || watchlistItems.length === 0) {
+      return [];
+    }
+
     const arrayOfTickers = watchlistItems.map((item: any) => item.ticker);
     const { data: bulkQuotes } = await getBulkQuotes(arrayOfTickers);
 

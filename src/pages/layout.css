@@ -1,6 +1,6 @@
 .mantine-AppShell-header {
   background-color: #282c34;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .mantine-AppShell-navbar {
