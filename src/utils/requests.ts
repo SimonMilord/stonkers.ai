@@ -1,3 +1,5 @@
+import { notifications } from "@mantine/notifications";
+
 const backendFinnhubUrl = `${import.meta.env.VITE_BACKEND_URL}/finnhub`;
 
 // ==== API Requests to Finnhub api routes =====
@@ -168,7 +170,7 @@ export const generateCompanyDescription = async (companyName: string) => {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to generate company description");
+      await handleApiError(response, "Failed to generate company description");
     }
 
     const data = await response.json();
@@ -195,7 +197,7 @@ export const generateCompetitiveAdvantages = async (companyName: string) => {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to generate competitive advantages analysis");
+      await handleApiError(response, "Failed to generate competitive advantages analysis");
     }
 
     const data = await response.json();
@@ -222,7 +224,7 @@ export const generateInvestmentRisks = async (companyName: string) => {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to generate investment risks analysis");
+      await handleApiError(response, "Failed to generate investment risks analysis");
     }
 
     const data = await response.json();
@@ -243,6 +245,11 @@ const handleApiResponse = async (
   symbol?: string
 ) => {
   if (!response.ok) {
+    if (response.status === 429) {
+      showRateLimitNotification();
+      throw new Error("Rate limit exceeded (429)");
+    }
+
     const baseMessage = symbol
       ? `Unable to complete network request for ${endpoint} with symbol: ${symbol}`
       : `Unable to complete network request for ${endpoint}`;
@@ -302,4 +309,46 @@ export const validateSymbolSupport = async (
     missingData,
     errors,
   };
+};
+
+let rateLimitNotificationShown = false;
+
+/**
+ * Shows a rate limit notification using Mantine notifications.
+ * Implements debouncing to prevent multiple notifications from showing simultaneously.
+ */
+const showRateLimitNotification = () => {
+  if (rateLimitNotificationShown) {
+    return;
+  }
+
+  rateLimitNotificationShown = true;
+  
+  notifications.show({
+    title: "Rate Limit Reached",
+    message:
+      "We have hit the API maximum allowed number of requests, please wait a few seconds",
+    color: "yellow",
+    autoClose: 5000,
+    onClose: () => {
+      rateLimitNotificationShown = false;
+    },
+  });
+
+  setTimeout(() => {
+    rateLimitNotificationShown = false;
+  }, 5000);
+};
+
+/**
+ * Handles API response errors, showing appropriate notifications
+ * @param response - The fetch Response object
+ * @param errorMessage - Custom error message to throw
+ * @throws Error with the provided error message
+ */
+const handleApiError = async (response: Response, errorMessage: string) => {
+  if (response.status === 429) {
+    showRateLimitNotification();
+  }
+  throw new Error(errorMessage);
 };
