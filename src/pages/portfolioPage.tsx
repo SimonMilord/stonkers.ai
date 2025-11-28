@@ -90,6 +90,11 @@ export default function PortfolioPageRefactored() {
       }
       const { data: portfolioHoldings } = await response.json();
 
+      // Return early if portfolio is empty
+      if (!portfolioHoldings || portfolioHoldings.length === 0) {
+        return [];
+      }
+
       // Sort holdings by orderIndex to maintain user-defined order
       portfolioHoldings.sort((a: any, b: any) => {
         const orderA = a.orderIndex ?? 999; // Default high value for undefined orderIndex
