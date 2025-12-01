@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Table, ActionIcon, Text, Badge, Image, Flex } from "@mantine/core";
 import { RiDeleteBin5Fill, RiMenuFill } from "react-icons/ri";
 import { useSortable } from "@dnd-kit/sortable";
@@ -26,6 +26,7 @@ interface WatchlistItemProps {
 }
 
 export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
+  const [imageError, setImageError] = useState(false);
   const {
     attributes,
     listeners,
@@ -87,16 +88,23 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
       </Table.Td>
       <Table.Td>
         <Flex>
-          <Image
-            src={`${finnhubImgUrl}${stock.ticker}.png`}
-            alt={stock.ticker}
-            className="watchlist-item-logo"
-            mr={12}
-            h={25}
-            w={25}
-            radius="md"
-            fit="cover"
-          />
+          {!imageError ? (
+            <Image
+              src={`${finnhubImgUrl}${stock.ticker}.png`}
+              alt={stock.ticker}
+              className="watchlist-item-logo"
+              mr={12}
+              h={25}
+              w={25}
+              radius="md"
+              fit="cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="watchlist-item-logo-placeholder">
+              {stock.ticker.slice(0, 2).toUpperCase()}
+            </div>
+          )}
           <Text
             onClick={() => history.push(`/details/${stock.ticker}`)}
             className="watchlist-item-name"
