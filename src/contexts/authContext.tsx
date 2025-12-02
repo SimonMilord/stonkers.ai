@@ -41,6 +41,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const backendUrl =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+      console.log('🔍 Checking auth status with backend:', backendUrl);
+      console.log('🍪 Current cookies:', document.cookie);
+
       const response = await fetch(`${backendUrl}/auth/me`, {
         method: "GET",
         credentials: "include", // Include HTTP-only cookies
@@ -49,10 +52,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
       });
 
+      console.log('📡 Auth response status:', response.status);
+
       if (response.ok) {
         const userData = await response.json();
+        console.log('✅ User authenticated:', userData);
         setUser(userData);
       } else {
+        console.log('❌ User not authenticated');
         setUser(null);
       }
     } catch (error) {
