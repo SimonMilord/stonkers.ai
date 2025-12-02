@@ -58,8 +58,11 @@ function AppContent() {
           path="/auth/success"
           exact
           render={() => {
-            // After successful OAuth, redirect to home
-            window.location.href = "/home";
+            // After successful OAuth, we need to wait a moment for cookies to be set
+            // then trigger auth check before redirecting
+            setTimeout(() => {
+              window.location.href = "/home";
+            }, 500);
             return <Loader />;
           }}
         />
