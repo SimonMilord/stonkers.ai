@@ -55,9 +55,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('📡 Auth response status:', response.status);
 
       if (response.ok) {
-        const userData = await response.json();
-        console.log('✅ User authenticated:', userData);
-        setUser(userData);
+        const result = await response.json();
+        console.log('✅ Auth response:', result);
+        
+        // Check if we actually have user data
+        if (result.success && result.data) {
+          console.log('✅ User authenticated:', result.data);
+          setUser(result.data);
+        } else {
+          console.log('❌ No user data in response');
+          setUser(null);
+        }
       } else {
         console.log('❌ User not authenticated');
         setUser(null);
