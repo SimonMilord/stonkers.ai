@@ -2,7 +2,7 @@
   "buildCommand": "vite build",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
   ]
