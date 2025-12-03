@@ -49,7 +49,8 @@ export default function DetailsPage() {
     setCompanyDescription(null);
     setIsGeneratingContent(false);
     currentCompanyRef.current = null; // Reset the current company ref
-
+    
+    setIsInWatchlist(false);
     fetchStockData(symbol);
     checkIfInWatchlist(symbol);
   }, [symbol]);
@@ -60,10 +61,19 @@ export default function DetailsPage() {
         method: "GET",
         credentials: "include",
       });
+
+      if (!response.ok) {
+        console.error("Failed to check watchlist status:", response.status);
+        setIsInWatchlist(false);
+        return;
+      }
+
       const data = await response.json();
-      setIsInWatchlist(data.inWatchlist);
+      console.log("Checked if in watchlist:", symbol, isInWatchlist);
+      setIsInWatchlist(data.inWatchlist === true);
     } catch (error) {
       console.error("Error checking watchlist status:", error);
+      setIsInWatchlist(false);
     }
   };
 
