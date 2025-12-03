@@ -60,6 +60,7 @@ export default function CompanyNewsCard({
                   </Group>
                   <Anchor
                     href={newsItem.url}
+                    rel="noopener noreferrer"
                     target="_blank"
                     underline="hover"
                     c="inherit"

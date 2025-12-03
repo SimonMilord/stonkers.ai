@@ -30,7 +30,7 @@ export default function CompanyProfileCard({
     profileData?.shareOutstanding * 1000000
   );
   const companyWebsiteLink = profileData?.weburl ? (
-    <a href={profileData?.weburl} target="_blank" className="companyUrl">
+    <a href={profileData?.weburl} target="_blank" className="companyUrl" rel="noopener noreferrer">
       {profileData?.weburl}
     </a>
   ) : (
