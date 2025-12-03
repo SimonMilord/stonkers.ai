@@ -69,8 +69,6 @@ export default function DetailsPage() {
       }
 
       const data = await response.json();
-      console.log("Checked if in watchlist:", symbol, isInWatchlist);
-      console.log('data: ' + JSON.stringify(data));
       setIsInWatchlist(data.data.inWatchlist === true);
     } catch (error) {
       console.error("Error checking watchlist status:", error);
