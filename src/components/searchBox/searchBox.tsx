@@ -3,6 +3,7 @@ import { Box, TextInput, Loader, ActionIcon } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
 import { useStockData } from "../../hooks/useStockData";
 import { getStockSymbol, validateSymbolSupport } from "../../utils/requests";
+import { sanitizeStockSymbol } from "../../utils/validation";
 import { RiCloseLine } from "react-icons/ri";
 import "./searchBox.css";
 
@@ -49,7 +50,11 @@ export default function SearchBox(props: { variant: string }) {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.currentTarget.value;
-    setQuery(newValue);
+    
+    const sanitized = sanitizeStockSymbol(newValue);
+    if (sanitized !== null || newValue.trim() === "") {
+      setQuery(newValue); // Keep original for display, but validate on submit
+    }
     
     // Close dropdown if input is cleared
     if (newValue.trim() === "") {
@@ -61,18 +66,23 @@ export default function SearchBox(props: { variant: string }) {
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    const trimmedQuery = query.trim();
-    if (event.key === "Enter" && trimmedQuery !== "") {
+    if (event.key === "Enter") {
+      const sanitizedQuery = sanitizeStockSymbol(query.trim());
+      if (!sanitizedQuery) {
+        setValidationError("Invalid symbol format. Please enter a valid stock symbol (1-10 characters, letters and numbers only).");
+        return;
+      }
+
       setNoResultsFound(false);
       setValidationError("");
 
       try {
-        const queriedSymbol = await searchForSymbol(trimmedQuery);
-        setSearchedQuery(trimmedQuery);
+        const queriedSymbol = await searchForSymbol(sanitizedQuery);
+        setSearchedQuery(sanitizedQuery);
 
         if (queriedSymbol === null) {
           console.warn(
-            `No symbol found for: ${trimmedQuery}. Please try again with a different symbol.`
+            `No symbol found for: ${sanitizedQuery}. Please try again with a different symbol.`
           );
           setNoResultsFound(true);
         }
@@ -92,18 +102,18 @@ export default function SearchBox(props: { variant: string }) {
           } else {
             // Symbol is not fully supported, show error message
             setValidationError(
-              `Symbol "${trimmedQuery}" is not supported. Please try a different US listed stock.`
+              `Symbol "${sanitizedQuery}" is not supported. Please try a different US listed stock.`
             );
             console.warn("Symbol validation failed:", validation);
           }
         }
       } catch (error) {
-        console.error(`Error searching for stock: ${trimmedQuery}`, error);
+        console.error(`Error searching for stock: ${sanitizedQuery}`, error);
         setValidationError(
           "An error occurred while searching. Please try again."
         );
       }
-      setQuery(trimmedQuery);
+      setQuery(sanitizedQuery);
     }
   };
 

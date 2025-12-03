@@ -12,7 +12,7 @@ import {
   Loader,
 } from "@mantine/core";
 import { useStockSearch } from "../../hooks/useStockSearch";
-import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings";
+import { sanitizeStockSymbol, sanitizeNumericInput } from "../../utils/validation";
 
 interface AddHoldingFormProps {
   onHoldingAdded: () => void;
@@ -54,7 +54,11 @@ export default function AddHoldingForm({
   }, [searchTicker, searchForStock, clearSearch]);
 
   const handleTickerSearch = (value: string) => {
-    setSearchTicker(value);
+    // Only allow valid stock symbol characters while typing
+    const sanitized = sanitizeStockSymbol(value);
+    if (sanitized !== null || value.trim() === "") {
+      setSearchTicker(value);
+    }
   };
 
   const handleAddNewHolding = async () => {
@@ -62,13 +66,31 @@ export default function AddHoldingForm({
       if (!foundStock || !shares || !avgPricePaid) {
         return;
       }
-      onStockHolding(foundStock, Number(shares), Number(avgPricePaid));
+      
+      const sanitizedShares = sanitizeNumericInput(shares);
+      const sanitizedAvgPrice = sanitizeNumericInput(avgPricePaid);
+      
+      if (sanitizedShares === null || sanitizedShares <= 0) {
+        return;
+      }
+      
+      if (sanitizedAvgPrice === null || sanitizedAvgPrice <= 0) {
+        return;
+      }
+      
+      onStockHolding(foundStock, sanitizedShares, sanitizedAvgPrice);
     } else {
       // Handle cash position
       if (!cashAmount) {
         return;
       }
-      onCashHolding(Number(cashAmount));
+      
+      const sanitizedCashAmount = sanitizeNumericInput(cashAmount);
+      if (sanitizedCashAmount === null || sanitizedCashAmount <= 0) {
+        return;
+      }
+      
+      onCashHolding(sanitizedCashAmount);
     }
     resetNewHoldingForm();
   };

@@ -10,6 +10,7 @@ import {
   Text,
 } from "@mantine/core";
 import { roundToDecimal } from "@utils/functions";
+import { sanitizeNumericInput } from "../../utils/validation";
 import React from "react";
 import { CalculatorMethod, FormValues } from "src/pages/calculatorPage";
 import "./calculatorFormCard.css";
@@ -30,6 +31,14 @@ export default function CalculatorFormCard({
   const epsTTM = roundToDecimal(metrics?.epsTTM, 2);
   const peRatio = roundToDecimal(metrics?.peRatio, 2);
   const epsGrowthTTM = roundToDecimal(metrics?.epsGrowthTTM, 2);
+
+  // Enhanced input handler with validation
+  const handleInputChange = (field: string, value: number | string) => {
+    const sanitized = sanitizeNumericInput(value);
+    if (sanitized !== null) {
+      onInputChange(field, sanitized);
+    }
+  };
 
   return (
     <Paper withBorder radius="md" p="lg" className="calculator-form-card">
@@ -88,7 +97,7 @@ export default function CalculatorFormCard({
             placeholder="Enter FCF/Share"
             radius="md"
             value={formValues.fcfPerShare}
-            onChange={(value) => onInputChange("fcfPerShare", value || 0)}
+            onChange={(value) => handleInputChange("fcfPerShare", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -101,7 +110,7 @@ export default function CalculatorFormCard({
             placeholder="Enter FCF/Share Growth rate"
             radius="md"
             value={formValues.fcfGrowthRate}
-            onChange={(value) => onInputChange("fcfGrowthRate", value || 0)}
+            onChange={(value) => handleInputChange("fcfGrowthRate", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -114,7 +123,7 @@ export default function CalculatorFormCard({
             placeholder="Enter FCF Yield"
             radius="md"
             value={formValues.targetFcfYield}
-            onChange={(value) => onInputChange("targetFcfYield", value || 0)}
+            onChange={(value) => handleInputChange("targetFcfYield", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -127,7 +136,7 @@ export default function CalculatorFormCard({
             placeholder="Enter Desired Return"
             radius="md"
             value={formValues.desiredReturn}
-            onChange={(value) => onInputChange("desiredReturn", value || 0)}
+            onChange={(value) => handleInputChange("desiredReturn", value || 0)}
           />
         </Box>
       ) : (
@@ -142,7 +151,7 @@ export default function CalculatorFormCard({
             placeholder="Input placeholder"
             radius="md"
             value={formValues.eps}
-            onChange={(value) => onInputChange("eps", value || 0)}
+            onChange={(value) => handleInputChange("eps", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -155,7 +164,7 @@ export default function CalculatorFormCard({
             placeholder="Input placeholder"
             radius="md"
             value={formValues.epsGrowthRate}
-            onChange={(value) => onInputChange("epsGrowthRate", value || 0)}
+            onChange={(value) => handleInputChange("epsGrowthRate", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -167,7 +176,7 @@ export default function CalculatorFormCard({
             placeholder="Input placeholder"
             radius="md"
             value={formValues.targetPeRatio}
-            onChange={(value) => onInputChange("targetPeRatio", value || 0)}
+            onChange={(value) => handleInputChange("targetPeRatio", value || 0)}
           />
           <NumberInput
             className="calculator-number-input"
@@ -179,7 +188,7 @@ export default function CalculatorFormCard({
             placeholder="Enter Desired Return"
             radius="md"
             value={formValues.desiredReturn}
-            onChange={(value) => onInputChange("desiredReturn", value || 0)}
+            onChange={(value) => handleInputChange("desiredReturn", value || 0)}
           />
         </Box>
       )}
