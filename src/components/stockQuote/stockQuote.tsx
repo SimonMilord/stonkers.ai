@@ -4,14 +4,15 @@ import { QuoteData, CompanyProfileData } from '../../types/financialApi';
 
 export default function StockQuote({ quoteData, companyProfileData }: { quoteData: QuoteData; companyProfileData: CompanyProfileData }) {
   const fluctuationColor = quoteData?.dp >= 0 ? "green" : "red";
+  const processedTicker = companyProfileData?.ticker.includes('.') ? companyProfileData?.ticker.split('.')[0] : companyProfileData?.ticker;
   return (
     <Box m='lg'>
       <Flex align="center" mb='md'>
         <Image mr={12} h={50} radius="md" src={companyProfileData?.logo}/>
-        <Text size='lg'>{companyProfileData?.name} - {companyProfileData?.ticker}</Text>
+        <Text size='lg'>{companyProfileData?.name} - {processedTicker}</Text>
       </Flex>
       <Flex justify="center" gap="lg">
-        <Text>{quoteData?.c}$ {companyProfileData?.currency}</Text>
+        <Text>{quoteData?.c}$ USD</Text>
         <Text c={fluctuationColor}>${quoteData?.d} | {(quoteData?.dp?.toFixed(2))}%</Text>
       </Flex>
     </Box>

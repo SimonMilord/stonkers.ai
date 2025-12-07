@@ -3,7 +3,7 @@ import "@mantine/notifications/styles.css";
 import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Loader, MantineProvider } from "@mantine/core";
+import { Center, Loader, MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import HomePage from "./pages/homePage";
@@ -63,7 +63,11 @@ function AppContent() {
             setTimeout(() => {
               window.location.href = "/home";
             }, 500);
-            return <Loader />;
+            return (
+              <Center h="100vh">
+                <Loader size="xl" type="dots"/>
+              </Center>
+            );
           }}
         />
 

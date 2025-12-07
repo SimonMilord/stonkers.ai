@@ -26,6 +26,10 @@ interface WatchlistItemProps {
 }
 
 export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
+  // Handle international tickers with dots (e.g., ASML.AS)
+  const processedTicker = stock.ticker.includes(".")
+    ? stock.ticker.split(".")[0]
+    : stock.ticker;
   const [imageError, setImageError] = useState(false);
   const {
     attributes,
@@ -58,7 +62,7 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
       title: "Remove from Watchlist",
       children: (
         <Text size="sm" py="md">
-          Are you sure you want to remove <strong>{stock.ticker}</strong> (
+          Are you sure you want to remove <strong>{processedTicker}</strong> (
           {stock.name}) from your watchlist?
         </Text>
       ),
@@ -102,14 +106,14 @@ export default function WatchlistItem({ stock, onRemove }: WatchlistItemProps) {
             />
           ) : (
             <div className="watchlist-item-logo-placeholder">
-              {stock.ticker.slice(0, 2).toUpperCase()}
+              {processedTicker.slice(0, 2).toUpperCase()}
             </div>
           )}
           <Text
-            onClick={() => history.push(`/details/${stock.ticker}`)}
+            onClick={() => history.push(`/details/${processedTicker}`)}
             className="watchlist-item-name"
           >
-            {stock.name} ({stock.ticker})
+            {stock.name} ({processedTicker})
           </Text>
         </Flex>
       </Table.Td>

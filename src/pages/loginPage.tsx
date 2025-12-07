@@ -8,6 +8,7 @@ import {
   Stack,
   Divider,
   Center,
+  Anchor,
 } from "@mantine/core";
 import { FcGoogle } from "react-icons/fc";
 import { RiUserLine } from "react-icons/ri";
@@ -81,8 +82,7 @@ export default function LoginPage() {
               </Stack>
 
               <Text c="dimmed" size="xs" ta="center" mt="xl">
-                By signing in, you agree to our terms of service and privacy
-                policy
+                Stonkers.ai v1.0 | <Anchor href="https://www.simonmilord.com/">&copy;simonmilord</Anchor>
               </Text>
             </Stack>
           </Paper>
