@@ -65,11 +65,11 @@ export default function CalculatorResultsCard({
       {
         label: "Stock Price Projection",
         data: projectionData,
-        borderColor: "rgb(34, 197, 94)",
+        borderColor: "#228BE6",
         backgroundColor: "rgba(34, 197, 94, 0.1)",
         borderWidth: 3,
-        pointBackgroundColor: "rgb(34, 197, 94)",
-        pointBorderColor: "rgb(34, 197, 94)",
+        pointBackgroundColor: "#228BE6",
+        pointBorderColor: "#228BE6",
         pointRadius: 6,
         pointHoverRadius: 8,
         tension: 0.4,
@@ -91,7 +91,7 @@ export default function CalculatorResultsCard({
         backgroundColor: "rgba(0, 0, 0, 0.8)",
         titleColor: "white",
         bodyColor: "white",
-        borderColor: "rgb(34, 197, 94)",
+        borderColor: "#228BE6",
         borderWidth: 1,
         callbacks: {
           label: function (context) {
@@ -123,7 +123,7 @@ export default function CalculatorResultsCard({
     },
     elements: {
       point: {
-        hoverBackgroundColor: "rgb(34, 197, 94)",
+        hoverBackgroundColor: "#339AF0",
       },
     },
   };

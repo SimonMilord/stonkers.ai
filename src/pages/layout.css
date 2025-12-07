@@ -54,5 +54,25 @@
 }
 
 .layout__navlink:hover {
-  background-color: #393f4b;
+  background-color: #282c34;
+  color: #228BE6;
+}
+
+.layout__navlink-logout {
+  cursor: pointer;
+}
+
+/* Override Mantine NavLink active background color */
+.layout__navlink[data-active="true"] {
+  background-color: transparent !important;
+}
+
+.layout__navlink[data-active="true"]:hover {
+  background-color: #282c34 !important;
+}
+
+/* Set active state text and icon color to blue */
+.layout__navlink[data-active="true"] .mantine-NavLink-label,
+.layout__navlink[data-active="true"] .mantine-NavLink-leftSection {
+  color: #339af0 !important;
 }

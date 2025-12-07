@@ -88,11 +88,10 @@ const Layout: React.FC<LayoutProps> = ({ children, opened, toggle }) => {
           />
         ))}
         <NavLink
-          className="layout__navlink"
+          className="layout__navlink layout__navlink-logout"
           leftSection={<CiLogin size={20} />}
           label="Log out"
           onClick={handleLogout}
-          style={{ cursor: "pointer" }}
         />
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>

@@ -92,6 +92,11 @@ export default function DetailsPage() {
         });
 
         if (!response.ok) {
+          if (response.status === 409) {
+            console.warn("Stock is already in watchlist.");
+            setIsInWatchlist(true);
+            return;
+          }
           throw new Error("Failed to add stock to watchlist");
         }
 
@@ -255,7 +260,7 @@ export default function DetailsPage() {
                 }`}
               >
                 <Button
-                  variant={"light"}
+                  variant={"filled"}
                   color={isInWatchlist ? "red" : "blue"}
                   onClick={
                     isInWatchlist
