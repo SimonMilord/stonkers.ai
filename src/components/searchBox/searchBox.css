@@ -5,6 +5,14 @@
   position: relative;
 }
 
+/* SearchBox TextInput styling */
+.searchbox__container .mantine-TextInput-input {
+  background-color: var(--color-app-background);
+  border-color: white;
+  padding: 1rem;
+  color: white;
+}
+
 .searchbox__input-wrapper {
   position: relative;
 }
@@ -21,7 +29,7 @@
   top: calc(100% - 8px);
   left: 0;
   right: 0;
-  background: #282c34;
+  background: var(--color-app-background);
   border: 1px solid white;
   border-top: none;
   border-radius: 0 0 8px 8px;
@@ -46,7 +54,7 @@
   padding: 12px 16px;
   color: #ffffff;
   font-size: 14px;
-  background: #282c34;
+  background: var(--color-app-background);
   cursor: default;
   border-radius: 0;
 }

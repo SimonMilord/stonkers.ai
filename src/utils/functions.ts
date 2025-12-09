@@ -90,3 +90,17 @@ export const getFCFperShareGrowth = (
     return null;
   }
 };
+
+/**
+ * Formats a UNIX timestamp to DD-MM-YYYY format
+ * @param timestamp UNIX timestamp
+ * @returns Formatted date string in DD-MM-YYYY format
+ */
+export const formatDate = (timestamp: number): string => {
+  return new Date(timestamp * 1000)
+    .toISOString()
+    .split("T")[0]
+    .split("-")
+    .reverse()
+    .join("-");
+};

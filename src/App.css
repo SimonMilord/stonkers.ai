@@ -97,3 +97,15 @@ Benefits:
 html {
   color-scheme: dark;
 }
+
+/* Prevent white background on overscroll */
+body {
+  background-color: var(--color-app-background);
+  overflow-x: hidden;
+}
+
+/* Ensure AppShell main content fills remaining height */
+.mantine-AppShell-main {
+  min-height: calc(100vh - 75px); /* Subtract header height */
+  background-color: var(--color-app-background);
+}
