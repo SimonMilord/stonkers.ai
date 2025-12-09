@@ -22,7 +22,7 @@ ChartJS.register(
   LineElement,
   ChartTitle,
   Tooltip,
-  Legend
+  Legend,
 );
 
 export default function CalculatorResultsCard({
@@ -187,7 +187,9 @@ export default function CalculatorResultsCard({
           <Text size="sm" c="dimmed">
             Current Price
           </Text>
-          <Text size="lg">${currentPrice}</Text>
+          <Text size="lg" fw={600}>
+            ${currentPrice}
+          </Text>
         </Stack>
         <Stack gap="xs">
           <Text size="sm" c="dimmed">

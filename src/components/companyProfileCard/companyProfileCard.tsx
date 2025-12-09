@@ -24,13 +24,18 @@ export default function CompanyProfileCard({
 }) {
   const notAvailable: String = "Not Available";
   const formattedMarketCap = formatDollarAmount(
-    profileData?.marketCapitalization * 1000000
+    profileData?.marketCapitalization * 1000000,
   );
   const formattedSharesOutstanding = formatDollarAmount(
-    profileData?.shareOutstanding * 1000000
+    profileData?.shareOutstanding * 1000000,
   );
   const companyWebsiteLink = profileData?.weburl ? (
-    <a href={profileData?.weburl} target="_blank" className="companyUrl" rel="noopener noreferrer">
+    <a
+      href={profileData?.weburl}
+      target="_blank"
+      className="companyUrl"
+      rel="noopener noreferrer"
+    >
       {profileData?.weburl}
     </a>
   ) : (

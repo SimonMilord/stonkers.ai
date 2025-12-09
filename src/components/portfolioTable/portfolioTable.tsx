@@ -50,7 +50,7 @@ export default function PortfolioTable({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const getSortIcon = (field: SortField) => {

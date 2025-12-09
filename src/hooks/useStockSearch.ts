@@ -75,11 +75,11 @@ export const useStockSearch = () => {
         setSearchError(`Stock "${symbol.toUpperCase()}" not found.`);
       } else if (error.message && error.message.includes("network")) {
         setSearchError(
-          `Network error. Please check your connection and try again.`
+          `Network error. Please check your connection and try again.`,
         );
       } else {
         setSearchError(
-          `Error searching for "${symbol.toUpperCase()}". Please try again.`
+          `Error searching for "${symbol.toUpperCase()}". Please try again.`,
         );
       }
     }

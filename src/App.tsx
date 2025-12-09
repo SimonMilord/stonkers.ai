@@ -65,7 +65,7 @@ function AppContent() {
             }, 500);
             return (
               <Center h="100vh">
-                <Loader size="xl" type="dots"/>
+                <Loader size="xl" type="dots" />
               </Center>
             );
           }}

@@ -76,7 +76,7 @@ export default function PortfolioItem({
   const handleKeyDown = (
     event: React.KeyboardEvent,
     type: "shares" | "costBasis",
-    currentValue: number
+    currentValue: number,
   ) => {
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
 
@@ -211,7 +211,7 @@ export default function PortfolioItem({
         <Text>
           $
           {formatCurrency(
-            isCash ? stock.costBasis : stock.shares * stock.currentPrice
+            isCash ? stock.costBasis : stock.shares * stock.currentPrice,
           )}
         </Text>
       </Table.Td>
@@ -228,8 +228,8 @@ export default function PortfolioItem({
             isCash
               ? "gray"
               : Number(computedGainLossPercent) < 0
-              ? "red"
-              : "green"
+                ? "red"
+                : "green"
           }
         >
           {isCash ? "-" : `${computedGainLossPercent}%`}

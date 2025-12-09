@@ -55,7 +55,7 @@ export default function CompanyMetricsCard({
     const longTermDebt = balanceSheetEntries?.find(
       (entry: any) =>
         entry?.concept === longTermDebtConceptTarget ||
-        entry?.label === longTermDebtTargetLabel
+        entry?.label === longTermDebtTargetLabel,
     );
 
     return roundToDecimal(longTermDebt?.value, 2);
@@ -82,7 +82,7 @@ export default function CompanyMetricsCard({
     {
       key: `FCF Yield ($${roundToDecimal(fcfPerShare, 2)} / $${roundToDecimal(
         stockPrice,
-        2
+        2,
       )}):`,
       value: `${getFCFYield()}`,
     },
@@ -93,42 +93,42 @@ export default function CompanyMetricsCard({
       key: "Rev growth TTM:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.revenueGrowthTTMYoy, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "Rev growth 3Y:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.revenueGrowth3Y, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "Rev growth 5Y:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.revenueGrowth5Y, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "EPS growth TTM:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.epsGrowthTTMYoy, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "EPS growth 3Y:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.epsGrowth3Y, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "EPS growth 5Y:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.epsGrowth5Y, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
@@ -146,21 +146,21 @@ export default function CompanyMetricsCard({
       key: "Gross margin TTM:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.grossMarginTTM, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "Operating margin TTM:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.operatingMarginTTM, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
       key: "Profit margin TTM:",
       value: validateMetricsValue(
         `${roundToDecimal(metrics?.netProfitMarginTTM, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
@@ -175,7 +175,7 @@ export default function CompanyMetricsCard({
       key: "ROIC:",
       value: validateMetricsValue(
         `${roundToDecimal(metricsData?.series?.annual?.roic[0]?.v * 100, 2)}`,
-        "%"
+        "%",
       ),
     },
     {
@@ -183,7 +183,7 @@ export default function CompanyMetricsCard({
       value:
         `${roundToDecimal(
           metricsData?.series?.annual?.fcfMargin[0]?.v * 100,
-          2
+          2,
         )}%` || notAvailable,
     },
   ];
@@ -192,42 +192,42 @@ export default function CompanyMetricsCard({
     {
       key: "Cash:",
       value: validateMetricsValue(
-        formatDollarAmount(retrieveCashOnBalanceSheet())
+        formatDollarAmount(retrieveCashOnBalanceSheet()),
       ),
     },
     {
       key: "LT Debt:",
       value: validateMetricsValue(
-        formatDollarAmount(retrieveDebtOnBalanceSheet())
+        formatDollarAmount(retrieveDebtOnBalanceSheet()),
       ),
     },
     {
       key: "Net Cash position:",
       value: validateMetricsValue(
         formatDollarAmount(
-          retrieveCashOnBalanceSheet() - retrieveDebtOnBalanceSheet()
-        )
+          retrieveCashOnBalanceSheet() - retrieveDebtOnBalanceSheet(),
+        ),
       ),
     },
     {
       key: "Div/sh:",
       value: validateMetricsValue(
         roundToDecimal(metrics?.dividendPerShareTTM, 2),
-        "$"
+        "$",
       ),
     },
     {
       key: "Div yield:",
       value: validateMetricsValue(
         roundToDecimal(metrics?.currentDividendYieldTTM, 2),
-        "%"
+        "%",
       ),
     },
     {
       key: "Payout ratio:",
       value: validateMetricsValue(
         roundToDecimal(metrics?.payoutRatioTTM, 2),
-        "%"
+        "%",
       ),
     },
   ];

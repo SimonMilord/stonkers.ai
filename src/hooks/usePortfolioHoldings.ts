@@ -39,7 +39,7 @@ export const usePortfolioHoldings = () => {
         console.error(`Failed to update shares for ${ticker}:`, error);
       }
     },
-    500 // 500ms delay
+    500, // 500ms delay
   );
 
   const removeFromHoldings = useCallback(async (ticker: string) => {
@@ -71,12 +71,12 @@ export const usePortfolioHoldings = () => {
             return { ...item, shares: newShares, costBasis: newCostBasis };
           }
           return item;
-        })
+        }),
       );
 
       debouncedBackendUpdate(ticker, newShares, newCostBasis);
     },
-    [debouncedBackendUpdate]
+    [debouncedBackendUpdate],
   );
 
   const addStockHolding = useCallback(
@@ -85,7 +85,7 @@ export const usePortfolioHoldings = () => {
         // Check if stock holding already exists
         const existingStockIndex = prev.findIndex(
           (holding) =>
-            holding.ticker === foundStock.ticker && holding.type === "stock"
+            holding.ticker === foundStock.ticker && holding.type === "stock",
         );
 
         if (existingStockIndex !== -1) {
@@ -124,14 +124,14 @@ export const usePortfolioHoldings = () => {
         }
       });
     },
-    []
+    [],
   );
 
   const addCashHolding = useCallback((cashAmount: number) => {
     setHoldings((prev) => {
       // Check if USD cash holding already exists
       const existingCashIndex = prev.findIndex(
-        (holding) => holding.ticker === "USD" && holding.type === "cash"
+        (holding) => holding.ticker === "USD" && holding.type === "cash",
       );
 
       if (existingCashIndex !== -1) {

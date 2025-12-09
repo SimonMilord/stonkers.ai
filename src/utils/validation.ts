@@ -8,15 +8,15 @@
  * @returns Sanitized symbol or null if invalid
  */
 export const sanitizeStockSymbol = (input: string): string | null => {
-  if (typeof input !== 'string') {
+  if (typeof input !== "string") {
     return null;
   }
 
   // Remove any HTML tags, scripts, and special characters
   const cleaned = input
     .trim()
-    .replace(/[<>\"'&]/g, '') // Remove HTML/XML special characters
-    .replace(/[^\w.-]/g, '') // Only allow alphanumeric, dots, and hyphens
+    .replace(/[<>\"'&]/g, "") // Remove HTML/XML special characters
+    .replace(/[^\w.-]/g, "") // Only allow alphanumeric, dots, and hyphens
     .toUpperCase();
 
   // Validate length and format
@@ -35,18 +35,18 @@ export const sanitizeStockSymbol = (input: string): string | null => {
  * @returns Sanitized number or null if invalid
  */
 export const sanitizeNumericInput = (input: string | number): number | null => {
-  if (typeof input === 'number') {
+  if (typeof input === "number") {
     return isNaN(input) || !isFinite(input) ? null : input;
   }
 
-  if (typeof input !== 'string') {
+  if (typeof input !== "string") {
     return null;
   }
 
   // Remove any non-numeric characters except decimal point and negative sign
-  const cleaned = input.trim().replace(/[^0-9.-]/g, '');
+  const cleaned = input.trim().replace(/[^0-9.-]/g, "");
   const parsed = parseFloat(cleaned);
-  
+
   return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
 };
 
@@ -56,15 +56,15 @@ export const sanitizeNumericInput = (input: string | number): number | null => {
  * @returns Sanitized company name or null if invalid
  */
 export const sanitizeCompanyName = (input: string): string | null => {
-  if (typeof input !== 'string') {
+  if (typeof input !== "string") {
     return null;
   }
 
   // Remove HTML tags and potentially dangerous characters
   const cleaned = input
     .trim()
-    .replace(/[<>\"'&]/g, '') // Remove HTML/XML special characters
-    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/[<>\"'&]/g, "") // Remove HTML/XML special characters
+    .replace(/\s+/g, " ") // Normalize whitespace
     .substring(0, 100); // Limit length
 
   return cleaned.length > 0 ? cleaned : null;
@@ -76,15 +76,18 @@ export const sanitizeCompanyName = (input: string): string | null => {
  * @param maxLength Maximum allowed length
  * @returns Sanitized text
  */
-export const sanitizeDisplayText = (input: string, maxLength: number = 500): string => {
-  if (typeof input !== 'string') {
-    return '';
+export const sanitizeDisplayText = (
+  input: string,
+  maxLength: number = 500,
+): string => {
+  if (typeof input !== "string") {
+    return "";
   }
 
   return input
     .trim()
-    .replace(/[<>\"'&]/g, '') // Remove HTML/XML special characters
-    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/[<>\"'&]/g, "") // Remove HTML/XML special characters
+    .replace(/\s+/g, " ") // Normalize whitespace
     .substring(0, maxLength);
 };
 
