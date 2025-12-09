@@ -9,6 +9,7 @@ import {
   Group,
   Anchor,
 } from "@mantine/core";
+import { formatDate } from "../../utils/functions";
 
 interface News {
   category?: string;
@@ -29,14 +30,6 @@ export default function CompanyNewsCard({
   title: string;
   newsData: News[];
 }) {
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000)
-      .toISOString()
-      .split("T")[0]
-      .split("-")
-      .reverse()
-      .join("-");
-  };
 
   return (
     <Paper withBorder radius="md" p="lg">

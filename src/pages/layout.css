@@ -1,14 +1,14 @@
 .mantine-AppShell-header {
-  background-color: #282c34;
+  background-color: var(--color-app-background);
   overflow: visible;
 }
 
 .mantine-AppShell-navbar {
-  background-color: #282c34;
+  background-color: var(--color-app-background);
 }
 
 .mantine-AppShell-footer {
-  background-color: #282c34;
+  background-color: var(--color-app-background);
 }
 
 .home-link {
@@ -54,8 +54,7 @@
 }
 
 .layout__navlink:hover {
-  background-color: #282c34;
-  color: #228be6;
+  background-color: var(--color-app-background);
 }
 
 .layout__navlink-logout {
@@ -68,11 +67,11 @@
 }
 
 .layout__navlink[data-active="true"]:hover {
-  background-color: #282c34 !important;
+  background-color: var(--color-app-background) !important;
 }
 
 /* Set active state text and icon color to blue */
 .layout__navlink[data-active="true"] .mantine-NavLink-label,
 .layout__navlink[data-active="true"] .mantine-NavLink-leftSection {
-  color: #339af0 !important;
+  color: var(--color-primary-blue) !important;
 }

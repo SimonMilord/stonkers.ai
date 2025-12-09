@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Stack,
@@ -28,11 +28,11 @@ export default function AddHoldingForm({
   onStockHolding,
   onCashHolding,
 }: AddHoldingFormProps) {
-  const [positionType, setPositionType] = React.useState<string>("Stock");
-  const [searchTicker, setSearchTicker] = React.useState<string>("");
-  const [shares, setShares] = React.useState<number | string>("");
-  const [avgPricePaid, setAvgPricePaid] = React.useState<number | string>("");
-  const [cashAmount, setCashAmount] = React.useState<number | string>("");
+  const [positionType, setPositionType] = useState<string>("Stock");
+  const [searchTicker, setSearchTicker] = useState<string>("");
+  const [shares, setShares] = useState<number | string>("");
+  const [avgPricePaid, setAvgPricePaid] = useState<number | string>("");
+  const [cashAmount, setCashAmount] = useState<number | string>("");
 
   const {
     searchLoading,
@@ -43,7 +43,7 @@ export default function AddHoldingForm({
   } = useStockSearch();
 
   // Debounced search effect
-  React.useEffect(() => {
+  useEffect(() => {
     if (!searchTicker.trim()) {
       clearSearch();
       return;
