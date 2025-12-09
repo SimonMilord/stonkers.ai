@@ -82,7 +82,10 @@ export default function LoginPage() {
               </Stack>
 
               <Text c="dimmed" size="xs" ta="center" mt="xl">
-                Stonkers.ai v1.0 | <Anchor href="https://www.simonmilord.com/">&copy;simonmilord</Anchor>
+                Stonkers.ai v1.0 |{" "}
+                <Anchor href="https://www.simonmilord.com/">
+                  &copy;simonmilord
+                </Anchor>
               </Text>
             </Stack>
           </Paper>

@@ -42,7 +42,7 @@ export default function WatchlistPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   useEffect(() => {
@@ -82,7 +82,8 @@ export default function WatchlistPage() {
     const processedTickers = watchlistItems.map((item: any) => {
       const ticker = item.ticker;
       const dotIndex = ticker.indexOf(".");
-      const processedTicker = dotIndex !== -1 ? ticker.substring(0, dotIndex) : ticker;
+      const processedTicker =
+        dotIndex !== -1 ? ticker.substring(0, dotIndex) : ticker;
       return processedTicker;
     });
 
@@ -95,7 +96,7 @@ export default function WatchlistPage() {
         price: bulkQuotes[processedTickers[index]]?.c || 0,
         changeDollar: bulkQuotes[processedTickers[index]]?.d || 0,
         changePercent: bulkQuotes[processedTickers[index]]?.dp || 0,
-      })
+      }),
     );
     return mappedWatchlistItems;
   };

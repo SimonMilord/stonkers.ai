@@ -36,7 +36,7 @@ export default function DetailsPage() {
     string | null
   >(null);
   const [companyDescription, setCompanyDescription] = useState<string | null>(
-    null
+    null,
   );
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const currentCompanyRef = useRef<string | null>(null); // Track current company to prevent race conditions
@@ -49,7 +49,7 @@ export default function DetailsPage() {
     setCompanyDescription(null);
     setIsGeneratingContent(false);
     currentCompanyRef.current = null; // Reset the current company ref
-    
+
     setIsInWatchlist(false);
     fetchStockData(symbol);
     checkIfInWatchlist(symbol);

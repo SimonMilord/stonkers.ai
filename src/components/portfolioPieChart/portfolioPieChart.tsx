@@ -36,7 +36,7 @@ export default function PortfolioPieChart({
 }: PortfolioPieChartProps) {
   const totalPortfolioValue = holdings.reduce(
     (acc, item) => acc + item.shares * item.currentPrice,
-    0
+    0,
   );
 
   // Prepare data for the chart

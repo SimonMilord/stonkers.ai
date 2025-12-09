@@ -139,7 +139,7 @@ export const useProgressiveStockData = (symbol: string) => {
 export const fetchWithRetry = async (
   url: string,
   options: RequestInit = {},
-  retries = 3
+  retries = 3,
 ): Promise<Response> => {
   for (let i = 0; i <= retries; i++) {
     try {
@@ -150,7 +150,7 @@ export const fetchWithRetry = async (
     } catch (error) {
       if (i === retries) throw error;
       await new Promise((resolve) =>
-        setTimeout(resolve, 1000 * Math.pow(2, i))
+        setTimeout(resolve, 1000 * Math.pow(2, i)),
       );
     }
   }

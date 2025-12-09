@@ -52,15 +52,15 @@ export default function PortfolioPageRefactored() {
   // Portfolio totals calculations
   const totalMarketValue = useMemo(
     () => calculateTotalMarketValue(holdings),
-    [holdings]
+    [holdings],
   );
   const totalGainLoss = useMemo(
     () => calculateTotalGainLoss(holdings),
-    [holdings]
+    [holdings],
   );
   const totalCashPosition = useMemo(
     () => calculateTotalCashPosition(holdings),
-    [holdings]
+    [holdings],
   );
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function PortfolioPageRefactored() {
       } catch (error) {
         console.warn(
           "Bulk quotes not available, fetching individual quotes:",
-          error
+          error,
         );
         // Fallback: fetch quotes individually
         for (const ticker of stockTickers) {
@@ -152,7 +152,7 @@ export default function PortfolioPageRefactored() {
               type: "stock",
             };
           }
-        }
+        },
       );
 
       return mappedHoldings;
@@ -177,16 +177,16 @@ export default function PortfolioPageRefactored() {
         // Use the current sorted holdings as the base for reordering
         const currentSortedHoldings = sortedHoldings;
         const oldIndex = currentSortedHoldings.findIndex(
-          (item) => item.ticker === active.id
+          (item) => item.ticker === active.id,
         );
         const newIndex = currentSortedHoldings.findIndex(
-          (item) => item.ticker === over?.id
+          (item) => item.ticker === over?.id,
         );
 
         reorderedHoldings = arrayMove(
           currentSortedHoldings,
           oldIndex,
-          newIndex
+          newIndex,
         );
         setHoldings(reorderedHoldings);
       } else {
@@ -235,7 +235,7 @@ export default function PortfolioPageRefactored() {
   const handleStockHolding = async (
     foundStock: any,
     shares: number,
-    avgPricePaid: number
+    avgPricePaid: number,
   ) => {
     addStockHolding(foundStock, shares, avgPricePaid);
     try {

@@ -17,14 +17,14 @@ export type SortDirection = "asc" | "desc" | null;
 export const calculateTotalMarketValue = (holdings: Holding[]): number => {
   return holdings.reduce(
     (acc, item) => acc + item.shares * item.currentPrice,
-    0
+    0,
   );
 };
 
 export const calculateTotalGainLoss = (holdings: Holding[]): number => {
   return holdings.reduce(
     (acc, item) => acc + item.shares * (item.currentPrice - item.costBasis),
-    0
+    0,
   );
 };
 
@@ -38,7 +38,7 @@ export const calculateTotalCashPosition = (holdings: Holding[]): number => {
 const getSortValue = (
   holding: Holding,
   field: SortField,
-  totalPortfolioValue: number
+  totalPortfolioValue: number,
 ) => {
   const valueMap = {
     name: holding.name.toLowerCase(),
@@ -58,7 +58,7 @@ const getSortValue = (
 const sortHoldings = (
   holdings: Holding[],
   field: SortField | null,
-  direction: SortDirection
+  direction: SortDirection,
 ) => {
   if (!field || !direction) return holdings;
 

@@ -9,11 +9,11 @@ const backendFinnhubUrl = `${import.meta.env.VITE_BACKEND_URL}/finnhub`;
  * @returns The stock symbol if found, otherwise null.
  */
 export const getStockSymbol = async (
-  symbol: string
+  symbol: string,
 ): Promise<string | null> => {
   try {
     const response = await fetch(
-      `${backendFinnhubUrl}/search?q=${encodeURIComponent(symbol)}`
+      `${backendFinnhubUrl}/search?q=${encodeURIComponent(symbol)}`,
     );
 
     if (!response.ok) {
@@ -22,7 +22,7 @@ export const getStockSymbol = async (
         return null;
       }
       throw new Error(
-        `Unable to complete network request to search for symbol: ${symbol}. Status: ${response.status}`
+        `Unable to complete network request to search for symbol: ${symbol}. Status: ${response.status}`,
       );
     }
 
@@ -95,7 +95,7 @@ export const getCompanyProfile = async (symbol: string) => {
  */
 export const getEarningsCalendar = async (symbol: string) => {
   const response = await fetch(
-    `${backendFinnhubUrl}/earnings/calendar/${symbol}`
+    `${backendFinnhubUrl}/earnings/calendar/${symbol}`,
   );
   return await handleApiResponse(response, "earnings calendar", symbol);
 };
@@ -107,7 +107,7 @@ export const getEarningsCalendar = async (symbol: string) => {
  */
 export const getEarningsSurprise = async (symbol: string) => {
   const response = await fetch(
-    `${backendFinnhubUrl}/earnings/surprise/${symbol}`
+    `${backendFinnhubUrl}/earnings/surprise/${symbol}`,
   );
   return await handleApiResponse(response, "earnings surprise", symbol);
 };
@@ -129,7 +129,7 @@ export const getCompanyNews = async (symbol: string) => {
  */
 export const getRecommendationTrends = async (symbol: string) => {
   const response = await fetch(
-    `${backendFinnhubUrl}/recommendations/${symbol}`
+    `${backendFinnhubUrl}/recommendations/${symbol}`,
   );
   return await handleApiResponse(response, "recommendation trends", symbol);
 };
@@ -166,7 +166,7 @@ export const generateCompanyDescription = async (companyName: string) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ companyName }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -193,11 +193,14 @@ export const generateCompetitiveAdvantages = async (companyName: string) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ companyName }),
-      }
+      },
     );
 
     if (!response.ok) {
-      await handleApiError(response, "Failed to generate competitive advantages analysis");
+      await handleApiError(
+        response,
+        "Failed to generate competitive advantages analysis",
+      );
     }
 
     const data = await response.json();
@@ -220,11 +223,14 @@ export const generateInvestmentRisks = async (companyName: string) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ companyName }),
-      }
+      },
     );
 
     if (!response.ok) {
-      await handleApiError(response, "Failed to generate investment risks analysis");
+      await handleApiError(
+        response,
+        "Failed to generate investment risks analysis",
+      );
     }
 
     const data = await response.json();
@@ -242,7 +248,7 @@ export const generateInvestmentRisks = async (companyName: string) => {
 const handleApiResponse = async (
   response: Response,
   endpoint: string,
-  symbol?: string
+  symbol?: string,
 ) => {
   if (!response.ok) {
     if (response.status === 429) {
@@ -256,7 +262,7 @@ const handleApiResponse = async (
 
     if (response.status === 404) {
       throw new Error(
-        `${endpoint} not found${symbol ? ` for symbol: ${symbol}` : ""} (404)`
+        `${endpoint} not found${symbol ? ` for symbol: ${symbol}` : ""} (404)`,
       );
     }
 
@@ -268,7 +274,7 @@ const handleApiResponse = async (
 
 // Validation function to check if a symbol has full data support
 export const validateSymbolSupport = async (
-  symbol: string
+  symbol: string,
 ): Promise<{
   isSupported: boolean;
   availableData: string[];
@@ -282,7 +288,7 @@ export const validateSymbolSupport = async (
   ];
 
   const results = await Promise.allSettled(
-    dataChecks.map((check) => check.fn())
+    dataChecks.map((check) => check.fn()),
   );
 
   const availableData: string[] = [];
@@ -323,7 +329,7 @@ const showRateLimitNotification = () => {
   }
 
   rateLimitNotificationShown = true;
-  
+
   notifications.show({
     title: "Rate Limit Reached",
     message:

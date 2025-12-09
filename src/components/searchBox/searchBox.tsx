@@ -50,12 +50,12 @@ export default function SearchBox(props: { variant: string }) {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.currentTarget.value;
-    
+
     const sanitized = sanitizeStockSymbol(newValue);
     if (sanitized !== null || newValue.trim() === "") {
       setQuery(newValue); // Keep original for display, but validate on submit
     }
-    
+
     // Close dropdown if input is cleared
     if (newValue.trim() === "") {
       setNoResultsFound(false);
@@ -64,12 +64,14 @@ export default function SearchBox(props: { variant: string }) {
   };
 
   const handleKeyDown = async (
-    event: React.KeyboardEvent<HTMLInputElement>
+    event: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (event.key === "Enter") {
       const sanitizedQuery = sanitizeStockSymbol(query.trim());
       if (!sanitizedQuery) {
-        setValidationError("Invalid symbol format. Please enter a valid stock symbol (1-10 characters, letters and numbers only).");
+        setValidationError(
+          "Invalid symbol format. Please enter a valid stock symbol (1-10 characters, letters and numbers only).",
+        );
         return;
       }
 
@@ -82,7 +84,7 @@ export default function SearchBox(props: { variant: string }) {
 
         if (queriedSymbol === null) {
           console.warn(
-            `No symbol found for: ${sanitizedQuery}. Please try again with a different symbol.`
+            `No symbol found for: ${sanitizedQuery}. Please try again with a different symbol.`,
           );
           setNoResultsFound(true);
         }
@@ -102,7 +104,7 @@ export default function SearchBox(props: { variant: string }) {
           } else {
             // Symbol is not fully supported, show error message
             setValidationError(
-              `Symbol "${sanitizedQuery}" is not supported. Please try a different US listed stock.`
+              `Symbol "${sanitizedQuery}" is not supported. Please try a different US listed stock.`,
             );
             console.warn("Symbol validation failed:", validation);
           }
@@ -110,7 +112,7 @@ export default function SearchBox(props: { variant: string }) {
       } catch (error) {
         console.error(`Error searching for stock: ${sanitizedQuery}`, error);
         setValidationError(
-          "An error occurred while searching. Please try again."
+          "An error occurred while searching. Please try again.",
         );
       }
       setQuery(sanitizedQuery);

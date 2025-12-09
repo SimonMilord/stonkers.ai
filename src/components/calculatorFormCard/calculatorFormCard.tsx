@@ -123,7 +123,9 @@ export default function CalculatorFormCard({
             placeholder="Enter FCF Yield"
             radius="md"
             value={formValues.targetFcfYield}
-            onChange={(value) => handleInputChange("targetFcfYield", value || 0)}
+            onChange={(value) =>
+              handleInputChange("targetFcfYield", value || 0)
+            }
           />
           <NumberInput
             className="calculator-number-input"

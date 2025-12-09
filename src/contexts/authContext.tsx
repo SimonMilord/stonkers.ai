@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         // Check if we actually have user data
         if (result.success && result.data) {
           setUser(result.data);

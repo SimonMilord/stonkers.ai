@@ -12,7 +12,10 @@ import {
   Loader,
 } from "@mantine/core";
 import { useStockSearch } from "../../hooks/useStockSearch";
-import { sanitizeStockSymbol, sanitizeNumericInput } from "../../utils/validation";
+import {
+  sanitizeStockSymbol,
+  sanitizeNumericInput,
+} from "../../utils/validation";
 
 interface AddHoldingFormProps {
   onHoldingAdded: () => void;
@@ -66,30 +69,30 @@ export default function AddHoldingForm({
       if (!foundStock || !shares || !avgPricePaid) {
         return;
       }
-      
+
       const sanitizedShares = sanitizeNumericInput(shares);
       const sanitizedAvgPrice = sanitizeNumericInput(avgPricePaid);
-      
+
       if (sanitizedShares === null || sanitizedShares <= 0) {
         return;
       }
-      
+
       if (sanitizedAvgPrice === null || sanitizedAvgPrice <= 0) {
         return;
       }
-      
+
       onStockHolding(foundStock, sanitizedShares, sanitizedAvgPrice);
     } else {
       // Handle cash position
       if (!cashAmount) {
         return;
       }
-      
+
       const sanitizedCashAmount = sanitizeNumericInput(cashAmount);
       if (sanitizedCashAmount === null || sanitizedCashAmount <= 0) {
         return;
       }
-      
+
       onCashHolding(sanitizedCashAmount);
     }
     resetNewHoldingForm();
