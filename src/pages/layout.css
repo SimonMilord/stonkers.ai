@@ -57,6 +57,12 @@
   background-color: var(--color-app-background);
 }
 
+/* Set hover state text and icon color to blue */
+.layout__navlink:hover .mantine-NavLink-label,
+.layout__navlink:hover .mantine-NavLink-leftSection {
+  color: var(--color-primary-blue) !important;
+}
+
 .layout__navlink-logout {
   cursor: pointer;
 }

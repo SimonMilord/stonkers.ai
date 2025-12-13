@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { Holding } from "../components/portfolioItem/portfolioItem";
-import { StockSearchResult } from "../hooks/useStockSearch";
+import { StockSearchResult } from "@hooks/useStockSearch";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 

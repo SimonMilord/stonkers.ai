@@ -15,7 +15,7 @@ import LoginPage from "./pages/loginPage";
 import { StockProvider } from "./contexts/stockContext";
 import { AuthProvider } from "./contexts/authContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import usePageTitle from "./hooks/usePageTitle";
+import usePageTitle from "@hooks/usePageTitle";
 
 export default function App() {
   return (

@@ -14,8 +14,8 @@ import {
   calculateTotalMarketValue,
   calculateTotalGainLoss,
   calculateTotalCashPosition,
-} from "../hooks/usePortfolioSorting";
-import { usePortfolioHoldings } from "../hooks/usePortfolioHoldings";
+} from "@hooks/usePortfolioSorting";
+import { usePortfolioHoldings } from "@hooks/usePortfolioHoldings";
 import { getBulkQuotes, getQuote } from "../utils/requests";
 
 interface PortfolioMetric {
