@@ -40,7 +40,7 @@ export const formatDollarAmount = (amount: number) => {
  */
 export const validateMetricsValue = (
   str: string | number | null,
-  unit?: string,
+  unit?: string
 ) => {
   const notAvailable: string = "N/A";
   if (typeof str === "number") {
@@ -74,7 +74,7 @@ export const formatCurrency = (amount: number): string => {
  */
 export const getFCFperShareGrowth = (
   fcfPerShareArray: any[],
-  period: number,
+  period: number
 ): number | null => {
   const previousIndex: number = 4 * period;
 
