@@ -78,7 +78,7 @@ export const sanitizeCompanyName = (input: string): string | null => {
  */
 export const sanitizeDisplayText = (
   input: string,
-  maxLength: number = 500,
+  maxLength: number = 500
 ): string => {
   if (typeof input !== "string") {
     return "";
