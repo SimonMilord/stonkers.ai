@@ -1,6 +1,6 @@
 import { Card, Text } from "@mantine/core";
-import React from "react";
 import { formatCurrency } from "../../utils/functions";
+import React from "react";
 
 export default function DataCard({
   data,

@@ -11,11 +11,17 @@ import {
   Box,
   Loader,
 } from "@mantine/core";
-import { useStockSearch } from "../../hooks/useStockSearch";
+import { useStockSearch } from "@hooks/useStockSearch";
 import {
   sanitizeStockSymbol,
   sanitizeNumericInput,
 } from "../../utils/validation";
+import "./addHoldingForm.css";
+
+const POSTION_TYPES = {
+  STOCK: "Stock",
+  CASH: "Cash",
+} as const;
 
 interface AddHoldingFormProps {
   onHoldingAdded: () => void;
@@ -27,8 +33,8 @@ export default function AddHoldingForm({
   onHoldingAdded,
   onStockHolding,
   onCashHolding,
-}: AddHoldingFormProps) {
-  const [positionType, setPositionType] = useState<string>("Stock");
+}: AddHoldingFormProps): React.JSX.Element {
+  const [positionType, setPositionType] = useState<string>(POSTION_TYPES.STOCK);
   const [searchTicker, setSearchTicker] = useState<string>("");
   const [shares, setShares] = useState<number | string>("");
   const [avgPricePaid, setAvgPricePaid] = useState<number | string>("");
@@ -64,36 +70,47 @@ export default function AddHoldingForm({
     }
   };
 
-  const handleAddNewHolding = async () => {
-    if (positionType === "Stock") {
-      if (!foundStock || !shares || !avgPricePaid) {
-        return;
-      }
+  const validateStockInputs = (
+    foundStock: any,
+    shares: number | string,
+    avgPricePaid: number | string
+  ) => {
+    if (!foundStock || !shares || !avgPricePaid) return null;
 
-      const sanitizedShares = sanitizeNumericInput(shares);
-      const sanitizedAvgPrice = sanitizeNumericInput(avgPricePaid);
+    const sanitizedShares = sanitizeNumericInput(shares);
+    const sanitizedAvgPrice = sanitizeNumericInput(avgPricePaid);
 
-      if (sanitizedShares === null || sanitizedShares <= 0) {
-        return;
-      }
+    if (sanitizedShares === null || sanitizedShares <= 0) return null;
+    if (sanitizedAvgPrice === null || sanitizedAvgPrice <= 0) return null;
 
-      if (sanitizedAvgPrice === null || sanitizedAvgPrice <= 0) {
-        return;
-      }
+    return { sanitizedShares, sanitizedAvgPrice };
+  };
 
-      onStockHolding(foundStock, sanitizedShares, sanitizedAvgPrice);
+  const validateCashInput = (cashAmount: number | string) => {
+    const sanitized = sanitizeNumericInput(cashAmount);
+    return sanitized !== null && sanitized > 0 ? sanitized : null;
+  };
+
+  const handleAddNewHolding = () => {
+    if (positionType === POSTION_TYPES.STOCK) {
+      const validatedStock = validateStockInputs(
+        foundStock,
+        shares,
+        avgPricePaid
+      );
+
+      if (!validatedStock) return;
+
+      onStockHolding(
+        foundStock,
+        validatedStock.sanitizedShares,
+        validatedStock.sanitizedAvgPrice
+      );
     } else {
-      // Handle cash position
-      if (!cashAmount) {
-        return;
-      }
+      const validatedCash = validateCashInput(cashAmount);
+      if (validatedCash === null) return;
 
-      const sanitizedCashAmount = sanitizeNumericInput(cashAmount);
-      if (sanitizedCashAmount === null || sanitizedCashAmount <= 0) {
-        return;
-      }
-
-      onCashHolding(sanitizedCashAmount);
+      onCashHolding(validatedCash);
     }
     resetNewHoldingForm();
   };
@@ -110,7 +127,6 @@ export default function AddHoldingForm({
   return (
     <Card radius="md" p="lg">
       <Stack align="center">
-        {/* Position Type Toggle */}
         <SegmentedControl
           value={positionType}
           onChange={setPositionType}
@@ -118,12 +134,11 @@ export default function AddHoldingForm({
           radius="md"
           className="portfolio-segmented-control"
           data={[
-            { label: "Stock", value: "Stock" },
-            { label: "Cash", value: "Cash" },
+            { label: "Stock", value: POSTION_TYPES.STOCK },
+            { label: "Cash", value: POSTION_TYPES.CASH },
           ]}
         />
-        {positionType === "Stock" ? (
-          /* Stock Form */
+        {positionType === POSTION_TYPES.STOCK ? (
           <Group justify="center" className="add-holding-form-group">
             <TextInput
               placeholder="Search stock ticker"
@@ -146,7 +161,7 @@ export default function AddHoldingForm({
               radius="md"
             />
             <NumberInput
-              placeholder="Cost Basis"
+              placeholder="Cost per share"
               value={avgPricePaid}
               onChange={setAvgPricePaid}
               min={0}
@@ -165,11 +180,10 @@ export default function AddHoldingForm({
                   : ""
               }
             >
-              Add New Holding
+              Add Holding
             </Button>
           </Group>
         ) : (
-          /* Cash Form */
           <Group justify="center" className="add-holding-form-group">
             <NumberInput
               placeholder="USD Amount"
@@ -187,12 +201,11 @@ export default function AddHoldingForm({
               radius="md"
               className={!cashAmount ? "portfolio-button-disabled" : ""}
             >
-              Add New Holding
+              Add Cash
             </Button>
           </Group>
         )}
-        {/* Error message container with fixed height */}
-        <Box style={{ minHeight: "20px" }}>
+        <Box className="error-container">
           {searchError && (
             <Text size="sm" c="red" ta="center">
               {searchError}

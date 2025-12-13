@@ -17,7 +17,7 @@ import {
   generateCompetitiveAdvantages,
   generateInvestmentRisks,
 } from "@utils/requests";
-import { useStockData } from "../hooks/useStockData";
+import { useStockData } from "@hooks/useStockData";
 import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
