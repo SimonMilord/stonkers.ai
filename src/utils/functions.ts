@@ -16,6 +16,16 @@ export const roundToDecimal = (num: number, decimalPlaces: number): number => {
 };
 
 /**
+ * Helper function that safely rounds a number or undefined value to decimal places.
+ * Returns 0 if the value is undefined or null.
+ * @param value Number to round (can be undefined)
+ * @param decimals Number of decimal places to round to
+ */
+export const safeRoundToDecimal = (value: number | undefined, decimals: number): number => {
+  return roundToDecimal(value, decimals) || 0;
+};
+
+/**
  * Helper function that formats a number into a dollar amount with appropriate suffixes (T, B, M).
  */
 export const formatDollarAmount = (amount: number) => {

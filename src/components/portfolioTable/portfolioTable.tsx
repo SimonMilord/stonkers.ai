@@ -58,7 +58,6 @@ const TABLE_HEADERS: TableHeader[] = [
   { field: "weight" as SortField, label: "Weight" },
 ];
 
-// Utility functions
 const getSortIcon = (field: SortField, sortField: SortField | null, sortDirection: SortDirection) => {
   if (sortField !== field) {
     return <RiExpandUpDownLine size={ICON_SIZE} />;
@@ -76,7 +75,6 @@ const getGainLossColor = (value: number): string => {
   return value >= 0 ? "green" : "red";
 };
 
-// Custom hooks
 const useDndSensors = () => {
   return useSensors(
     useSensor(PointerSensor),
@@ -86,7 +84,6 @@ const useDndSensors = () => {
   );
 };
 
-// Sub-components
 const SortableHeader: React.FC<{
   header: TableHeader;
   sortField: SortField | null;
