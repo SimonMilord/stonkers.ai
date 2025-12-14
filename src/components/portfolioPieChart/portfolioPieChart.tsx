@@ -9,7 +9,6 @@ import "./portfolioPieChart.css";
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-// Types
 interface PortfolioPieChartProps {
   holdings: Holding[];
   title?: string;
@@ -27,7 +26,6 @@ interface ChartConfig {
   options: any;
 }
 
-// Constants
 const CHART_COLORS = [
   "#3B82F6", // Blue
   "#FF9500", // Orange
@@ -62,7 +60,6 @@ const TOOLTIP_CONFIG = {
   BORDER_WIDTH: 1,
 } as const;
 
-// Utility functions
 const calculateTotalPortfolioValue = (holdings: Holding[]): number => {
   return holdings.reduce(
     (acc, item) => acc + item.shares * item.currentPrice,
@@ -95,7 +92,6 @@ const formatCurrency = (value: number): string => {
   });
 };
 
-// Custom hooks
 const useChartData = (holdings: Holding[]): ChartConfig => {
   return React.useMemo(() => {
     if (holdings.length === 0) {

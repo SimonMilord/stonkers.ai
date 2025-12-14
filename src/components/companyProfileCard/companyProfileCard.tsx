@@ -30,7 +30,6 @@ const MARKET_CAP_MULTIPLIER = 1000000;
 const SHARES_MULTIPLIER = 1000000;
 const LOADER_MIN_HEIGHT = 100;
 
-// Utility functions
 const formatShareCount = (shares: number): string => {
   if (!shares) return NOT_AVAILABLE;
   return formatDollarAmount(shares * SHARES_MULTIPLIER);

@@ -40,7 +40,6 @@ interface FormInputProps {
   isPercentage?: boolean;
 }
 
-// Compound component for metric displays
 const MetricsSection: React.FC<MetricsSectionProps> & {
   Header: React.FC<MetricsSectionProps>;
   Grid: React.FC<MetricsSectionProps>;
@@ -75,7 +74,6 @@ MetricsSection.Metric = ({ label, value, suffix = "" }) => (
   </Stack>
 );
 
-// Compound component for form inputs
 const FormSection: React.FC<MetricsSectionProps> & {
   Input: React.FC<FormInputProps>;
 } = ({ children }) => <Box className="calculator-form">{children}</Box>;

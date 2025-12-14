@@ -41,7 +41,6 @@ interface TableHeader {
   label: string;
 }
 
-// Constants
 const ICON_SIZE = 14;
 const TOTAL_WEIGHT = "100.00%";
 const EMPTY_MESSAGE = "No stocks in your portfolio. Add some to get started!";
