@@ -34,6 +34,7 @@
 .guest-login-btn:hover {
   background-color: var(--input-background);
   border-color: var(--input-border-focus);
+  color: var(--color-text-white);
   transform: translateY(-1px);
 }
 

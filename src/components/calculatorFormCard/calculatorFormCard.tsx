@@ -10,9 +10,98 @@ import {
   Text,
 } from "@mantine/core";
 import { roundToDecimal } from "@utils/functions";
-import React from "react";
+import { sanitizeNumericInput } from "../../utils/validation";
+import React, { useMemo } from "react";
 import { CalculatorMethod, FormValues } from "src/pages/calculatorPage";
 import "./calculatorFormCard.css";
+
+const TWO_DECIMALS = 2;
+const MAX_PERCENTAGE = 100;
+const DEFAULT_VALUE = 0;
+
+// Define component types
+interface MetricsSectionProps {
+  children?: React.ReactNode;
+}
+
+interface MetricProps {
+  label: string;
+  value: number | null | undefined;
+  suffix?: string;
+}
+
+interface FormInputProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  placeholder: string;
+  min?: number;
+  max?: number;
+  isPercentage?: boolean;
+}
+
+const MetricsSection: React.FC<MetricsSectionProps> & {
+  Header: React.FC<MetricsSectionProps>;
+  Grid: React.FC<MetricsSectionProps>;
+  Metric: React.FC<MetricProps>;
+} = ({ children }) => (
+  <Paper withBorder radius="md" p="lg" mb="lg">
+    {children}
+  </Paper>
+);
+
+MetricsSection.Header = ({ children }) => (
+  <Center mb="md">
+    <Title order={5}>{children}</Title>
+  </Center>
+);
+
+MetricsSection.Grid = ({ children }) => (
+  <>
+    <Divider mb="lg" />
+    <Group justify="space-between">{children}</Group>
+  </>
+);
+
+MetricsSection.Metric = ({ label, value, suffix = "" }) => (
+  <Stack gap="xs">
+    <Text size="sm" c="dimmed">
+      {label}
+    </Text>
+    <Text fw={500}>
+      {value !== null && value !== undefined ? `${value}${suffix}` : "N/A"}
+    </Text>
+  </Stack>
+);
+
+const FormSection: React.FC<MetricsSectionProps> & {
+  Input: React.FC<FormInputProps>;
+} = ({ children }) => <Box className="calculator-form">{children}</Box>;
+
+FormSection.Input = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  min = 0,
+  max,
+  isPercentage = false,
+}) => (
+  <NumberInput
+    className="calculator-number-input"
+    label={label}
+    variant="filled"
+    allowDecimal
+    step={1}
+    min={min}
+    max={max}
+    placeholder={placeholder}
+    radius="md"
+    value={value}
+    onChange={(val) => onChange(val || DEFAULT_VALUE)}
+    rightSection={isPercentage ? "%" : undefined}
+  />
+);
 
 export default function CalculatorFormCard({
   method,
@@ -24,12 +113,36 @@ export default function CalculatorFormCard({
   onInputChange: (field: string, value: number) => void;
 }) {
   const { methodName, metrics } = method;
-  const fcfPerShareTTM = roundToDecimal(metrics?.fcfPerShareTTM, 2);
-  const fcfYieldTTM = roundToDecimal(metrics?.fcfYieldTTM, 2);
-  const fcfPerShareGrowthTTM = roundToDecimal(metrics?.fcfPerShareGrowthTTM, 2);
-  const epsTTM = roundToDecimal(metrics?.epsTTM, 2);
-  const peRatio = roundToDecimal(metrics?.peRatio, 2);
-  const epsGrowthTTM = roundToDecimal(metrics?.epsGrowthTTM, 2);
+
+  // Memoize rounded metrics to avoid recalculation
+  const roundedMetrics = useMemo(
+    () => ({
+      fcfPerShareTTM: roundToDecimal(metrics?.fcfPerShareTTM, TWO_DECIMALS),
+      fcfYieldTTM: roundToDecimal(metrics?.fcfYieldTTM, TWO_DECIMALS),
+      fcfPerShareGrowthTTM: roundToDecimal(
+        metrics?.fcfPerShareGrowthTTM,
+        TWO_DECIMALS
+      ),
+      epsTTM: roundToDecimal(metrics?.epsTTM, TWO_DECIMALS),
+      peRatio: roundToDecimal(metrics?.peRatio, TWO_DECIMALS),
+      epsGrowthTTM: roundToDecimal(metrics?.epsGrowthTTM, TWO_DECIMALS),
+    }),
+    [metrics]
+  );
+
+  // Enhanced input handler with validation
+  const handleInputChange = (field: string, value: number | string) => {
+    const sanitized = sanitizeNumericInput(value);
+    if (sanitized !== null) {
+      onInputChange(field, sanitized);
+    }
+  };
+
+  // Create wrapped handlers for each field
+  const createFieldHandler = (field: string) => (value: number) => handleInputChange(field, value);
+
+  const isEarningsMethod = methodName === "Earnings";
+  const isCashFlowMethod = methodName === "Cash Flows";
 
   return (
     <Paper withBorder radius="md" p="lg" className="calculator-form-card">
@@ -37,151 +150,104 @@ export default function CalculatorFormCard({
         Assumptions
       </Title>
       <Divider mb="lg" />
-      <Paper withBorder radius="md" p="lg">
-        <Center>
-          <Title order={5} mb="8">
-            Current {methodName} data (TTM)
-          </Title>
-        </Center>
-        <Divider mb="lg" />
-        {methodName === "Earnings" ? (
-          <Group justify="space-between">
-            <Stack>
-              <Text>EPS</Text>
-              <Text>{epsTTM ?? "N/A"}</Text>
-            </Stack>
-            <Stack>
-              <Text>PE ratio</Text>
-              <Text>{`${peRatio ?? "N/A"}`}</Text>
-            </Stack>
-            <Stack>
-              <Text>EPS growth</Text>
-              <Text>{`${epsGrowthTTM ?? "N/A"}`}%</Text>
-            </Stack>
-          </Group>
-        ) : (
-          <Group justify="space-between">
-            <Stack>
-              <Text>FCF/Share</Text>
-              <Text>{fcfPerShareTTM ?? "N/A"}</Text>
-            </Stack>
-            <Stack>
-              <Text>FCF Yield</Text>
-              <Text>{`${fcfYieldTTM ?? "N/A"}%`}</Text>
-            </Stack>
-            <Stack>
-              <Text>FCF/Share growth</Text>
-              <Text>{`${fcfPerShareGrowthTTM ?? "N/A"}%`}</Text>
-            </Stack>
-          </Group>
-        )}
-      </Paper>
-      {methodName === "Cash Flows" ? (
-        <Box className="calculator-form">
-          <NumberInput
-            className="calculator-number-input"
+      <MetricsSection>
+        <MetricsSection.Header>
+          Current {methodName} data (TTM)
+        </MetricsSection.Header>
+        <MetricsSection.Grid>
+          {isEarningsMethod ? (
+            <>
+              <MetricsSection.Metric
+                label="EPS"
+                value={roundedMetrics.epsTTM}
+              />
+              <MetricsSection.Metric
+                label="PE ratio"
+                value={roundedMetrics.peRatio}
+              />
+              <MetricsSection.Metric
+                label="EPS growth"
+                value={roundedMetrics.epsGrowthTTM}
+                suffix="%"
+              />
+            </>
+          ) : (
+            <>
+              <MetricsSection.Metric
+                label="FCF/Share"
+                value={roundedMetrics.fcfPerShareTTM}
+              />
+              <MetricsSection.Metric
+                label="FCF Yield"
+                value={roundedMetrics.fcfYieldTTM}
+                suffix="%"
+              />
+              <MetricsSection.Metric
+                label="FCF/Share growth"
+                value={roundedMetrics.fcfPerShareGrowthTTM}
+                suffix="%"
+              />
+            </>
+          )}
+        </MetricsSection.Grid>
+      </MetricsSection>
+      {isCashFlowMethod ? (
+        <FormSection>
+          <FormSection.Input
             label="FCF/Share (TTM)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            placeholder="Enter FCF/Share"
-            radius="md"
             value={formValues.fcfPerShare}
-            onChange={(value) => onInputChange("fcfPerShare", value || 0)}
+            onChange={createFieldHandler("fcfPerShare")}
+            placeholder="Enter FCF/Share"
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="FCF/Share Growth rate (%)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            max={100}
-            placeholder="Enter FCF/Share Growth rate"
-            radius="md"
             value={formValues.fcfGrowthRate}
-            onChange={(value) => onInputChange("fcfGrowthRate", value || 0)}
+            onChange={createFieldHandler("fcfGrowthRate")}
+            placeholder="Enter FCF/Share Growth rate"
+            max={MAX_PERCENTAGE}
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="Target FCF Yield (%)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            max={100}
-            placeholder="Enter FCF Yield"
-            radius="md"
             value={formValues.targetFcfYield}
-            onChange={(value) => onInputChange("targetFcfYield", value || 0)}
+            onChange={createFieldHandler("targetFcfYield")}
+            placeholder="Enter FCF Yield"
+            max={MAX_PERCENTAGE}
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="Desired Return (%)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            max
-            placeholder="Enter Desired Return"
-            radius="md"
             value={formValues.desiredReturn}
-            onChange={(value) => onInputChange("desiredReturn", value || 0)}
+            onChange={createFieldHandler("desiredReturn")}
+            placeholder="Enter Desired Return"
           />
-        </Box>
+        </FormSection>
       ) : (
-        <Box className="calculator-form">
-          <NumberInput
-            className="calculator-number-input"
+        <FormSection>
+          <FormSection.Input
             label="EPS (TTM)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            placeholder="Input placeholder"
-            radius="md"
             value={formValues.eps}
-            onChange={(value) => onInputChange("eps", value || 0)}
+            onChange={(val) => handleInputChange("eps", val)}
+            placeholder="Enter EPS value"
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="EPS Growth rate (%)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            max={100}
-            placeholder="Input placeholder"
-            radius="md"
             value={formValues.epsGrowthRate}
-            onChange={(value) => onInputChange("epsGrowthRate", value || 0)}
+            onChange={(val) => handleInputChange("epsGrowthRate", val)}
+            placeholder="Enter EPS growth rate"
+            max={MAX_PERCENTAGE}
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="Target P/E multiple"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            placeholder="Input placeholder"
-            radius="md"
             value={formValues.targetPeRatio}
-            onChange={(value) => onInputChange("targetPeRatio", value || 0)}
+            onChange={(val) => handleInputChange("targetPeRatio", val)}
+            placeholder="Enter target P/E ratio"
           />
-          <NumberInput
-            className="calculator-number-input"
+          <FormSection.Input
             label="Desired Return (%)"
-            variant="filled"
-            allowDecimal
-            step={1}
-            min={0}
-            placeholder="Enter Desired Return"
-            radius="md"
             value={formValues.desiredReturn}
-            onChange={(value) => onInputChange("desiredReturn", value || 0)}
+            onChange={(val) => handleInputChange("desiredReturn", val)}
+            placeholder="Enter desired return"
           />
-        </Box>
+        </FormSection>
       )}
     </Paper>
   );

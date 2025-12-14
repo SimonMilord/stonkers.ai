@@ -7,64 +7,37 @@ the application. Provides consistent dark theme styling.
 ================================================================================
 */
 
-/* Confirmation modal styling */
-.confirmation-modal .mantine-Modal-header {
-  background-color: var(--color-app-background);
-  border-bottom: none;
+/* Base modal styling - applies to all modal variants */
+.confirmation-modal,
+.info-modal {
+  /* Modal header */
 }
 
-.confirmation-modal .mantine-Modal-title {
-  color: var(--color-text-white);
-  font-weight: 600;
-}
-
-.confirmation-modal .mantine-Modal-content {
-  background-color: var(--color-app-background);
-}
-
-.confirmation-modal .mantine-Modal-body {
-  background-color: var(--color-app-background);
-  color: var(--color-text-light);
-}
-
-/* Close button styling */
-.confirmation-modal .mantine-Modal-close {
-  color: var(--color-text-light);
-  background-color: transparent;
-  border: none;
-  transition: color 0.2s ease;
-}
-
-.confirmation-modal .mantine-Modal-close:hover {
-  color: var(--color-mantine-gray-8);
-  background-color: transparent;
-}
-
-.confirmation-modal .mantine-Modal-close:focus {
-  color: var(--color-text-white);
-  background-color: transparent;
-}
-
-/* Additional modal variants can be added here */
+.confirmation-modal .mantine-Modal-header,
 .info-modal .mantine-Modal-header {
   background-color: var(--color-app-background);
   border-bottom: none;
 }
 
+.confirmation-modal .mantine-Modal-title,
 .info-modal .mantine-Modal-title {
   color: var(--color-text-white);
   font-weight: 600;
 }
 
+.confirmation-modal .mantine-Modal-content,
 .info-modal .mantine-Modal-content {
   background-color: var(--color-app-background);
 }
 
+.confirmation-modal .mantine-Modal-body,
 .info-modal .mantine-Modal-body {
   background-color: var(--color-app-background);
   color: var(--color-text-light);
 }
 
+/* Close button styling */
+.confirmation-modal .mantine-Modal-close,
 .info-modal .mantine-Modal-close {
   color: var(--color-text-light);
   background-color: transparent;
@@ -72,11 +45,13 @@ the application. Provides consistent dark theme styling.
   transition: color 0.2s ease;
 }
 
+.confirmation-modal .mantine-Modal-close:hover,
 .info-modal .mantine-Modal-close:hover {
   color: var(--color-text-white);
   background-color: transparent;
 }
 
+.confirmation-modal .mantine-Modal-close:focus,
 .info-modal .mantine-Modal-close:focus {
   color: var(--color-text-white);
   background-color: transparent;

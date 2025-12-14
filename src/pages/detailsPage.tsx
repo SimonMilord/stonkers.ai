@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { Flex, Button, Tooltip, Loader } from "@mantine/core";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
-import { Flex, Button, Tooltip, Loader } from "@mantine/core";
 import CompanyProfileCard from "@components/companyProfileCard/companyProfileCard";
 import CompanyMetricsCard from "@components/companyMetricsCard/companyMetricsCard";
 import GeneratedContentCard from "@components/generatedContentCard/generatedContentCard";
 import CompanyNewsCard from "@components/companyNewsCard/companyNewsCard";
-import "./detailsPage.css";
 import {
   getEarningsCalendar,
   getEarningsSurprise,
@@ -17,102 +16,267 @@ import {
   generateCompetitiveAdvantages,
   generateInvestmentRisks,
 } from "@utils/requests";
-import { useStockData } from "../hooks/useStockData";
+import { useStockData } from "@hooks/useStockData";
+import usePageTitle from "@hooks/usePageTitle";
 import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
+import "./detailsPage.css";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+interface StockDetails {
+  quoteData?: any;
+  companyProfileData?: any;
+  basicFinancialsData?: any;
+  reportedFinancialsData?: any;
+  earningsCalendarData?: any;
+  earningsSurpriseData?: any;
+  companyNewsData?: any;
+  recommendationTrendsData?: any;
+}
 
-export default function DetailsPage() {
-  const location = useLocation();
-  const { id } = useParams<{ id: string }>();
-  const symbol = id || location?.state?.symbol || "";
+interface AIContentState {
+  investmentRisks: string | null;
+  competitiveAdvantages: string | null;
+  companyDescription: string | null;
+  isGenerating: boolean;
+}
 
-  const [opened, setOpened] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [stockDetails, setStockDetails] = useState({});
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [investmentRisks, setInvestmentRisks] = useState<string | null>(null);
-  const [competitiveAdvantages, setCompetitiveAdvantages] = useState<
-    string | null
-  >(null);
-  const [companyDescription, setCompanyDescription] = useState<string | null>(
-    null
+interface WatchlistResponse {
+  data: {
+    inWatchlist: boolean;
+  };
+}
+
+interface WatchlistRequest {
+  ticker: string;
+  companyName: string;
+}
+
+interface DetailPageParams {
+  id: string;
+}
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+const API_ENDPOINTS = {
+  WATCHLIST_CHECK: (symbol: string) => `${BACKEND_URL}/watchlist/check/${symbol}`,
+  WATCHLIST: `${BACKEND_URL}/watchlist`,
+} as const;
+
+const HTTP_CONFIG = {
+  CREDENTIALS: "include" as const,
+  HEADERS: {
+    "Content-Type": "application/json",
+  },
+} as const;
+
+const BUTTON_CONFIG = {
+  SIZE: "md" as const,
+  COLORS: {
+    ADD: "blue",
+    REMOVE: "red",
+  },
+  VARIANT: "filled" as const,
+} as const;
+
+const TOOLTIP_MESSAGES = {
+  ADD_TO_WATCHLIST: "Add to Watchlist",
+  REMOVE_FROM_WATCHLIST: "Remove from Watchlist",
+} as const;
+
+const ERROR_MESSAGES = {
+  FETCH_STOCK_DATA: "Error fetching stock data",
+  CHECK_WATCHLIST: "Failed to check watchlist status",
+  ADD_TO_WATCHLIST: "Failed to add stock to watchlist",
+  REMOVE_FROM_WATCHLIST: "Error removing from watchlist",
+  GENERATE_AI_CONTENT: "Error generating AI content",
+  ALREADY_IN_WATCHLIST: "Stock is already in watchlist.",
+} as const;
+
+const HTTP_STATUS = {
+  CONFLICT: 409,
+} as const;
+
+const getSymbolFromParams = (id?: string, locationState?: any): string => {
+  return id || locationState?.symbol || "";
+};
+
+const hasRequiredContent = (content: string | null): boolean => {
+  return !!content?.trim();
+};
+
+const hasAllAIContent = (
+  risks: string | null,
+  advantages: string | null,
+  description: string | null
+): boolean => {
+  return (
+    hasRequiredContent(risks) &&
+    hasRequiredContent(advantages) &&
+    hasRequiredContent(description)
   );
-  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
-  const currentCompanyRef = useRef<string | null>(null); // Track current company to prevent race conditions
-  const { fetchAndSetStockData } = useStockData();
+};
 
-  useEffect(() => {
-    // Clear previous AI content when switching stocks
-    setInvestmentRisks(null);
-    setCompetitiveAdvantages(null);
-    setCompanyDescription(null);
-    setIsGeneratingContent(false);
-    currentCompanyRef.current = null; // Reset the current company ref
-    
-    setIsInWatchlist(false);
-    fetchStockData(symbol);
-    checkIfInWatchlist(symbol);
-  }, [symbol]);
+const createWatchlistRequest = (profileData: any): WatchlistRequest => ({
+  ticker: profileData.ticker,
+  companyName: profileData.name,
+});
 
-  const checkIfInWatchlist = async (symbol: string) => {
+const createInitialAIContentState = (): AIContentState => ({
+  investmentRisks: null,
+  competitiveAdvantages: null,
+  companyDescription: null,
+  isGenerating: false,
+});
+
+const useWatchlistStatus = () => {
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+
+  const checkWatchlistStatus = useCallback(async (symbol: string) => {
     try {
-      const response = await fetch(`${backendUrl}/watchlist/check/${symbol}`, {
+      const response = await fetch(API_ENDPOINTS.WATCHLIST_CHECK(symbol), {
         method: "GET",
-        credentials: "include",
+        credentials: HTTP_CONFIG.CREDENTIALS,
       });
 
       if (!response.ok) {
-        console.error("Failed to check watchlist status:", response.status);
+        console.error(ERROR_MESSAGES.CHECK_WATCHLIST, response.status);
         setIsInWatchlist(false);
         return;
       }
 
-      const data = await response.json();
+      const data: WatchlistResponse = await response.json();
       setIsInWatchlist(data.data.inWatchlist === true);
     } catch (error) {
-      console.error("Error checking watchlist status:", error);
+      console.error(ERROR_MESSAGES.CHECK_WATCHLIST, error);
       setIsInWatchlist(false);
     }
-  };
+  }, []);
 
-  const handleAddToWatchlist = async () => {
-    if (!isInWatchlist) {
-      try {
-        const response = await fetch(`${backendUrl}/watchlist`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ticker: stockDetails.companyProfileData.ticker,
-            companyName: stockDetails.companyProfileData.name,
-          }),
-        });
+  const addToWatchlist = useCallback(async (profileData: any): Promise<void> => {
+    if (isInWatchlist) return;
 
-        if (!response.ok) {
-          throw new Error("Failed to add stock to watchlist");
+    try {
+      const response = await fetch(API_ENDPOINTS.WATCHLIST, {
+        method: "POST",
+        credentials: HTTP_CONFIG.CREDENTIALS,
+        headers: HTTP_CONFIG.HEADERS,
+        body: JSON.stringify(createWatchlistRequest(profileData)),
+      });
+
+      if (!response.ok) {
+        if (response.status === HTTP_STATUS.CONFLICT) {
+          console.warn(ERROR_MESSAGES.ALREADY_IN_WATCHLIST);
+          setIsInWatchlist(true);
+          return;
         }
-
-        await response.json();
-        setIsInWatchlist(true);
-        // You can add a notification here
-      } catch (error) {
-        console.error("Error adding to watchlist:", error);
+        throw new Error(ERROR_MESSAGES.ADD_TO_WATCHLIST);
       }
-    }
-  };
 
-  const handleRemoveFromWatchlist = async () => {
+      await response.json();
+      setIsInWatchlist(true);
+    } catch (error) {
+      console.error(ERROR_MESSAGES.ADD_TO_WATCHLIST, error);
+    }
+  }, [isInWatchlist]);
+
+  const removeFromWatchlist = useCallback(async (): Promise<void> => {
     try {
       setIsInWatchlist(false);
     } catch (error) {
-      console.error("Error removing from watchlist:", error);
+      console.error(ERROR_MESSAGES.REMOVE_FROM_WATCHLIST, error);
     }
-  };
+  }, []);
 
-  const fetchStockData = async (symbol: string) => {
+  return {
+    isInWatchlist,
+    checkWatchlistStatus,
+    addToWatchlist,
+    removeFromWatchlist,
+  };
+};
+
+const useAIContent = () => {
+  const [aiContent, setAIContent] = useState<AIContentState>(createInitialAIContentState);
+  const currentCompanyRef = useRef<string | null>(null);
+
+  const resetAIContent = useCallback(() => {
+    setAIContent(createInitialAIContentState());
+    currentCompanyRef.current = null;
+  }, []);
+
+  const generateAIContent = useCallback(async (companyName: string) => {
+    if (!companyName || aiContent.isGenerating) return;
+    
+    // Skip if already generating for this company
+    if (currentCompanyRef.current === companyName) return;
+    
+    // Skip if we already have all content for this company
+    if (hasAllAIContent(
+      aiContent.investmentRisks,
+      aiContent.competitiveAdvantages,
+      aiContent.companyDescription
+    )) {
+      return;
+    }
+
+    currentCompanyRef.current = companyName;
+    setAIContent(prev => ({ ...prev, isGenerating: true }));
+
+    try {
+      const promises: Promise<string>[] = [];
+      
+      // Only fetch content that we don't have yet
+      if (!hasRequiredContent(aiContent.competitiveAdvantages)) {
+        promises.push(generateCompetitiveAdvantages(companyName));
+      } else {
+        promises.push(Promise.resolve(aiContent.competitiveAdvantages!));
+      }
+
+      if (!hasRequiredContent(aiContent.investmentRisks)) {
+        promises.push(generateInvestmentRisks(companyName));
+      } else {
+        promises.push(Promise.resolve(aiContent.investmentRisks!));
+      }
+
+      if (!hasRequiredContent(aiContent.companyDescription)) {
+        promises.push(generateCompanyDescription(companyName));
+      } else {
+        promises.push(Promise.resolve(aiContent.companyDescription!));
+      }
+
+      const [advantages, risks, description] = await Promise.all(promises);
+
+      // Only update state if we're still looking at the same company
+      if (currentCompanyRef.current === companyName) {
+        setAIContent({
+          competitiveAdvantages: advantages,
+          investmentRisks: risks,
+          companyDescription: description,
+          isGenerating: false,
+        });
+      }
+    } catch (error) {
+      console.error(ERROR_MESSAGES.GENERATE_AI_CONTENT, error);
+      setAIContent(prev => ({ ...prev, isGenerating: false }));
+    } finally {
+      if (currentCompanyRef.current === companyName) {
+        currentCompanyRef.current = null;
+      }
+    }
+  }, [aiContent]);
+
+  return {
+    ...aiContent,
+    resetAIContent,
+    generateAIContent,
+  };
+};
+
+const useStockDetails = () => {
+  const [stockDetails, setStockDetails] = useState<StockDetails>({});
+  const [loading, setLoading] = useState(false);
+  const { fetchAndSetStockData } = useStockData();
+
+  const fetchStockData = useCallback(async (symbol: string) => {
     setLoading(true);
 
     try {
@@ -133,7 +297,7 @@ export default function DetailsPage() {
       ]);
 
       // Combine core data from hook with additional details page data
-      const stockData: any = {
+      const stockData: StockDetails = {
         quoteData: coreData.quoteData,
         companyProfileData: coreData.profileData,
         basicFinancialsData: coreData.basicFinancialsData,
@@ -159,165 +323,173 @@ export default function DetailsPage() {
 
       setStockDetails(stockData);
     } catch (error) {
-      console.error("Error fetching stock data: ", error);
+      console.error(ERROR_MESSAGES.FETCH_STOCK_DATA, error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  }, [fetchAndSetStockData]);
+
+  return {
+    stockDetails,
+    loading,
+    fetchStockData,
+  };
+};
+
+export default React.memo(function DetailsPage() {
+  const location = useLocation();
+  const { id } = useParams<DetailPageParams>();
+  const symbol = getSymbolFromParams(id, location?.state);
+  
+  const [opened, setOpened] = useState(false);
+  
+  const { stockDetails, loading, fetchStockData } = useStockDetails();
+  const {
+    isInWatchlist,
+    checkWatchlistStatus,
+    addToWatchlist,
+    removeFromWatchlist,
+  } = useWatchlistStatus();
+  const {
+    investmentRisks,
+    competitiveAdvantages,
+    companyDescription,
+    isGenerating: isGeneratingContent,
+    resetAIContent,
+    generateAIContent,
+  } = useAIContent();
+  
+  usePageTitle();
+
+  const toggleSidebar = useCallback(() => {
+    setOpened(prev => !prev);
+  }, []);
+
+  const handleAddToWatchlist = useCallback(() => {
+    if (stockDetails.companyProfileData) {
+      addToWatchlist(stockDetails.companyProfileData);
+    }
+  }, [addToWatchlist, stockDetails.companyProfileData]);
+
+  const handleRemoveFromWatchlist = useCallback(() => {
+    removeFromWatchlist();
+  }, [removeFromWatchlist]);
+
+  // Effect for symbol changes
+  useEffect(() => {
+    resetAIContent();
+    fetchStockData(symbol);
+    checkWatchlistStatus(symbol);
+  }, [symbol, resetAIContent, fetchStockData, checkWatchlistStatus]);
+
+  // Effect for AI content generation
+  useEffect(() => {
+    if (stockDetails.companyProfileData?.name) {
+      generateAIContent(stockDetails.companyProfileData.name);
+    }
+  }, [stockDetails.companyProfileData?.name, generateAIContent]);
+
+  const renderWatchlistButton = () => {
+    if (!stockDetails.quoteData || !stockDetails.companyProfileData) {
+      return null;
+    }
+
+    return (
+      <Tooltip
+        label={
+          isInWatchlist
+            ? TOOLTIP_MESSAGES.REMOVE_FROM_WATCHLIST
+            : TOOLTIP_MESSAGES.ADD_TO_WATCHLIST
+        }
+      >
+        <Button
+          variant={BUTTON_CONFIG.VARIANT}
+          color={isInWatchlist ? BUTTON_CONFIG.COLORS.REMOVE : BUTTON_CONFIG.COLORS.ADD}
+          onClick={isInWatchlist ? handleRemoveFromWatchlist : handleAddToWatchlist}
+          size={BUTTON_CONFIG.SIZE}
+          aria-label={
+            isInWatchlist
+              ? TOOLTIP_MESSAGES.REMOVE_FROM_WATCHLIST
+              : TOOLTIP_MESSAGES.ADD_TO_WATCHLIST
+          }
+        >
+          {isInWatchlist ? <RiSubtractLine /> : <RiAddLargeLine />}
+        </Button>
+      </Tooltip>
+    );
   };
 
-  // Fetch AI-generated content when company profile data is available
-  useEffect(() => {
-    const fetchAIContent = async () => {
-      if (stockDetails.companyProfileData?.name && !isGeneratingContent) {
-        const companyName = stockDetails.companyProfileData.name;
+  const renderStockQuote = () => {
+    if (!stockDetails.quoteData || !stockDetails.companyProfileData) {
+      return <Loader aria-label="Loading stock data" />;
+    }
 
-        // Skip if we're already generating content for this company
-        if (currentCompanyRef.current === companyName) {
-          return;
-        }
-
-        // Skip if we already have content for this company (check if all exist and are not empty)
-        if (
-          investmentRisks?.trim() &&
-          competitiveAdvantages?.trim() &&
-          companyDescription?.trim()
-        ) {
-          return;
-        }
-
-        currentCompanyRef.current = companyName;
-        setIsGeneratingContent(true);
-
-        try {
-          // Only fetch content that we don't have yet
-          const promises = [];
-
-          if (!competitiveAdvantages?.trim()) {
-            promises.push(generateCompetitiveAdvantages(companyName));
-          } else {
-            promises.push(Promise.resolve(competitiveAdvantages));
-          }
-
-          if (!investmentRisks?.trim()) {
-            promises.push(generateInvestmentRisks(companyName));
-          } else {
-            promises.push(Promise.resolve(investmentRisks));
-          }
-
-          if (!companyDescription?.trim()) {
-            promises.push(generateCompanyDescription(companyName));
-          } else {
-            promises.push(Promise.resolve(companyDescription));
-          }
-
-          const [advantages, risks, description] = await Promise.all(promises);
-
-          // Only update state if we're still looking at the same company
-          if (currentCompanyRef.current === companyName) {
-            setCompetitiveAdvantages(advantages);
-            setInvestmentRisks(risks);
-            setCompanyDescription(description);
-          }
-        } catch (error) {
-          console.error("Error generating AI content:", error);
-        } finally {
-          setIsGeneratingContent(false);
-          // Clear the ref if we're still processing the same company
-          if (currentCompanyRef.current === companyName) {
-            currentCompanyRef.current = null;
-          }
-        }
-      }
-    };
-
-    fetchAIContent();
-  }, [stockDetails.companyProfileData?.name]); // Remove isGeneratingContent and content dependencies to prevent loops
+    return (
+      <StockQuote
+        quoteData={stockDetails.quoteData}
+        companyProfileData={stockDetails.companyProfileData}
+      />
+    );
+  };
 
   return (
-    <Layout loading={loading} opened={opened} toggle={() => setOpened(!opened)}>
-      <>
-        <Flex className="details-page-header">
-          <div className="details-page-spacer"></div>
-          <div className="details-page-quote-container">
-            {stockDetails.quoteData && stockDetails.companyProfileData ? (
-              <StockQuote
-                quoteData={stockDetails.quoteData}
-                companyProfileData={stockDetails.companyProfileData}
-              />
-            ) : (
-              <Loader />
-            )}
-          </div>
-          <div className="details-page-button-container">
-            {stockDetails.quoteData && stockDetails.companyProfileData && (
-              <Tooltip
-                label={`${
-                  isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"
-                }`}
-              >
-                <Button
-                  variant={"light"}
-                  color={isInWatchlist ? "red" : "blue"}
-                  onClick={
-                    isInWatchlist
-                      ? handleRemoveFromWatchlist
-                      : handleAddToWatchlist
-                  }
-                  size="md"
-                >
-                  {isInWatchlist ? <RiSubtractLine /> : <RiAddLargeLine />}
-                </Button>
-              </Tooltip>
-            )}
-          </div>
-        </Flex>
+    <Layout loading={loading} opened={opened} toggle={toggleSidebar}>
+      <Flex className="details-page-header">
+        <div className="details-page-spacer" />
+        <div className="details-page-quote-container">
+          {renderStockQuote()}
+        </div>
+        <div className="details-page-button-container">
+          {renderWatchlistButton()}
+        </div>
+      </Flex>
 
-        <Flex
-          mih={50}
-          gap="md"
-          justify="flex-start"
-          align="flex-start"
-          direction="row"
-          wrap="wrap"
-        >
-          <div className="card-container">
-            <CompanyProfileCard
-              profileData={stockDetails.companyProfileData}
-              companyDescription={companyDescription}
-              isGeneratingDescription={
-                isGeneratingContent && !companyDescription
-              }
-            />
-          </div>
-          <div className="card-container">
-            <CompanyMetricsCard
-              quoteData={stockDetails.quoteData}
-              metricsData={stockDetails.basicFinancialsData}
-              profileData={stockDetails.companyProfileData}
-              reportedFinancialData={stockDetails.reportedFinancialsData}
-            />
-          </div>
-          <div className="card-container">
-            <GeneratedContentCard
-              title="Competitive Advantages"
-              generatedContent={competitiveAdvantages}
-              isLoading={isGeneratingContent && !competitiveAdvantages}
-            />
-          </div>
-          <div className="card-container">
-            <GeneratedContentCard
-              title="Investment Risks"
-              generatedContent={investmentRisks}
-              isLoading={isGeneratingContent && !investmentRisks}
-            />
-          </div>
-          <div className="card-container">
-            <CompanyNewsCard
-              title={`Recent News`}
-              newsData={stockDetails?.companyNewsData}
-            />
-          </div>
-        </Flex>
-      </>
+      <Flex
+        mih={50}
+        gap="md"
+        justify="flex-start"
+        align="flex-start"
+        direction="row"
+        wrap="wrap"
+      >
+        <div className="card-container">
+          <CompanyProfileCard
+            profileData={stockDetails.companyProfileData}
+            companyDescription={companyDescription}
+            isGeneratingDescription={
+              isGeneratingContent && !hasRequiredContent(companyDescription)
+            }
+          />
+        </div>
+        <div className="card-container">
+          <CompanyMetricsCard
+            quoteData={stockDetails.quoteData}
+            metricsData={stockDetails.basicFinancialsData}
+            profileData={stockDetails.companyProfileData}
+            reportedFinancialData={stockDetails.reportedFinancialsData}
+          />
+        </div>
+        <div className="card-container">
+          <GeneratedContentCard
+            title="Competitive Advantages"
+            generatedContent={competitiveAdvantages}
+            isLoading={isGeneratingContent && !hasRequiredContent(competitiveAdvantages)}
+          />
+        </div>
+        <div className="card-container">
+          <GeneratedContentCard
+            title="Investment Risks"
+            generatedContent={investmentRisks}
+            isLoading={isGeneratingContent && !hasRequiredContent(investmentRisks)}
+          />
+        </div>
+        <div className="card-container">
+          <CompanyNewsCard
+            title="Recent News"
+            newsData={stockDetails?.companyNewsData}
+          />
+        </div>
+      </Flex>
     </Layout>
   );
-}
+});

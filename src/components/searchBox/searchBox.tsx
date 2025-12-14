@@ -1,36 +1,101 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Box, TextInput, Loader, ActionIcon } from "@mantine/core";
 import { useHistory, useLocation } from "react-router-dom";
-import { useStockData } from "../../hooks/useStockData";
-import { getStockSymbol, validateSymbolSupport } from "../../utils/requests";
 import { RiCloseLine } from "react-icons/ri";
+import { useStockData } from "@hooks/useStockData";
+import { getStockSymbol, validateSymbolSupport } from "@utils/requests";
+import { sanitizeStockSymbol } from "@utils/validation";
 import "./searchBox.css";
 
-/**
- * SearchBox component that allows users to search for a stock symbol.
- * @param props variant: string - The variant of the search box. It can be "standalone" or "header".
- * @returns
- */
-export default function SearchBox(props: { variant: string }) {
-  const [query, setQuery] = useState("");
-  const [searchedQuery, setSearchedQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [noResultsFound, setNoResultsFound] = useState(false);
-  const [validationError, setValidationError] = useState<string>("");
-  const searchBoxRef = useRef<HTMLDivElement>(null);
-  const history = useHistory();
-  const location = useLocation();
-  const { fetchAndSetStockData } = useStockData();
+interface SearchBoxProps {
+  variant: "standalone" | "header";
+}
 
-  // Close dropdown when clicking outside
+interface SearchState {
+  query: string;
+  searchedQuery: string;
+  loading: boolean;
+  noResultsFound: boolean;
+  validationError: string;
+}
+
+const VALIDATION_MESSAGES = {
+  INVALID_FORMAT:
+    "Invalid symbol format. Please enter a valid stock symbol (1-10 characters, letters and numbers only).",
+  NOT_SUPPORTED: (symbol: string) =>
+    `Symbol "${symbol}" is not supported. Please try a different US listed stock.`,
+  SEARCH_ERROR: "An error occurred while searching. Please try again.",
+  NO_RESULTS: (query: string) => `No results found for: ${query}`,
+} as const;
+
+const INITIAL_SEARCH_STATE: SearchState = {
+  query: "",
+  searchedQuery: "",
+  loading: false,
+  noResultsFound: false,
+  validationError: "",
+};
+
+const INPUT_CONFIG = {
+  SIZE: "lg" as const,
+  RADIUS: "md" as const,
+  PLACEHOLDER: "Search for a stock",
+  ARIA_LABEL: "Search box",
+  CLEAR_ICON_SIZE: 16,
+} as const;
+
+const getInputVariant = (
+  variant: SearchBoxProps["variant"]
+): "unstyled" | "filled" => {
+  return variant === "standalone" ? "unstyled" : "filled";
+};
+
+const shouldShowDropdown = (
+  noResultsFound: boolean,
+  validationError: string
+): boolean => {
+  return noResultsFound || !!validationError;
+};
+
+const getDropdownMessage = (
+  validationError: string,
+  searchedQuery: string
+): string => {
+  return validationError || VALIDATION_MESSAGES.NO_RESULTS(searchedQuery);
+};
+
+const useSearchState = () => {
+  const [state, setState] = useState<SearchState>(INITIAL_SEARCH_STATE);
+
+  const updateState = (updates: Partial<SearchState>) => {
+    setState((prev) => ({ ...prev, ...updates }));
+  };
+
+  const clearSearch = () => {
+    setState((prev) => ({
+      ...prev,
+      query: "",
+      searchedQuery: "",
+      noResultsFound: false,
+      validationError: "",
+    }));
+  };
+
+  return {
+    ...state,
+    updateState,
+    clearSearch,
+  };
+};
+
+const useClickOutside = (
+  ref: React.RefObject<HTMLDivElement>,
+  callback: () => void
+) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchBoxRef.current &&
-        !searchBoxRef.current.contains(event.target as Node)
-      ) {
-        setNoResultsFound(false);
-        setValidationError("");
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        callback();
       }
     };
 
@@ -38,176 +103,201 @@ export default function SearchBox(props: { variant: string }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [ref, callback]);
+};
 
-  const clearSearch = () => {
-    setQuery("");
-    setSearchedQuery("");
-    setNoResultsFound(false);
-    setValidationError("");
-  };
+const useStockSearch = () => {
+  const { fetchAndSetStockData } = useStockData();
+  const history = useHistory();
+  const location = useLocation();
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.currentTarget.value;
-    setQuery(newValue);
-    
-    // Close dropdown if input is cleared
-    if (newValue.trim() === "") {
-      setNoResultsFound(false);
-      setValidationError("");
-    }
-  };
-
-  const handleKeyDown = async (
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    const trimmedQuery = query.trim();
-    if (event.key === "Enter" && trimmedQuery !== "") {
-      setNoResultsFound(false);
-      setValidationError("");
-
-      try {
-        const queriedSymbol = await searchForSymbol(trimmedQuery);
-        setSearchedQuery(trimmedQuery);
-
-        if (queriedSymbol === null) {
-          console.warn(
-            `No symbol found for: ${trimmedQuery}. Please try again with a different symbol.`
-          );
-          setNoResultsFound(true);
-        }
-        // Check current location and handle accordingly
-        if (location.pathname === "/calculator" && !!queriedSymbol) {
-          // If on calculator page, fetch stock data and update context without navigation
-          await fetchAndSetStockData(queriedSymbol);
-        } else {
-          // For navigation to details page, validate symbol support first
-          const validation = await validateSymbolSupport(queriedSymbol);
-
-          if (validation.isSupported && !!queriedSymbol) {
-            // Symbol is fully supported, proceed with navigation
-            history.push(`/details/${queriedSymbol}`, {
-              symbol: queriedSymbol,
-            });
-          } else {
-            // Symbol is not fully supported, show error message
-            setValidationError(
-              `Symbol "${trimmedQuery}" is not supported. Please try a different US listed stock.`
-            );
-            console.warn("Symbol validation failed:", validation);
-          }
-        }
-      } catch (error) {
-        console.error(`Error searching for stock: ${trimmedQuery}`, error);
-        setValidationError(
-          "An error occurred while searching. Please try again."
-        );
-      }
-      setQuery(trimmedQuery);
-    }
-  };
-
-  /**
-   * This function will search for a stock symbol using the Finnhub API and return the symbol.
-   * @param symbol
-   * @returns string | null
-   */
   const searchForSymbol = async (symbol: string): Promise<string | null> => {
-    setLoading(true);
     try {
-      const symbolFound = await getStockSymbol(symbol);
-      setLoading(false);
-      return symbolFound;
+      return await getStockSymbol(symbol);
     } catch (error) {
-      setLoading(false);
       throw error;
     }
   };
 
+  const handleSymbolFound = async (symbol: string) => {
+    if (location.pathname === "/calculator") {
+      await fetchAndSetStockData(symbol);
+    } else {
+      const validation = await validateSymbolSupport(symbol);
+
+      if (validation.isSupported) {
+        history.push(`/details/${symbol}`, { symbol });
+      } else {
+        throw new Error(VALIDATION_MESSAGES.NOT_SUPPORTED(symbol));
+      }
+    }
+  };
+  return {
+    searchForSymbol,
+    handleSymbolFound,
+  };
+};
+
+const SearchInput: React.FC<{
+  variant: SearchBoxProps["variant"];
+  query: string;
+  loading: boolean;
+  onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClearSearch: () => void;
+}> = React.memo(
+  ({ variant, query, loading, onInputChange, onKeyDown, onClearSearch }) => (
+    <TextInput
+      variant={getInputVariant(variant)}
+      radius={INPUT_CONFIG.RADIUS}
+      size={INPUT_CONFIG.SIZE}
+      placeholder={INPUT_CONFIG.PLACEHOLDER}
+      aria-label={INPUT_CONFIG.ARIA_LABEL}
+      value={query}
+      onChange={onInputChange}
+      onKeyDown={onKeyDown}
+      rightSection={
+        loading ? (
+          <Loader size="sm" aria-label="Searching..." />
+        ) : query ? (
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={onClearSearch}
+            className="searchbox__clear-btn"
+            aria-label="Clear search"
+          >
+            <RiCloseLine size={INPUT_CONFIG.CLEAR_ICON_SIZE} />
+          </ActionIcon>
+        ) : null
+      }
+    />
+  )
+);
+
+const DropdownMessage: React.FC<{
+  validationError: string;
+  searchedQuery: string;
+}> = React.memo(({ validationError, searchedQuery }) => (
+  <div className="searchbox__dropdown">
+    <div className="searchbox__dropdown-item" role="alert" aria-live="polite">
+      {getDropdownMessage(validationError, searchedQuery)}
+    </div>
+  </div>
+));
+
+export default React.memo(function SearchBox({ variant }: SearchBoxProps) {
+  const {
+    query,
+    searchedQuery,
+    loading,
+    noResultsFound,
+    validationError,
+    updateState,
+    clearSearch,
+  } = useSearchState();
+
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+  const { searchForSymbol, handleSymbolFound } = useStockSearch();
+
+  // Handle click outside to close dropdown
+  useClickOutside(searchBoxRef, () => {
+    updateState({ noResultsFound: false, validationError: "" });
+  });
+
+  const handleInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.currentTarget.value;
+      const sanitized = sanitizeStockSymbol(newValue);
+
+      if (sanitized !== null || newValue.trim() === "") {
+        updateState({ query: newValue });
+      }
+
+      if (newValue.trim() === "") {
+        updateState({ noResultsFound: false, validationError: "" });
+      }
+    },
+    [updateState]
+  );
+
+  const handleKeyDown = React.useCallback(
+    async (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== "Enter") return;
+
+      const sanitizedQuery = sanitizeStockSymbol(query.trim());
+      if (!sanitizedQuery) {
+        updateState({ validationError: VALIDATION_MESSAGES.INVALID_FORMAT });
+        return;
+      }
+
+      updateState({
+        loading: true,
+        noResultsFound: false,
+        validationError: "",
+        searchedQuery: sanitizedQuery,
+      });
+
+      try {
+        const foundSymbol = await searchForSymbol(sanitizedQuery);
+
+        if (!foundSymbol) {
+          updateState({
+            loading: false,
+            noResultsFound: true,
+          });
+          console.warn(`No symbol found for: ${sanitizedQuery}`);
+          return;
+        }
+
+        await handleSymbolFound(foundSymbol);
+        updateState({
+          loading: false,
+          query: sanitizedQuery,
+        });
+      } catch (error) {
+        console.error(`Error searching for stock: ${sanitizedQuery}`, error);
+        updateState({
+          loading: false,
+          validationError:
+            error instanceof Error
+              ? error.message
+              : VALIDATION_MESSAGES.SEARCH_ERROR,
+        });
+      }
+    },
+    [query, updateState, searchForSymbol, handleSymbolFound]
+  );
+
+  const showDropdown = shouldShowDropdown(noResultsFound, validationError);
+
   return (
-    <Box className="searchbox__container" ref={searchBoxRef}>
-      {props.variant === "standalone" && (
-        <>
-          <div
-            className={`searchbox__input-wrapper ${
-              noResultsFound || validationError ? "dropdown-open" : ""
-            }`}
-          >
-            <TextInput
-              variant="unstyled"
-              radius="md"
-              size="lg"
-              placeholder="Search for a stock"
-              aria-label="Search box"
-              value={query}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              rightSection={
-                loading ? (
-                  <Loader size="sm" />
-                ) : query ? (
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={clearSearch}
-                    className="searchbox__clear-btn"
-                  >
-                    <RiCloseLine size={16} />
-                  </ActionIcon>
-                ) : null
-              }
-            />
-            {(noResultsFound || validationError) && (
-              <div className="searchbox__dropdown">
-                <div className="searchbox__dropdown-item">
-                  {validationError || `No results found for: ${searchedQuery}`}
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-      {props.variant === "header" && (
-        <>
-          <div
-            className={`searchbox__input-wrapper ${
-              noResultsFound || validationError ? "dropdown-open" : ""
-            }`}
-          >
-            <TextInput
-              variant="filled"
-              radius="md"
-              size="lg"
-              placeholder="Search for a stock"
-              aria-label="Search box"
-              value={query}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              rightSection={
-                loading ? (
-                  <Loader size="sm" />
-                ) : query ? (
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={clearSearch}
-                    className="searchbox__clear-btn"
-                  >
-                    <RiCloseLine size={16} />
-                  </ActionIcon>
-                ) : null
-              }
-            />
-            {(noResultsFound || validationError) && (
-              <div className="searchbox__dropdown">
-                <div className="searchbox__dropdown-item">
-                  {validationError || `No results found for: ${searchedQuery}`}
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+    <Box
+      className="searchbox__container"
+      ref={searchBoxRef}
+      component="section"
+      aria-label={`Stock search - ${variant} variant`}
+    >
+      <div
+        className={`searchbox__input-wrapper ${
+          showDropdown ? "dropdown-open" : ""
+        }`}
+      >
+        <SearchInput
+          variant={variant}
+          query={query}
+          loading={loading}
+          onInputChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onClearSearch={clearSearch}
+        />
+        {showDropdown && (
+          <DropdownMessage
+            validationError={validationError}
+            searchedQuery={searchedQuery}
+          />
+        )}
+      </div>
     </Box>
   );
-}
+});

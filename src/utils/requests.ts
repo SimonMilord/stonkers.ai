@@ -197,7 +197,10 @@ export const generateCompetitiveAdvantages = async (companyName: string) => {
     );
 
     if (!response.ok) {
-      await handleApiError(response, "Failed to generate competitive advantages analysis");
+      await handleApiError(
+        response,
+        "Failed to generate competitive advantages analysis"
+      );
     }
 
     const data = await response.json();
@@ -224,7 +227,10 @@ export const generateInvestmentRisks = async (companyName: string) => {
     );
 
     if (!response.ok) {
-      await handleApiError(response, "Failed to generate investment risks analysis");
+      await handleApiError(
+        response,
+        "Failed to generate investment risks analysis"
+      );
     }
 
     const data = await response.json();
@@ -323,7 +329,7 @@ const showRateLimitNotification = () => {
   }
 
   rateLimitNotificationShown = true;
-  
+
   notifications.show({
     title: "Rate Limit Reached",
     message:

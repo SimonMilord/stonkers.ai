@@ -64,16 +64,16 @@ export const useStockData = () => {
             (basicFinancialsData?.series?.quarterly?.fcfPerShareTTM?.[0]?.v /
               (quoteData?.c || 1)) *
               100,
-            2
+            2,
           ),
           fcfPerShareGrowthTTM: roundToDecimal(
             Number(
               getFCFperShareGrowth(
                 basicFinancialsData?.series?.quarterly?.fcfPerShareTTM,
-                1
-              )
+                1,
+              ),
             ),
-            2
+            2,
           ),
         });
 
@@ -96,7 +96,7 @@ export const useStockData = () => {
         throw error;
       }
     },
-    [setCurrentStock]
+    [setCurrentStock],
   );
 
   return {
