@@ -17,7 +17,6 @@ import { AuthProvider } from "./contexts/authContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import usePageTitle from "@hooks/usePageTitle";
 
-// Main App component
 export default function App() {
   return (
     <MantineProvider>
