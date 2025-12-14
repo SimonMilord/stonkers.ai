@@ -42,7 +42,7 @@ export default function WatchlistPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function WatchlistPage() {
         price: bulkQuotes[processedTickers[index]]?.c || 0,
         changeDollar: bulkQuotes[processedTickers[index]]?.d || 0,
         changePercent: bulkQuotes[processedTickers[index]]?.dp || 0,
-      }),
+      })
     );
     return mappedWatchlistItems;
   };

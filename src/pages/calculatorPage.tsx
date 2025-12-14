@@ -1,195 +1,246 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Center, Flex, Grid, Switch, Text } from "@mantine/core";
 import Layout from "./layout";
 import StockQuote from "@components/stockQuote/stockQuote";
-import { Center, Flex, Grid, Switch, Text } from "@mantine/core";
 import CalculatorFormCard from "@components/calculatorFormCard/calculatorFormCard";
 import CalculatorResultsCard from "@components/calculatorResultsCard/calculatorResultsCard";
-import { useStockInfo } from "../contexts/stockContext";
-import { roundToDecimal } from "@utils/functions";
+import { useStockInfo } from "@contexts/stockContext";
+import { safeRoundToDecimal } from "@utils/functions";
+import {
+  FormValues as CalculatorFormValues,
+  CalculationResults as CalculatorResults,
+  CalculationParams,
+  DEFAULT_DESIRED_RETURN,
+  DECIMAL_PLACES,
+  PROJECTION_YEARS,
+  calculateEPSMethod,
+  calculateFCFMethod,
+  calculateProjectedCAGR,
+  performCalculation,
+  createInitialFormValues,
+} from "@utils/calculatorUtils";
+import usePageTitle from "@hooks/usePageTitle";
+import { CompanyProfileData, QuoteData } from "../types/financialApi";
 import "./calculatorPage.css";
 
-export type metrics = {
+export interface Metrics {
   [key: string]: number | undefined;
-};
+}
 
-export type CalculatorMethod = {
+export interface CalculatorMethod {
   methodName: string;
-  metrics?: metrics;
-};
+  metrics?: Metrics;
+}
 
-export type FormValues = {
-  fcfPerShare: number;
-  fcfGrowthRate: number;
-  targetFcfYield: number;
-  desiredReturn: number;
-  eps: number;
-  epsGrowthRate: number;
-  targetPeRatio: number;
-};
+// Use imported types
+export type FormValues = CalculatorFormValues;
+export type CalculationResults = CalculatorResults;
 
-export type CalculationResults = {
-  fairValue: number;
-  currentPrice: number;
-  targetPrice5yr: number;
-  projectedCagr: number;
-};
+const CALCULATION_METHODS = {
+  EPS: "EPS",
+  FCF: "FCF",
+} as const;
 
-const defaultDesiredReturn = 15;
+const METHOD_INFO = {
+  CASH_FLOWS: "Cash Flows",
+  EARNINGS: "Earnings",
+} as const;
 
-export default function CalculatorPage() {
+const SWITCH_CONFIG = {
+  SIZE: "xl" as const,
+  ON_LABEL: CALCULATION_METHODS.EPS,
+  OFF_LABEL: CALCULATION_METHODS.FCF,
+} as const;
+
+const GRID_CONFIG = {
+  SPAN: { base: 12, md: 6 },
+  CLASS_NAME: "calculator-grid-col",
+} as const;
+
+const MESSAGES = {
+  NO_STOCK_SELECTED: "No stock selected. Search for a stock first.",
+} as const;
+
+const useCalculatorState = (currentStock: any) => {
   const [opened, setOpened] = useState(false);
   const [isEPSMethod, setIsEPSMethod] = useState(true);
-  const { currentStock } = useStockInfo();
-
-  // Initialize form values based on current stock data
-  const [formValues, setFormValues] = useState<FormValues>({
-    fcfPerShare: roundToDecimal(currentStock?.fcfPerShareTTM, 2) || 0,
-    fcfGrowthRate: roundToDecimal(currentStock?.fcfPerShareGrowthTTM, 2) || 0,
-    targetFcfYield: roundToDecimal(currentStock?.fcfYieldTTM, 2) || 0,
-    desiredReturn: defaultDesiredReturn,
-    eps: roundToDecimal(currentStock?.epsTTM, 2) || 0,
-    epsGrowthRate: roundToDecimal(currentStock?.epsGrowthTTM, 2) || 0,
-    targetPeRatio: roundToDecimal(currentStock?.peRatioTTM, 2) || 0,
+  const [formValues, setFormValues] = useState<FormValues>(() => createInitialFormValues(currentStock));
+  const [calculationResults, setCalculationResults] = useState<CalculationResults>({
+    fairValue: 0,
+    currentPrice: currentStock?.price || 0,
+    targetPrice5yr: 0,
+    projectedCagr: 0,
   });
 
-  const [calculationResults, setCalculationResults] =
-    useState<CalculationResults>({
-      fairValue: 0,
-      currentPrice: currentStock?.price || 0,
-      targetPrice5yr: 0,
-      projectedCagr: 0,
-    });
+  const toggleSidebar = useCallback(() => {
+    setOpened(prev => !prev);
+  }, []);
 
-  useEffect(() => {
-    if (currentStock) {
-      setFormValues({
-        fcfPerShare: roundToDecimal(currentStock.fcfPerShareTTM, 2) || 0,
-        fcfGrowthRate:
-          roundToDecimal(currentStock.fcfPerShareGrowthTTM, 2) || 0,
-        targetFcfYield: roundToDecimal(currentStock.fcfYieldTTM, 2) || 0,
-        desiredReturn: defaultDesiredReturn,
-        eps: roundToDecimal(currentStock.epsTTM, 2) || 0,
-        epsGrowthRate: roundToDecimal(currentStock.epsGrowthTTM, 2) || 0,
-        targetPeRatio: roundToDecimal(currentStock.peRatioTTM, 2) || 0,
-      });
-    }
-  }, [currentStock]);
+  const toggleCalculationMethod = useCallback((checked: boolean) => {
+    setIsEPSMethod(checked);
+  }, []);
 
-  // Calculate returns whenever form values change
-  useEffect(() => {
-    calculateReturns();
-  }, [formValues, isEPSMethod]);
-
-  const handleInputChange = (field: string, value: number) => {
-    setFormValues((prevValues) => ({
-      ...prevValues,
+  const handleInputChange = useCallback((field: string, value: number) => {
+    setFormValues(prev => ({
+      ...prev,
       [field]: value,
     }));
+  }, []);
+
+  return {
+    opened,
+    isEPSMethod,
+    formValues,
+    calculationResults,
+    setFormValues,
+    setCalculationResults,
+    toggleSidebar,
+    toggleCalculationMethod,
+    handleInputChange,
   };
+};
 
-  const calculateReturns = () => {
-    const currentPrice = currentStock?.price || 0;
-    let fairValue = 0;
-    let targetPrice5yr = 0;
-    let discountRate = 0;
-
-    if (isEPSMethod) {
-      // EPS-based calculation
-      const { eps, epsGrowthRate, targetPeRatio, desiredReturn } = formValues;
-      const epsYr5 = eps * (1 + epsGrowthRate / 100) ** 5;
-      targetPrice5yr = epsYr5 * targetPeRatio;
-      discountRate = desiredReturn;
-    } else {
-      // FCF-based calculation
-      const { fcfPerShare, fcfGrowthRate, targetFcfYield, desiredReturn } =
-        formValues;
-      const futureFcf = fcfPerShare * (1 + fcfGrowthRate / 100) ** 5;
-      targetPrice5yr = futureFcf / (targetFcfYield / 100);
-      discountRate = desiredReturn;
-    }
-    fairValue = targetPrice5yr / (1 + discountRate / 100) ** 5;
-    const projectedCagr =
-      currentPrice > 0
-        ? ((targetPrice5yr / currentPrice) ** (1 / 5) - 1) * 100
-        : 0;
-
-    setCalculationResults({
-      fairValue: roundToDecimal(fairValue, 2),
-      currentPrice: roundToDecimal(currentPrice, 2),
-      targetPrice5yr: roundToDecimal(targetPrice5yr, 2),
-      projectedCagr: roundToDecimal(projectedCagr, 2),
-    });
-  };
-
-  const companyProfileData = {
+const useCalculatorData = (currentStock: any, isEPSMethod: boolean) => {
+  const companyProfileData: CompanyProfileData = React.useMemo(() => ({
     name: currentStock?.name,
     ticker: currentStock?.ticker,
     currency: currentStock?.currency,
     logo: currentStock?.logo,
-  };
+  }), [currentStock]);
 
-  const quoteData = {
+  const quoteData: QuoteData = React.useMemo(() => ({
     c: currentStock?.price,
     d: currentStock?.change,
     dp: currentStock?.changePercent,
-  };
+  }), [currentStock]);
 
-  const cashFlowMethodInfo: CalculatorMethod = {
-    methodName: "Cash Flows",
+  const cashFlowMethodInfo: CalculatorMethod = React.useMemo(() => ({
+    methodName: METHOD_INFO.CASH_FLOWS,
     metrics: {
       fcfPerShareTTM: currentStock?.fcfPerShareTTM,
       fcfYieldTTM: currentStock?.fcfYieldTTM,
       fcfPerShareGrowthTTM: currentStock?.fcfPerShareGrowthTTM,
     },
-  };
+  }), [currentStock]);
 
-  const earningsMethodInfo: CalculatorMethod = {
-    methodName: "Earnings",
+  const earningsMethodInfo: CalculatorMethod = React.useMemo(() => ({
+    methodName: METHOD_INFO.EARNINGS,
     metrics: {
       epsTTM: currentStock?.epsTTM,
       peRatio: currentStock?.peRatioTTM,
       epsGrowthTTM: currentStock?.epsGrowthTTM,
     },
-  };
+  }), [currentStock]);
 
-  return (
-    <Layout opened={opened} toggle={() => setOpened(!opened)}>
-      {currentStock ? (
-        <Center>
-          <StockQuote
-            quoteData={quoteData}
-            companyProfileData={companyProfileData}
-          />
-        </Center>
-      ) : (
+  const activeMethod = isEPSMethod ? earningsMethodInfo : cashFlowMethodInfo;
+
+  return {
+    companyProfileData,
+    quoteData,
+    activeMethod,
+    cashFlowMethodInfo,
+    earningsMethodInfo,
+  };
+};
+
+// Main component
+export default React.memo(function CalculatorPage() {
+  const { currentStock } = useStockInfo();
+  usePageTitle();
+  
+  const {
+    opened,
+    isEPSMethod,
+    formValues,
+    calculationResults,
+    setFormValues,
+    setCalculationResults,
+    toggleSidebar,
+    toggleCalculationMethod,
+    handleInputChange,
+  } = useCalculatorState(currentStock);
+
+  const {
+    companyProfileData,
+    quoteData,
+    activeMethod,
+  } = useCalculatorData(currentStock, isEPSMethod);
+
+  // Update form values when stock changes
+  useEffect(() => {
+    if (currentStock) {
+      const newFormValues = createInitialFormValues(currentStock);
+      setFormValues(newFormValues);
+    }
+  }, [currentStock, setFormValues]);
+
+  // Calculate results when inputs change
+  useEffect(() => {
+    if (currentStock) {
+      const results = performCalculation({
+        currentPrice: currentStock.price || 0,
+        formValues,
+        isEPSMethod,
+      });
+      setCalculationResults(results);
+    }
+  }, [currentStock, formValues, isEPSMethod, setCalculationResults]);
+
+  const renderStockQuote = () => {
+    if (!currentStock) {
+      return (
         <Flex direction="column" align="center" mb="xl">
-          <Text c="dimmed">No stock selected. Search for a stock first.</Text>
+          <Text c="dimmed">{MESSAGES.NO_STOCK_SELECTED}</Text>
         </Flex>
-      )}
-      <Center mb={"lg"}>
-        <Switch
-          size="xl"
-          onLabel="EPS"
-          offLabel="FCF"
-          checked={isEPSMethod}
-          onChange={(event) => setIsEPSMethod(event.currentTarget.checked)}
+      );
+    }
+
+    return (
+      <Center>
+        <StockQuote
+          quoteData={quoteData}
+          companyProfileData={companyProfileData}
         />
       </Center>
-      <Grid className="calculatorPage">
-        <Grid.Col span={{ base: 12, md: 6 }} className="calculator-grid-col">
-          <CalculatorFormCard
-            method={isEPSMethod ? earningsMethodInfo : cashFlowMethodInfo}
-            formValues={formValues}
-            onInputChange={handleInputChange}
-          />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }} className="calculator-grid-col">
-          <CalculatorResultsCard
-            calculationResults={calculationResults}
-            desiredReturn={formValues.desiredReturn}
-          />
-        </Grid.Col>
-      </Grid>
+    );
+  };
+
+  const renderMethodSwitch = () => (
+    <Center mb="lg">
+      <Switch
+        size={SWITCH_CONFIG.SIZE}
+        onLabel={SWITCH_CONFIG.ON_LABEL}
+        offLabel={SWITCH_CONFIG.OFF_LABEL}
+        checked={isEPSMethod}
+        onChange={(event) => toggleCalculationMethod(event.currentTarget.checked)}
+        aria-label="Toggle between EPS and FCF calculation methods"
+      />
+    </Center>
+  );
+
+  const renderCalculatorGrid = () => (
+    <Grid className="calculatorPage">
+      <Grid.Col span={GRID_CONFIG.SPAN} className={GRID_CONFIG.CLASS_NAME}>
+        <CalculatorFormCard
+          method={activeMethod}
+          formValues={formValues}
+          onInputChange={handleInputChange}
+        />
+      </Grid.Col>
+      <Grid.Col span={GRID_CONFIG.SPAN} className={GRID_CONFIG.CLASS_NAME}>
+        <CalculatorResultsCard
+          calculationResults={calculationResults}
+          desiredReturn={formValues.desiredReturn}
+        />
+      </Grid.Col>
+    </Grid>
+  );
+
+  return (
+    <Layout opened={opened} toggle={toggleSidebar}>
+      {renderStockQuote()}
+      {renderMethodSwitch()}
+      {renderCalculatorGrid()}
     </Layout>
   );
-}
+});
