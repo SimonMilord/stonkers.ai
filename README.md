@@ -11,6 +11,8 @@ A modern, responsive web application built with React and TypeScript that provid
 
 [Try it out here!](https://stonkersai.vercel.app/)
 
+[Link to the backend repo](https://github.com/SimonMilord/stonkers.ai-server)
+
 ## ✨ Features
 
 ### 🏠 **Market Overview**
