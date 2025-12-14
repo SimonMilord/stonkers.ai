@@ -21,7 +21,6 @@ import usePageTitle from "@hooks/usePageTitle";
 import { RiAddLargeLine, RiSubtractLine } from "react-icons/ri";
 import "./detailsPage.css";
 
-// Types
 interface StockDetails {
   quoteData?: any;
   companyProfileData?: any;
@@ -55,7 +54,6 @@ interface DetailPageParams {
   id: string;
 }
 
-// Constants
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const API_ENDPOINTS = {
@@ -97,7 +95,6 @@ const HTTP_STATUS = {
   CONFLICT: 409,
 } as const;
 
-// Utility functions
 const getSymbolFromParams = (id?: string, locationState?: any): string => {
   return id || locationState?.symbol || "";
 };
@@ -130,7 +127,6 @@ const createInitialAIContentState = (): AIContentState => ({
   isGenerating: false,
 });
 
-// Custom hooks
 const useWatchlistStatus = () => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
@@ -185,7 +181,6 @@ const useWatchlistStatus = () => {
   const removeFromWatchlist = useCallback(async (): Promise<void> => {
     try {
       setIsInWatchlist(false);
-      // TODO: Implement actual API call for removal
     } catch (error) {
       console.error(ERROR_MESSAGES.REMOVE_FROM_WATCHLIST, error);
     }

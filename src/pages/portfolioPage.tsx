@@ -204,7 +204,6 @@ const usePortfolioData = () => {
 export default function PortfolioPageRefactored() {
   const [opened, setOpened] = useState(false);
 
-  // Custom hooks for state management
   const {
     holdings,
     loading,

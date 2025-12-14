@@ -44,12 +44,10 @@ interface CalculatedMetrics {
   portfolioPercent: string;
 }
 
-// Constants
 const DRAGGING_OPACITY = 0.5;
 const ARROW_INCREMENT = 1;
 const DECIMAL_PLACES = 2;
 
-// Utility functions
 const calculateGainLoss = (
   currentPrice: number,
   costBasis: number,
@@ -233,11 +231,9 @@ export default React.memo(function PortfolioItem({
   const history = useHistory();
   const isCash = stock.type === "cash";
   
-  // Custom hooks
   const { attributes, listeners, setNodeRef, style, isDragging } = useDragAndDrop(stock.ticker);
   const metrics = useCalculatedMetrics(stock, totalPortfolioValue);
 
-  // Event handlers
   const handleNavigateToDetails = React.useCallback(() => {
     if (!isCash) {
       history.push(`/details/${stock.ticker}`);
