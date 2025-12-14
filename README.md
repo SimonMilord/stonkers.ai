@@ -224,7 +224,7 @@ The application integrates with a backend API for:
 
 ## 📄 License
 
-This project is private and proprietary.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
