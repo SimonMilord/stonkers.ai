@@ -78,16 +78,24 @@ export default function WatchlistPage() {
       return [];
     }
 
-    const arrayOfTickers = watchlistItems.map((item: any) => item.ticker);
-    const { data: bulkQuotes } = await getBulkQuotes(arrayOfTickers);
+    // If any tickers are from international markets, handle them accordingly (ie: ASML.AS -> ASML)
+    const processedTickers = watchlistItems.map((item: any) => {
+      const ticker = item.ticker;
+      const dotIndex = ticker.indexOf(".");
+      const processedTicker =
+        dotIndex !== -1 ? ticker.substring(0, dotIndex) : ticker;
+      return processedTicker;
+    });
+
+    const { data: bulkQuotes } = await getBulkQuotes(processedTickers);
 
     const mappedWatchlistItems: WatchlistItemData[] = watchlistItems.map(
-      (item: any) => ({
+      (item: any, index: number) => ({
         ticker: item.ticker,
         name: item.companyName,
-        price: bulkQuotes[item.ticker]?.c || 0,
-        changeDollar: bulkQuotes[item.ticker]?.d || 0,
-        changePercent: bulkQuotes[item.ticker]?.dp || 0,
+        price: bulkQuotes[processedTickers[index]]?.c || 0,
+        changeDollar: bulkQuotes[processedTickers[index]]?.d || 0,
+        changePercent: bulkQuotes[processedTickers[index]]?.dp || 0,
       })
     );
     return mappedWatchlistItems;

@@ -134,3 +134,20 @@
 .portfolio-button-disabled:hover {
   background-color: var(--button-disabled-bg);
 }
+
+/* Loading and Error State Styles */
+.portfolio-loading-container {
+  height: 80vh;
+}
+
+.portfolio-error-container {
+  height: 80vh;
+}
+
+.portfolio-loading-content,
+.portfolio-error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+}

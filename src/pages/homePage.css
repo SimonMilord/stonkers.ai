@@ -5,10 +5,3 @@
   justify-content: center;
   height: 100vh;
 }
-
-.mantine-TextInput-input {
-  background-color: #282c34;
-  border-color: white;
-  padding: 1rem;
-  color: white;
-}

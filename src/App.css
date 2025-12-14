@@ -22,11 +22,11 @@ Benefits:
 /* CSS Custom Properties (Variables) */
 :root {
   /* Color Palette */
-  --color-primary-blue: #339AF0;
-  --color-background-dark: #4A5568;
-  --color-text-light: #E2E8F0;
-  --color-text-white: #FFFFFF;
-  --color-text-muted: #A0AEC0;
+  --color-primary-blue: #339af0;
+  --color-background-dark: #4a5568;
+  --color-text-light: #e2e8f0;
+  --color-text-white: #ffffff;
+  --color-text-muted: #a0aec0;
   --color-success: #22c55e;
   --color-error: #ef4444;
 
@@ -96,4 +96,16 @@ Benefits:
 /* For better dark theme support */
 html {
   color-scheme: dark;
+}
+
+/* Prevent white background on overscroll */
+body {
+  background-color: var(--color-app-background);
+  overflow-x: hidden;
+}
+
+/* Ensure AppShell main content fills remaining height */
+.mantine-AppShell-main {
+  min-height: calc(100vh - 75px); /* Subtract header height */
+  background-color: var(--color-app-background);
 }

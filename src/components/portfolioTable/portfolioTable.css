@@ -1,0 +1,9 @@
+.portfolio-table-header-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.portfolio-table-total-row {
+  border-top: 2px solid #4A5568;
+}

@@ -33,7 +33,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prettier": "npx prettier --write .",
+    "prettier:check": "npx prettier --check ."
   },
   "eslintConfig": {
     "extends": [

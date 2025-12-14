@@ -1,4 +1,4 @@
- export type QuoteData = {
+export type QuoteData = {
   c: number; // Current price
   d?: number; // Change
   dp?: number; // Percent change
@@ -23,5 +23,3 @@ export type CompanyProfileData = {
   marketCapitalization?: number;
   phone?: string;
 };
-
-

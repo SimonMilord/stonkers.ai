@@ -1,4 +1,8 @@
 .portfolio-pie-chart {
+  height: 500px;
+  width: 600px;
+  margin: 0 auto;
+  position: relative;
   max-width: 100%;
   /* overflow: hidden; */
 }
