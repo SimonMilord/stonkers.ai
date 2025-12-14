@@ -17,7 +17,6 @@ import { AuthProvider } from "./contexts/authContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import usePageTitle from "@hooks/usePageTitle";
 
-// Stonkers app main component
 export default function App() {
   return (
     <MantineProvider>
