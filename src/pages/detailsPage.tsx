@@ -218,11 +218,7 @@ const useAIContent = () => {
       return;
     }
 
-    // If switching companies, reset content first
-    if (isDifferentCompany) {
-      setAIContent(createInitialAIContentState());
-    }
-
+    // Set loading state but keep existing content visible until new content loads
     contentCompanyRef.current = companyName;
     setAIContent(prev => ({ ...prev, isGenerating: true }));
 
@@ -251,7 +247,7 @@ const useAIContent = () => {
 
       const [advantages, risks, description] = await Promise.all(promises);
 
-      // Update content
+      // Update content only after all content is loaded
       setAIContent({
         competitiveAdvantages: advantages,
         investmentRisks: risks,
@@ -377,10 +373,9 @@ export default React.memo(function DetailsPage() {
 
   // Effect for symbol changes
   useEffect(() => {
-    resetAIContent();
     fetchStockData(symbol);
     checkWatchlistStatus(symbol);
-  }, [symbol, resetAIContent, fetchStockData, checkWatchlistStatus]);
+  }, [symbol, fetchStockData, checkWatchlistStatus]);
 
   // Effect for AI content generation
   useEffect(() => {
