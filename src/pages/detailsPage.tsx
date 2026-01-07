@@ -196,21 +196,21 @@ const useWatchlistStatus = () => {
 
 const useAIContent = () => {
   const [aiContent, setAIContent] = useState<AIContentState>(createInitialAIContentState);
-  const currentCompanyRef = useRef<string | null>(null);
+  const contentCompanyRef = useRef<string | null>(null); // Track which company the current content is for
 
   const resetAIContent = useCallback(() => {
     setAIContent(createInitialAIContentState());
-    currentCompanyRef.current = null;
+    contentCompanyRef.current = null;
   }, []);
 
   const generateAIContent = useCallback(async (companyName: string) => {
     if (!companyName || aiContent.isGenerating) return;
     
-    // Skip if already generating for this company
-    if (currentCompanyRef.current === companyName) return;
+    // If this is a different company than what we have content for, we need to generate new content
+    const isDifferentCompany = contentCompanyRef.current !== companyName;
     
-    // Skip if we already have all content for this company
-    if (hasAllAIContent(
+    // Skip if we already have all content for this specific company (not just any company)
+    if (!isDifferentCompany && hasAllAIContent(
       aiContent.investmentRisks,
       aiContent.competitiveAdvantages,
       aiContent.companyDescription
@@ -218,26 +218,32 @@ const useAIContent = () => {
       return;
     }
 
-    currentCompanyRef.current = companyName;
+    // If switching companies, reset content first
+    if (isDifferentCompany) {
+      setAIContent(createInitialAIContentState());
+    }
+
+    contentCompanyRef.current = companyName;
     setAIContent(prev => ({ ...prev, isGenerating: true }));
 
     try {
       const promises: Promise<string>[] = [];
       
-      // Only fetch content that we don't have yet
-      if (!hasRequiredContent(aiContent.competitiveAdvantages)) {
+      // For a different company, always fetch fresh content
+      // For the same company, only fetch what we don't have yet
+      if (isDifferentCompany || !hasRequiredContent(aiContent.competitiveAdvantages)) {
         promises.push(generateCompetitiveAdvantages(companyName));
       } else {
         promises.push(Promise.resolve(aiContent.competitiveAdvantages!));
       }
 
-      if (!hasRequiredContent(aiContent.investmentRisks)) {
+      if (isDifferentCompany || !hasRequiredContent(aiContent.investmentRisks)) {
         promises.push(generateInvestmentRisks(companyName));
       } else {
         promises.push(Promise.resolve(aiContent.investmentRisks!));
       }
 
-      if (!hasRequiredContent(aiContent.companyDescription)) {
+      if (isDifferentCompany || !hasRequiredContent(aiContent.companyDescription)) {
         promises.push(generateCompanyDescription(companyName));
       } else {
         promises.push(Promise.resolve(aiContent.companyDescription!));
@@ -245,22 +251,16 @@ const useAIContent = () => {
 
       const [advantages, risks, description] = await Promise.all(promises);
 
-      // Only update state if we're still looking at the same company
-      if (currentCompanyRef.current === companyName) {
-        setAIContent({
-          competitiveAdvantages: advantages,
-          investmentRisks: risks,
-          companyDescription: description,
-          isGenerating: false,
-        });
-      }
+      // Update content
+      setAIContent({
+        competitiveAdvantages: advantages,
+        investmentRisks: risks,
+        companyDescription: description,
+        isGenerating: false,
+      });
     } catch (error) {
       console.error(ERROR_MESSAGES.GENERATE_AI_CONTENT, error);
       setAIContent(prev => ({ ...prev, isGenerating: false }));
-    } finally {
-      if (currentCompanyRef.current === companyName) {
-        currentCompanyRef.current = null;
-      }
     }
   }, [aiContent]);
 
